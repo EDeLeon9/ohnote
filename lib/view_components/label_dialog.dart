@@ -75,7 +75,7 @@ class _LabelDialogState extends State<LabelDialog> {
                 },
               );
             } else {
-              if (_textController.text != '') {
+              if (_textController.text.isNotEmpty) {
                 Navigator.pop(context, widget.text != _textController.text ? _textController.text : null);
               }
             }

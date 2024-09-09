@@ -153,7 +153,7 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                                 },
                               );
                             } else {
-                              if (_textController.text != '') {
+                              if (_textController.text.isNotEmpty) {
                                 var newId = await AppData.newLabel(_textController.text, null);
                                 _labelsMap.addAll({newId: true});
                                 setState(() {

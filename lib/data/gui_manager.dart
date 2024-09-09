@@ -123,7 +123,7 @@ class GuiManager {
 
   bool noteIsInFilter(Note note) {
     WordsSearcher? wordsSearcher;
-    if (filters.value.text != '') {
+    if (filters.value.text.isNotEmpty) {
       wordsSearcher = WordsSearcher(filters.value.text);
     }
     DateTime noteDateTime = getFilterDateTime(note);

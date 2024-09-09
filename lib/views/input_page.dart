@@ -26,9 +26,9 @@ class InputPage extends StatefulWidget {
   State<InputPage> createState() => _InputPageState();
 }
 
-class _InputPageState extends State<InputPage> {
+class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
   String? _heroTag;
-  bool _draftCreated = false;
+  int? _draftId;
   late final bool _isNewNote;
   late String _oldText;
   late Color? _oldColor;
@@ -48,6 +48,8 @@ class _InputPageState extends State<InputPage> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this); //For didChangeAppLifecycleState()
+
     _isNewNote = widget.note.id == 0;
     _oldText = widget.note.text;
     _oldColor = widget.note.color.value;
@@ -79,8 +81,18 @@ class _InputPageState extends State<InputPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _textController.dispose();
     super.dispose();
+  }
+
+  //Used by WidgetsBinding.instance.addObserver(this) with WidgetsBindingObserver
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && _draftId != null) {
+      _saveDraft();
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -117,14 +129,14 @@ class _InputPageState extends State<InputPage> {
           Navigator.pop(context);
         } else {
           if (_isNewNote) {
-            if (await AppData.newNote(widget.note)) {
+            if ((await AppData.newNoteFromInput(widget.note)) > 0) {
               setState(() {
                 _heroTag = 'noteHero_${widget.note.id}';
               });
             }
           } else {
             if (widget.note.text.trim().isNotEmpty) {
-              AppData.updateNote(widget.note, _oldText, _oldColor);
+              AppData.updateNoteFromInput(widget.note, _oldText, _oldColor);
             } else {
               widget.note.text = _oldText;
               AppData.sendNotesToTrash([widget.note]);
@@ -177,6 +189,7 @@ class _InputPageState extends State<InputPage> {
                 isVisible: !favorite,
                 onPressed: () {
                   widget.note.favorite.value = !favorite;
+                  _saveDraft();
                 },
               ),
               AnimatedScaleButton(
@@ -186,6 +199,7 @@ class _InputPageState extends State<InputPage> {
                 isVisible: favorite,
                 onPressed: () {
                   widget.note.favorite.value = !favorite;
+                  _saveDraft();
                 },
               ),
             ],
@@ -211,6 +225,7 @@ class _InputPageState extends State<InputPage> {
               setState(() {
                 widget.note.labelIds = value;
               });
+              _saveDraft();
               if (widget.note.labelIds.isNotEmpty) {
                 CustomShowCase.startShowCase(
                   context: context,
@@ -262,10 +277,12 @@ class _InputPageState extends State<InputPage> {
                 child: InkWell(
                   onTap: () {
                     StyleColorPickerDialog.show(
-                      context: context,
-                      pickerColor: color,
-                      onColorChanged: (value) => widget.note.color.value = value != Colors.transparent ? value : null,
-                    );
+                        context: context,
+                        pickerColor: color,
+                        onColorChanged: (value) {
+                          widget.note.color.value = value != Colors.transparent ? value : null;
+                          _saveDraft();
+                        });
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
@@ -379,10 +396,10 @@ class _InputPageState extends State<InputPage> {
 
   void _saveDraft() async {
     _autoSaver.runLast(500, () async {
-      if (_draftCreated) {
-        AppData.updateNote(
+      if (_draftId != null && _draftId! > 0) {
+        await AppData.updateNoteFromInput(widget.note, widget.note.text, widget.note.color.value, _draftId);
       } else {
-        _draftCreated = await AppData.newNote(widget.note, true);
+        _draftId = await AppData.newNoteFromInput(widget.note, true);
       }
     });
   }
@@ -422,9 +439,9 @@ class _InputPageState extends State<InputPage> {
           }
           bool success = true;
           if (_isNewNote) {
-            success = await AppData.newNote(widget.note);
+            success = await AppData.newNoteFromInput(widget.note) > 0;
           } else {
-            AppData.updateNote(widget.note, _oldText, _oldColor);
+            AppData.updateNoteFromInput(widget.note, _oldText, _oldColor);
           }
           if (context.mounted) {
             if (success) {

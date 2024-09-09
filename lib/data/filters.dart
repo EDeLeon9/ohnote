@@ -83,7 +83,7 @@ class Filters {
     if (from != null || to != null) {
       captions.add(BY_DATE);
     }
-    if (text != '') {
+    if (text.isNotEmpty) {
       captions.add(BY_TEXT);
     }
     if (labelIds.isNotEmpty) {
@@ -98,7 +98,7 @@ class Filters {
     return captions;
   }
 
-  bool hasApplied() => favorites || from != null || to != null || text != '' || labelIds.isNotEmpty || colors.isNotEmpty || crossedOut;
+  bool hasApplied() => favorites || from != null || to != null || text.isNotEmpty || labelIds.isNotEmpty || colors.isNotEmpty || crossedOut;
 
   void copyFrom(Filters source) {
     favorites = source.favorites;

@@ -9,7 +9,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Solicitar guardar nota en db justo escribir/modificar algo (usar SingleAsync no global) (cancelar al salir de Edit Note) y probar cuando se minimiza, cuando abre el selector de apps, cuando se bloquea el celular y cuando se cierra la app antes de guardar.
 //Paneles con sombra en Dark mode no se aprecian (e.g. Style panel), pero lo que no se aprecia en light mode pero si en dark mode será poner esos paneles en otra tonalidad.
 //En Dark mode aclarar los encabezados y oscurecer los textos de los controles desactivados (por ejemplo en los filtros de From y To).
 //En Dark mode revisar colores de labels, al hacer tap no se aprecia.

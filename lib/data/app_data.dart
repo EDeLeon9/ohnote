@@ -194,52 +194,16 @@ class AppData {
     //Notes user order
     query = await iDb.db.query('notes_user_order', columns: ['data']);
     String notesUserOrderData = query.map((e) => e['data']).first;
-    if (notesUserOrderData != '') {
+    if (notesUserOrderData.isNotEmpty) {
       _notesUserOrder = notesUserOrderData.split(',').map((e) => int.parse(e)).toList();
     }
 
     //Recovering draft note in case application was closed during a note edition
-    query = await iDb.db.query('notes',
-        columns: [
-          'text',
-          'modif_date_time', //For orderBy, sometimes it's required in SQL.
-          'number_of_lines',
-          'color',
-          'favorite',
-          'label_ids',
-          'parent_id',
-        ],
-        where: 'parent_id IS NOT NULL AND history_date_time IS NULL',
-        orderBy: 'modif_date_time DESC'); //It should be only one draft in db, but just in case we're getting the last one.
-    if (query.isNotEmpty) {
-      var draft = query.first;
-      var parentId = draft['parent_id'];
-      if (parentId == 0) {
-        var newId = await iDb.db.insert('notes', {
-          'text': draft['text'],
-          'modif_date_time': draft['modif_date_time'],
-          'creation_date_time': draft['creation_date_time'], //TODO: Update creation_date_time every time when updating draft
-          'is_crossed_out': draft['is_crossed_out'],
-          'number_of_lines': draft['number_of_lines'],
-          'color': draft['color'],
-          'favorite': draft['favorite'],
-          'label_ids': draft['label_ids'],
-        });
-        _notesUserOrder.insert(0, newId);
-        _updateDbNotesUserOrder(iDb);
-        if (newId <= 0) {
-          _error('ERROR');
-        }
-      } else {}
-      var deleteDraftCount = await iDb.db.delete('notes', where: 'parent_id IS NOT NULL AND history_date_time IS NULL');
-      if (deleteDraftCount <= 0) {
-        _error('ERROR');
-      }
-    }
+    await _recoverFromDraft(iDb);
 
     //Note list
     notesManager.allList = await _queryNotes(
-      db: iDb.db,
+      iDb: iDb,
       guiManager: notesManager,
       where: 'parent_id IS NULL AND history_date_time IS NULL AND trash_date_time IS NULL AND archive_date_time IS NULL',
     );
@@ -259,7 +223,7 @@ class AppData {
   }) async {
     var iDb = await _openDb();
     var noteList = await _queryNotes(
-      db: iDb.db,
+      iDb: iDb,
       guiManager: guiManager,
       where: where,
     );
@@ -268,11 +232,11 @@ class AppData {
   }
 
   static Future<List<Note>> _queryNotes({
-    required Database db,
+    required _IndexedDatabase iDb,
     required GuiManager guiManager,
     required String where,
   }) async {
-    List<Map<String, dynamic>> query = await db.query(
+    List<Map<String, dynamic>> query = await iDb.db.query(
       'notes',
       columns: [
         'id',
@@ -291,29 +255,119 @@ class AppData {
       ],
       where: where,
     );
-    var notes = query.map((e) => Note.fromDbQuery(e, guiManager)).toList();
+    var notes = query.map((e) => Note.fromDbQuery(e, guiManager)).sorted(guiManager.sortComparison);
     //User order and label ids don't apply to history.
     //User order and label ids are set for trash and archive in case note is restored.
     if (notes.any((e) => e.historyDateTime == null)) {
+      var notesWithoutUserOrderDueSomeError = notes.where((e) => !_notesUserOrder.contains(e.id)).toList();
+      if (notesWithoutUserOrderDueSomeError.isNotEmpty) {
+        _notesUserOrder.insertAll(0, notesWithoutUserOrderDueSomeError.map((e) => e.id));
+        await _updateDbNotesUserOrder(iDb);
+      }
       var labelIds = labels.map((e) => e.id).toList();
       for (var note in notes) {
-        note.userOrder = _notesUserOrder.indexOf(note.id);
+        var userOrder = _notesUserOrder.indexOf(note.id);
+        if (userOrder < 0) {
+          userOrder = 0;
+          _notesUserOrder.insert(0, note.id);
+        }
+        note.userOrder = userOrder;
         var idLength = note.labelIds.length;
         note.labelIds.removeWhere((e) => !labelIds.contains(e));
         if (note.labelIds.length != idLength) {
-          await db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
+          await iDb.db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
         }
       }
     }
-    return notes.sorted(guiManager.sortComparison);
+    return notes.sorted(guiManager.sortComparison); //Sorts again by userOrder when necessary
   }
 
-  static Future<bool> newNote(Note note, [bool isDraft = false]) async {
-    var success = false;
+  static Future<void> _recoverFromDraft(_IndexedDatabase iDb) async {
+    List<Map<String, dynamic>> query = await iDb.db.query('notes',
+        columns: [
+          'text',
+          'modif_date_time',
+          'creation_date_time',
+          'is_crossed_out',
+          'number_of_lines',
+          'color',
+          'favorite',
+          'label_ids',
+          'parent_id',
+        ],
+        where: 'parent_id IS NOT NULL AND history_date_time IS NULL',
+        orderBy: 'modif_date_time DESC'); //It should be only one draft in db, but just in case we're getting the last one.
+    var draft = query.firstOrNull;
+    if (draft != null) {
+      String draftText = draft['text'];
+      if (draftText.trim().isNotEmpty) {
+        int parentId = draft['parent_id'];
+        Map<String, dynamic> map = {
+          'text': draftText,
+          'modif_date_time': draft['modif_date_time'],
+          'color': draft['color'],
+          'favorite': draft['favorite'],
+          'label_ids': draft['label_ids']
+        };
+        if (parentId == 0) {
+          map.addAll({
+            'creation_date_time': draft['creation_date_time'],
+            'is_crossed_out': draft['is_crossed_out'],
+            'number_of_lines': draft['number_of_lines'],
+          });
+          var newId = await iDb.db.insert('notes', map);
+          if (newId > 0) {
+            _notesUserOrder.insert(0, newId);
+            await _updateDbNotesUserOrder(iDb);
+          } else {
+            _error('ERROR');
+          }
+        } else {
+          query = await iDb.db.query(
+            'notes',
+            columns: ['text', 'modif_date_time', 'creation_date_time', 'is_crossed_out', 'number_of_lines', 'color'],
+            where: 'id = ?',
+            whereArgs: [parentId],
+          );
+          var parent = query.firstOrNull;
+          if (parent != null) {
+            if (draftText != parent['text'] || draft['color'] != parent['color']) {
+              await _addHistory(
+                iDb,
+                parentId,
+                draft['creation_date_time'],
+                parent['text'],
+                parent['modif_date_time'],
+                parent['creation_date_time'],
+                parent['is_crossed_out'],
+                parent['number_of_lines'],
+                parent['color'],
+              );
+            }
+            await iDb.db.update('notes', map, where: 'id = ?', whereArgs: [parentId]);
+          } else {
+            _error('ERROR');
+          }
+        }
+      }
+      var count = await _clearDraft(iDb);
+      if (count <= 0) {
+        _error('ERROR');
+      }
+    }
+  }
+
+  static Future<int> _clearDraft(_IndexedDatabase iDb) async {
+    return iDb.db.delete('notes', where: 'parent_id IS NOT NULL AND history_date_time IS NULL');
+  }
+
+  static Future<int> newNoteFromInput(Note note, [bool isDraft = false]) async {
+    var now = DateTime.now();
     var iDb = await _openDb();
     //var newUserOrder = mainManager.list.value!.map((e) => e.userOrder).fold(0, max) + 1; requires to import 'dart:math' to use max.
-    if !isDraft _clear Draft();
-    var now = DateTime.now();
+    if (!isDraft) {
+      await _clearDraft(iDb);
+    }
     var newId = await iDb.db.insert('notes', {
       'text': note.text,
       'modif_date_time': now.parseToStr(DTToStrFormat.DATABASE),
@@ -335,72 +389,58 @@ class AppData {
         }
         notesManager.allList = [note, ...notesManager.allList].sorted(notesManager.sortComparison);
         _notesUserOrder.insert(0, note.id);
-        //_closeDb(iDb); //_updateDbNotesUserOrder closes the db.
+        //_closeDb(iDb); _updateDbNotesUserOrder closes the db.
         _updateDbNotesUserOrder(iDb, true); //It is required to not await to continue with code without waiting for db.
         HomeWidgetManager.updateWidget(notesManager.allList);
         notesManager.requestFilterList();
       } else {
         _closeDb(iDb);
       }
-      success = true;
     } else {
       _closeDb(iDb);
       _error('ERROR');
     }
-    return success;
+    return newId;
   }
 
-  static void updateNote(Note note, String oldText, Color? oldColor, [bool isDraft = fals]) async {
-    if !isDraft _clear Draft ();
+  static Future<void> updateNoteFromInput(Note note, String oldText, Color? oldColor, [int? draftId]) async {
     _IndexedDatabase iDb;
-    var noteCopy = note.clone(); //Cloning note to save asynchronously to history with the current values.
-    if (note.text != oldText || note.color.value != oldColor) {
-      var now = DateTime.now();
+    var now = DateTime.now();
+    if ((note.text != oldText || note.color.value != oldColor) && draftId == null) {
+      var noteCopy = note.clone(); //Cloning note to save asynchronously to history with the current values.
       note.modifDateTime = now;
       if (!notesManager.noteIsInFilter(note)) {
         notesManager.displayList.value!.remove(note);
       }
       HomeWidgetManager.updateWidget(notesManager.allList);
       iDb = await _openDb();
-      ////Limiting the history size.
-      // List<Map<String, dynamic>> query = await iDb.db
-      //     .query('notes', columns: ['id'], where: 'parent_id = ${noteCopy.id} AND history_date_time IS NOT NULL', orderBy: 'history_date_time');
-      // var historyIds = query.map((e) => e['id'] as int);
-      // if (historyIds.length >= int.parse(settings[Settings.maxHistory]!.value)) {
-      //   await iDb.db.delete('notes', where: 'id = ?', whereArgs: [historyIds.first]);
-      // }
-      await _validateMaxHistory(iDb, int.parse(settings[Settings.maxHistory]!.value) - 1, noteCopy.id);
-      //Inserting to history in db.
-      var newId = await iDb.db.insert('notes', {
-        'parent_id': noteCopy.id,
-        'history_date_time': now.parseToStr(DTToStrFormat.DATABASE),
-        'text': oldText,
-        'modif_date_time': noteCopy.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
-        'creation_date_time': noteCopy.creationDateTime.parseToStr(DTToStrFormat.DATABASE),
-        'is_crossed_out': noteCopy.isCrossedOut.value ? 1 : 0,
-        'number_of_lines': noteCopy.numberOfLines.value,
-        'color': oldColor?.value,
-      });
-      if (newId <= 0) {
-        _error('ERROR');
-      }
+      await _addHistory(
+        iDb,
+        noteCopy.id,
+        now.parseToStr(DTToStrFormat.DATABASE),
+        oldText,
+        noteCopy.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
+        noteCopy.creationDateTime.parseToStr(DTToStrFormat.DATABASE),
+        noteCopy.isCrossedOut.value ? 1 : 0,
+        noteCopy.numberOfLines.value,
+        oldColor?.value,
+      );
     } else {
       iDb = await _openDb();
     }
-    var count = await iDb.db.update(
-      'notes',
-      {
-        'text': note.text,
-        'modif_date_time': note.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
-        'is_crossed_out': note.isCrossedOut.value ? 1 : 0,
-        'number_of_lines': note.numberOfLines.value,
-        'color': note.color.value?.value,
-        'favorite': note.favorite.value ? 1 : 0,
-        'label_ids': note.labelIdsString(),
-      },
-      where: 'id = ?',
-      whereArgs: [note.id],
-    );
+    Map<String, dynamic> updateMap = {
+      'text': note.text,
+      'modif_date_time': now.parseToStr(DTToStrFormat.DATABASE),
+      'color': note.color.value?.value,
+      'favorite': note.favorite.value ? 1 : 0,
+      'label_ids': note.labelIdsString(),
+    };
+    if (draftId == null) {
+      await _clearDraft(iDb);
+    } else {
+      updateMap.addAll({'creation_date_time': now.parseToStr(DTToStrFormat.DATABASE)});
+    }
+    var count = await iDb.db.update('notes', updateMap, where: 'id = ?', whereArgs: [draftId ?? note.id]);
     if (count <= 0) {
       _error('ERROR');
     }
@@ -409,7 +449,6 @@ class AppData {
 
   static void updateDbNotes(List<Note> notes, String field, String value) async {
     if (notes.isNotEmpty) {
-      HomeWidgetManager.updateWidget(notesManager.allList);
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate('UPDATE notes SET $field = $value WHERE id IN (${notes.map((e) => e.id).join(',')})');
       if (count <= 0) {
@@ -534,15 +573,6 @@ class AppData {
     }
   }
 
-  static Future<void> _clearDraft() async {
-    var iDb = await _openDb();
-    var count = await iDb.db.delete('notes', where: 'parent_id IS NOT NULL AND history_date_time IS NULL');
-    if (count <= 0) {
-      _error('ERROR');
-    }
-    _closeDb(iDb);
-  }
-
   static Future<int> newLabel(String text, GuiManager? labelsManager) async {
     labelsManager?.displayList.value = null;
     var iDb = await _openDb();
@@ -631,7 +661,7 @@ class AppData {
   }
 
   static Future<void> _updateDbNotesUserOrder(_IndexedDatabase iDb, [bool closeDb = false]) async {
-    int count = await iDb.db.rawUpdate('UPDATE notes_user_order SET data = \'${_notesUserOrder.join(',')}\'');
+    var count = await iDb.db.rawUpdate('UPDATE notes_user_order SET data = \'${_notesUserOrder.join(',')}\'');
     if (count <= 0) {
       _error('ERROR');
     }
@@ -652,7 +682,35 @@ class AppData {
 
   static Future<void> _validateMaxHistory(_IndexedDatabase iDb, int maxHistory, int parentNoteId) {
     return iDb.db.rawDelete(
-        'DELETE FROM notes WHERE id IN (SELECT id FROM notes WHERE parent_id = $parentNoteId AND history_date_time IS NOT NULL ORDER BY history_date_time DESC LIMIT -1 OFFSET ${maxHistory >= 0 ? maxHistory : maxHistory})');
+        'DELETE FROM notes WHERE id IN (SELECT id FROM notes WHERE parent_id = $parentNoteId AND history_date_time IS NOT NULL ORDER BY history_date_time DESC LIMIT -1 OFFSET ${maxHistory >= 0 ? maxHistory : 0})');
+  }
+
+  static Future<void> _addHistory(
+    _IndexedDatabase iDb,
+    int parentId,
+    String historyDateTime,
+    String text,
+    String modifDateTime,
+    String creationDateTime,
+    int isCrossedOut,
+    int numberOfLines,
+    int? color,
+  ) async {
+    await _validateMaxHistory(iDb, int.parse(settings[Settings.maxHistory]!.value) - 1, parentId);
+    //Inserting to history in db.
+    var id = await iDb.db.insert('notes', {
+      'parent_id': parentId,
+      'history_date_time': historyDateTime,
+      'text': text,
+      'modif_date_time': modifDateTime,
+      'creation_date_time': creationDateTime,
+      'is_crossed_out': isCrossedOut,
+      'number_of_lines': numberOfLines,
+      'color': color,
+    });
+    if (id <= 0) {
+      _error('ERROR');
+    }
   }
 
   static Future<void> validateTimeInTrash() async {
@@ -706,7 +764,7 @@ class AppData {
       filters.from != null || filters.to != null,
       Filters.BY_DATE,
     );
-    await update(filters.text, filters.text != '', Filters.BY_TEXT);
+    await update(filters.text, filters.text.isNotEmpty, Filters.BY_TEXT);
     await update(filters.labelIds.join(','), filters.labelIds.isNotEmpty, Filters.BY_LABEL);
     await update(filters.colors.map((e) => e.value).join(','), filters.colors.isNotEmpty, Filters.BY_COLOR);
     await update(true.toString(), filters.crossedOut, Filters.CROSSED_OUT);
