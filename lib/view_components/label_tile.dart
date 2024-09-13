@@ -4,7 +4,7 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/view_components/label_container.dart';
-import 'package:ohnote/view_components/label_dialog.dart';
+import 'package:ohnote/views/dialogs/edit_label_dialog.dart';
 import 'package:ohnote/constants.dart' as c;
 
 class LabelTile extends StatefulWidget {
@@ -110,13 +110,13 @@ class _LabelTileState extends State<LabelTile> {
               if (widget.label.guiManager.selectionQuantity.value != null) {
                 _checkLabel(!widget.label.isChecked.value);
               } else {
-                LabelDialog.show(
+                EditLabelDialog.show(
                   context: context,
                   text: widget.label.text,
                 ).then((value) {
                   if (value != null) {
                     widget.label.text = value;
-                    AppData.updateLabel(AppData.labels.where((e) => e.id == widget.label.id).first, value, widget.label.guiManager);
+                    AppData.updateLabel(AppData.labels.firstWhere((e) => e.id == widget.label.id), value, widget.label.guiManager);
                   }
                 });
               }

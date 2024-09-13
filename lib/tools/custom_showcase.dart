@@ -138,7 +138,7 @@ class CustomShowCaseWidgetState<T> extends State<CustomShowCaseWidget<T>> {
         }
         widget.onFinish?.call(shownKeyValues);
       },
-      builder: Builder(builder: (context) => widget.child),
+      builder: (context) => widget.child,
     );
   }
 }

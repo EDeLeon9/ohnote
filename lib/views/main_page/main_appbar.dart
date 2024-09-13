@@ -4,7 +4,7 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedopacity_change.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
-import 'package:ohnote/view_components/change_wallpaper_dialog.dart';
+import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
 import 'package:ohnote/constants.dart' as c;
@@ -148,6 +148,7 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = MainScaffold.of(context).moreSCK
                     ..showCaseDescription = 'Tap here to view more\nactions you can do\nwith your notes.',
+                  HeaderButton(HeaderButtonDetails.sortBy),
                   HeaderButton(HeaderButtonDetails.filters),
                   HeaderButton(HeaderButtonDetails.style),
                   HeaderButton(HeaderButtonDetails.favorite),

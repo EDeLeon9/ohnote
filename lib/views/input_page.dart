@@ -9,10 +9,10 @@ import 'package:ohnote/tools/animated/animatedscale_button.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/label_container.dart';
-import 'package:ohnote/view_components/label_note_dialog.dart';
-import 'package:ohnote/view_components/style_colorpicker_dialog.dart';
+import 'package:ohnote/views/dialogs/label_note_dialog.dart';
+import 'package:ohnote/views/dialogs/style_colorpicker_dialog.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
-import 'package:ohnote/views/history_bottomsheet.dart';
+import 'package:ohnote/views/bottomsheets/history_bottomsheet.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
 import 'package:ohnote/tools/single_async.dart' as a;
@@ -36,7 +36,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
   final _autoSaver = a.SingleAsync();
   final GuiManager historyManager = GuiManager(
     sortComparison: (a, b) => b.historyDateTime!.compareTo(a.historyDateTime!),
-    getFilterDateTime: (note) => note.modifDateTime,
+    getComparisonDateTime: (note) => note.modifDateTime,
   );
   late final List<ShowCaseKey<FirstAccess>> _showCaseKeys;
   final _configBarSCK = ShowCaseKey(FirstAccess.editConfigBarSC);
@@ -99,14 +99,14 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: (didPop, result) => _onPopInvoked(didPop, context),
       child: Scaffold(
         appBar: AppBar(
           title: Text(_isNewNote ? 'New Note' : 'Edit Note'),
           leading: _backButton(),
           actions: [
             _favoriteButton(),
-            _labelNoteButton(),
+            _labelNoteButton(context),
             _moreButton(),
           ],
         ),
@@ -122,7 +122,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
     );
   }
 
-  void _onPopInvoked(bool didPop) async {
+  void _onPopInvoked(bool didPop, BuildContext context) async {
     if (!didPop && !CustomShowCase.next(context)) {
       a.runFirst(() async {
         if (_isNewNote && widget.note.text.trim().isEmpty) {
@@ -209,7 +209,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _labelNoteButton() {
+  Widget _labelNoteButton(BuildContext context) {
     return CustomShowCase(
       showCaseKey: _labelNoteSCK,
       description: 'You can add labels to\nyour note by tapping\nhere. You can also\nfilter by label in the\nmain list.',
@@ -226,7 +226,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
                 widget.note.labelIds = value;
               });
               _saveDraft();
-              if (widget.note.labelIds.isNotEmpty) {
+              if (widget.note.labelIds.isNotEmpty && context.mounted) {
                 CustomShowCase.startShowCase(
                   context: context,
                   showCaseKeys: [_removeLabelSCK],
@@ -254,7 +254,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
         if (selected == HeaderButtonDetails.history) {
           _historyPressed();
         } else if (selected == HeaderButtonDetails.sendToTrash) {
-          _sendToTrashPressed();
+          _sendToTrashPressed(context);
         }
       },
     );
@@ -268,7 +268,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
         valueListenable: widget.note.color,
         builder: (context, color, child) {
           return AnimatedColor(
-            color: color ?? Theme.of(context).colorScheme.background,
+            color: color ?? Theme.of(context).colorScheme.surface,
             duration: c.animationDuration,
             builder: (animatedColor) {
               //Material allows to set color without removing InkWell splash effect.
@@ -417,7 +417,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
     });
   }
 
-  void _sendToTrashPressed() {
+  void _sendToTrashPressed(BuildContext context) {
     if (_isNewNote && widget.note.text.trim().isEmpty) {
       Navigator.pop(context);
     } else {

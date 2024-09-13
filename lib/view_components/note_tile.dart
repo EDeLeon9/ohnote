@@ -70,7 +70,7 @@ class _NoteTileState extends State<NoteTile> {
                 builder: (context, color, child) {
                   return AnimatedColor(
                     duration: c.animationDuration,
-                    color: color ?? Theme.of(context).colorScheme.background,
+                    color: color ?? Theme.of(context).colorScheme.surface,
                     builder: (animatedColor) {
                       return ListTile(
                         minVerticalPadding: 0.0,

@@ -11,7 +11,7 @@ import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
-import 'package:ohnote/view_components/label_dialog.dart';
+import 'package:ohnote/views/dialogs/edit_label_dialog.dart';
 import 'package:ohnote/view_components/label_tile.dart';
 import 'package:ohnote/tools/single_async.dart' as a;
 import 'package:ohnote/constants.dart' as c;
@@ -28,7 +28,7 @@ class _LabelsPageState extends State<LabelsPage> {
   final _labelMoreSCK = ShowCaseKey(FirstAccess.labelMoreSC);
   final GuiManager labelsManager = GuiManager(
     sortComparison: (a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()),
-    getFilterDateTime: (note) => note.creationDateTime, //Not used.
+    getComparisonDateTime: (note) => note.creationDateTime, //Not used.
   );
 
   @override
@@ -53,7 +53,7 @@ class _LabelsPageState extends State<LabelsPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) => _didPop(didPop, context),
+      onPopInvokedWithResult: (didPop, result) => _didPop(didPop, context),
       child: Scaffold(
         appBar: AppBar(
           title: ValueListenableBuilder(
@@ -138,7 +138,7 @@ class _LabelsPageState extends State<LabelsPage> {
         afterAnimationStateAction: (selectedLabels) {
           List<Label> labelsToRemove = [];
           for (var label in selectedLabels) {
-            labelsToRemove.add(AppData.labels.where((e) => e.id == label.id).first);
+            labelsToRemove.add(AppData.labels.firstWhere((e) => e.id == label.id));
           }
           AppData.removeLabels(labelsToRemove);
           AppData.removeNotesFromLists(selectedLabels, labelsManager);
@@ -186,7 +186,7 @@ class _LabelsPageState extends State<LabelsPage> {
           onPressed: () {
             a.runFirst(() async {
               labelsManager.selectionQuantity.value = null;
-              var value = await LabelDialog.show(context: context);
+              var value = await EditLabelDialog.show(context: context);
               if (value != null) {
                 await AppData.newLabel(value, labelsManager);
               }

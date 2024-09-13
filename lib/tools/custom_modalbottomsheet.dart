@@ -26,7 +26,7 @@ class CustomModalBottomSheet extends StatefulWidget {
       isScrollControlled: true,
       shape: shape,
       clipBehavior: Clip.antiAlias,
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return CustomModalBottomSheet._(
           onInitState: onInitState,
@@ -53,13 +53,13 @@ class _CustomModalBottomSheetState extends State<CustomModalBottomSheet> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         //a Navigator.pop() will raise onPopInvoked with didPop forced to true, so didPop validation is required.
         if (!didPop) {
           a.runFirst(() async {
             await Future.delayed(const Duration(milliseconds: 10)); //Ensures that screenWasPressed is set correctly before continue.
             if ((widget.validateCanPop?.call() ?? true) || (context.mounted && CustomModalBottomSheetListener.of(context).screenWasPressed)) {
-              Navigator.pop(context); // ignore: use_build_context_synchronously
+              Navigator.pop(context, result); // ignore: use_build_context_synchronously
             }
           });
         }

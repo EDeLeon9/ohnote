@@ -7,7 +7,7 @@ import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/smooth_materialpageroute.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
-import 'package:ohnote/views/style_panel.dart';
+import 'package:ohnote/views/bottomsheets/style_panel.dart';
 import 'package:ohnote/views/main_page/main_drawer.dart';
 import 'package:ohnote/views/input_page.dart';
 import 'package:ohnote/views/main_page/main_appbar.dart';
@@ -55,7 +55,7 @@ class MainScaffoldState extends State<MainScaffold> {
       builder: (context, dataInitialized, child) {
         return PopScope(
           canPop: false,
-          onPopInvoked: _onPopInvoked,
+          onPopInvokedWithResult: (didPop, result) => _onPopInvoked(didPop),
           child: ValueListenableBuilder(
             valueListenable: AppData.notesManager.stylePanelOpened,
             builder: (context, stylePanelOpened, child) {
@@ -250,8 +250,11 @@ class MainScaffoldState extends State<MainScaffold> {
             },
             decoration: AppData.notesManager.stylePanelOpened.value
                 ? BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: c.roundedTopBorder.borderRadius,
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border(top: BorderSide(color: Theme.of(context).colorScheme.outline))
+                        : null,
                     boxShadow: const [BoxShadow(blurRadius: 5.0, spreadRadius: -2.0)],
                   )
                 : null,

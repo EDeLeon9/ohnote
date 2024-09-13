@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/gui_manager.dart';
+import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
+import 'package:ohnote/data/sort_by.dart';
 import 'package:ohnote/tools/animated/animatedscale_button.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/tools/tappable_popupmenubutton.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
-import 'package:ohnote/views/filters_dialog.dart';
+import 'package:ohnote/views/dialogs/filters_dialog.dart';
+import 'package:ohnote/views/dialogs/sortby_dialog.dart';
 import 'package:ohnote/tools/custom_toast.dart' as t;
 import 'package:ohnote/tools/single_async.dart' as a;
 import 'package:ohnote/constants.dart' as c;
@@ -22,6 +25,7 @@ enum HeaderButtonDetails {
   deselectAll('Deselect all', Icons.deselect),
   searchText('Search text', Icons.search),
   more('More', Icons.more_vert),
+  sortBy('Sort by', Icons.sort),
   filters('Filters', Icons.filter_alt),
   style('Style', Icons.style),
   favorite('Favorite', Icons.star),
@@ -146,6 +150,7 @@ class HeaderButtons extends StatelessWidget {
                                   color: color,
                                   button: buttonsMap[HeaderButtonDetails.more],
                                   moreButtons: [
+                                    buttonsMap[HeaderButtonDetails.sortBy],
                                     buttonsMap[HeaderButtonDetails.filters],
                                     buttonsMap[HeaderButtonDetails.style],
                                     buttonsMap[HeaderButtonDetails.favorite],
@@ -154,7 +159,9 @@ class HeaderButtons extends StatelessWidget {
                                     buttonsMap[HeaderButtonDetails.discardHistory],
                                   ].whereNotNull().toList(),
                                   onSelected: (selected) {
-                                    if (selected == HeaderButtonDetails.filters) {
+                                    if (selected == HeaderButtonDetails.sortBy) {
+                                      _sortByPressed(context: context, guiManager: guiManager);
+                                    } else if (selected == HeaderButtonDetails.filters) {
                                       filtersPressed(context: context, guiManager: guiManager);
                                     } else if (selected == HeaderButtonDetails.style) {
                                       _stylePressed(guiManager: guiManager);
@@ -327,6 +334,40 @@ class HeaderButtons extends StatelessWidget {
             onSelected: onSelected,
           )
         : const SizedBox.shrink();
+  }
+
+  void _sortByPressed({required BuildContext context, required GuiManager guiManager}) {
+    SortByDialog.show(context: context).then((value) {
+      if (value != null) {
+        int Function(Note a, Note b) comparison;
+        switch (value.sortBy) {
+          case SortBy.text:
+            comparison = (Note a, Note b) => a.text.compareTo(b.text);
+            break;
+          case SortBy.date:
+            comparison = (Note a, Note b) => guiManager.getComparisonDateTime(a).compareTo(guiManager.getComparisonDateTime(b));
+            break;
+          case SortBy.color:
+            comparison = (Note a, Note b) => (b.color.value ?? Colors.transparent).value.compareTo((a.color.value ?? Colors.transparent).value);
+            break;
+          case SortBy.label:
+            comparison = (Note a, Note b) {
+              if (a.labelIds.isNotEmpty && b.labelIds.isNotEmpty) {
+                return AppData.labelIds.indexOf(a.labelIds.first).compareTo(AppData.labelIds.indexOf(b.labelIds.first));
+              }
+              return (a.labelIds.isNotEmpty ? 0 : 1).compareTo(b.labelIds.isNotEmpty ? 0 : 1);
+            };
+            break;
+          case SortBy.favorite:
+            comparison = (Note a, Note b) => (a.favorite.value ? 0 : 1).compareTo(b.favorite.value ? 0 : 1);
+            break;
+          case SortBy.crossedOut:
+            comparison = (Note a, Note b) => (a.isCrossedOut.value ? 0 : 1).compareTo(b.isCrossedOut.value ? 0 : 1);
+            break;
+        }
+        AppData.sortNotes(comparison, value.order);
+      }
+    });
   }
 
   static void filtersPressed({required BuildContext context, required GuiManager guiManager}) {

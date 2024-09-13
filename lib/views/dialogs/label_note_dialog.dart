@@ -6,7 +6,7 @@ import 'package:ohnote/tools/single_async.dart';
 import 'package:ohnote/view_components/label_container.dart';
 
 class LabelNoteDialog extends StatefulWidget {
-  const LabelNoteDialog({super.key, required this.selectedLabelsId});
+  const LabelNoteDialog._({super.key, required this.selectedLabelsId});
 
   final List<int> selectedLabelsId;
 
@@ -17,7 +17,7 @@ class LabelNoteDialog extends StatefulWidget {
     return showDialog<List<int>>(
       context: context,
       builder: (context) {
-        return LabelNoteDialog(selectedLabelsId: selectedLabelsId);
+        return LabelNoteDialog._(selectedLabelsId: selectedLabelsId);
       },
     );
   }
@@ -28,7 +28,6 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
   final _labelDialogSelectSCK = ShowCaseKey(FirstAccess.labelDialogSelectSC);
   final _labelDialogNewSCK = ShowCaseKey(FirstAccess.labelDialogNewSC);
   late final Map<int, bool> _labelsMap = Map.fromEntries(AppData.labels.map((e) => MapEntry(e.id, widget.selectedLabelsId.any((id) => e.id == id))));
-  List<int>? result;
 
   @override
   void initState() {
@@ -50,11 +49,9 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop && !CustomShowCase.next(context)) {
           Navigator.pop(context, result);
-        } else {
-          result = null;
         }
       },
       child: AlertDialog(
@@ -82,7 +79,7 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                     var selected = _labelsMap[e.id]!;
                     return LabelContainer(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      color: selected ? null : Theme.of(context).colorScheme.surfaceVariant,
+                      color: selected ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
                       onTap: () {
                         setState(() {
                           _labelsMap[e.id] = !selected;
@@ -127,7 +124,7 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                       const SizedBox(width: 10.0),
                       IconButton(
                         iconSize: 32.0,
-                        style: const ButtonStyle(padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 0.0))),
+                        style: const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 0.0))),
                         tooltip: 'New label',
                         visualDensity: const VisualDensity(horizontal: -4.0, vertical: -4.0),
                         icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
@@ -173,11 +170,8 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      result = _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList();
-                      Navigator.maybePop(context, result);
-                    },
-                    child: const Text('DONE'),
+                    onPressed: () => Navigator.maybePop(context, _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList()),
+                    child: const Text('APPLY'),
                   ),
                   const SizedBox(width: 5.0),
                   TextButton(

@@ -5,6 +5,7 @@ enum Settings {
   defaultNumberOfLines,
   maxHistory,
   useCreationDateTime,
+  lastSortBy,
   hideSendToTrashDialog,
   hideArchiveNotesDialog,
   hideRemovePermanentlyDialog,

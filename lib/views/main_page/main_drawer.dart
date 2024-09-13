@@ -32,7 +32,7 @@ class _MainDrawerState extends State<MainDrawer> {
       }
       return comparison;
     },
-    getFilterDateTime: (note) => note.trashDateTime!,
+    getComparisonDateTime: (note) => note.trashDateTime!,
   );
   late final GuiManager archiveManager = GuiManager(
     sortComparison: (a, b) {
@@ -42,7 +42,7 @@ class _MainDrawerState extends State<MainDrawer> {
       }
       return comparison;
     },
-    getFilterDateTime: (note) => note.archiveDateTime!,
+    getComparisonDateTime: (note) => note.archiveDateTime!,
   );
 
   @override
@@ -56,7 +56,7 @@ class _MainDrawerState extends State<MainDrawer> {
   Widget build(BuildContext context) {
     var fontColor = Theme.of(context).colorScheme.primary;
     return Drawer(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       child: Stack(
         children: [
           ListView(
@@ -67,21 +67,21 @@ class _MainDrawerState extends State<MainDrawer> {
                 title: const Text('Labels'),
                 leading: Icon(Icons.label, color: fontColor),
                 onTap: () {
-                  _openPage(const LabelsPage());
+                  _openPage(const LabelsPage(), context);
                 },
               ),
               ListTile(
                 title: const Text('Archive'),
                 leading: Icon(Icons.archive, color: fontColor),
                 onTap: () {
-                  _openPage(ArchivePage(archiveManager: archiveManager));
+                  _openPage(ArchivePage(archiveManager: archiveManager), context);
                 },
               ),
               ListTile(
                 title: const Text('Trash Can'),
                 leading: Icon(Icons.delete, color: fontColor),
                 onTap: () {
-                  _openPage(TrashCanPage(trashManager: trashManager));
+                  _openPage(TrashCanPage(trashManager: trashManager), context);
                 },
               ),
               c.defaultDivider,
@@ -89,7 +89,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 title: const Text('Settings'),
                 leading: Icon(Icons.settings, color: fontColor),
                 onTap: () {
-                  _openPage<Map<Settings, String>>(const SettingsPage(), (value) => widget.onSettingsClosed());
+                  _openPage<Map<Settings, String>>(const SettingsPage(), context, (value) => widget.onSettingsClosed());
                 },
               ),
               c.defaultDivider,
@@ -137,7 +137,7 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
-  void _openPage<T>(Widget page, [void Function(T? value)? whenCompletePage]) {
+  void _openPage<T>(Widget page, BuildContext context, [void Function(T? value)? whenCompletePage]) {
     Navigator.pop(context);
     _singleAsync.runFirst(() async {
       await Future.delayed(_drawerAnimationDuration);

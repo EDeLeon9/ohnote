@@ -9,9 +9,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Paneles con sombra en Dark mode no se aprecian (e.g. Style panel), pero lo que no se aprecia en light mode pero si en dark mode será poner esos paneles en otra tonalidad.
-//En Dark mode aclarar los encabezados y oscurecer los textos de los controles desactivados (por ejemplo en los filtros de From y To).
-//En Dark mode revisar colores de labels, al hacer tap no se aprecia.
 //Sort by (y para Trash can y Archive) (y guardar Sort usado en db) (recordar deshabilitar reordering).
 //Homescreen widget.
 //Anuncios.

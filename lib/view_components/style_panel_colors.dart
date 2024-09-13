@@ -6,7 +6,7 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/tools/animated/animated_growth.dart';
 import 'package:ohnote/tools/linear_fade_out_mask.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
-import 'package:ohnote/view_components/style_colorpicker_dialog.dart';
+import 'package:ohnote/views/dialogs/style_colorpicker_dialog.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
 

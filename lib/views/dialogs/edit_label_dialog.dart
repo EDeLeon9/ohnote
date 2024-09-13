@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 
-class LabelDialog extends StatefulWidget {
-  const LabelDialog({super.key, this.text});
+class EditLabelDialog extends StatefulWidget {
+  const EditLabelDialog._({this.text});
 
   final String? text;
 
   @override
-  State<LabelDialog> createState() => _LabelDialogState();
+  State<EditLabelDialog> createState() => _EditLabelDialogState();
 
   static Future<String?> show({required BuildContext context, String? text}) async {
     return showDialog<String>(
       context: context,
       builder: (context) {
-        return LabelDialog(text: text);
+        return EditLabelDialog._(text: text);
       },
     );
   }
 }
 
-class _LabelDialogState extends State<LabelDialog> {
+class _EditLabelDialogState extends State<EditLabelDialog> {
   late final _textController = TextEditingController()..text = widget.text ?? '';
 
   @override

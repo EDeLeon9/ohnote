@@ -4,11 +4,11 @@ import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/gui_manager.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/view_components/header_container.dart';
-import 'package:ohnote/views/details_dialog.dart';
+import 'package:ohnote/views/dialogs/details_dialog.dart';
 import 'package:ohnote/view_components/note_tile.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
-import 'package:ohnote/view_components/restore_history_bottomsheet.dart';
+import 'package:ohnote/views/bottomsheets/restore_history_bottomsheet.dart';
 import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
@@ -106,7 +106,7 @@ class HistoryBottomSheet {
                           context: context,
                           note: history,
                         ).then((value) {
-                          if (value == true) {
+                          if (value == true && context.mounted) {
                             Navigator.pop(context, history);
                           }
                         });

@@ -9,7 +9,7 @@ class HeaderContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.tertiaryContainer,
         boxShadow: [
           BoxShadow(
             blurRadius: 2.0,

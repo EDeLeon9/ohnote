@@ -6,7 +6,7 @@ import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/note_tile.dart';
-import 'package:ohnote/views/details_dialog.dart';
+import 'package:ohnote/views/dialogs/details_dialog.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/single_async.dart' as a;
@@ -37,7 +37,7 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) => _didPop(didPop, context),
+      onPopInvokedWithResult: (didPop, result) => _didPop(didPop, context),
       child: Scaffold(
         appBar: AppBar(
           title: ValueListenableBuilder(

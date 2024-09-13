@@ -10,7 +10,7 @@ class RestoreHistoryBottomSheet {
       context: context,
       shape: c.roundedTopBorder,
       clipBehavior: Clip.antiAlias,
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return SizedBox(
           height: 170.0,

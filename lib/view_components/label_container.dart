@@ -30,6 +30,7 @@ class LabelContainer extends StatelessWidget {
         shadowColor: Colors.black,
         color: color ?? Theme.of(context).colorScheme.primary,
         child: InkWell(
+          splashColor: Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.onPrimary, 0.5)?.withOpacity(0.35),
           onTap: onTap,
           onLongPress: onLongPress,
           child: ConstrainedBox(

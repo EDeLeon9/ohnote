@@ -9,7 +9,7 @@ import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
 
 class GuiManager {
-  GuiManager({required this.sortComparison, required this.getFilterDateTime}) {
+  GuiManager({required this.sortComparison, required this.getComparisonDateTime}) {
     selectionQuantity.addListener(() {
       if (selectionQuantity.value == null) {
         isManualSelection = false;
@@ -33,8 +33,8 @@ class GuiManager {
   final styleSelectedNumberOfLines = ValueNotifier<int>(1);
   final showSearchText = ValueNotifier<bool>(false);
   final searchTextFocusNode = FocusNode();
-  int Function(Note a, Note b) sortComparison;
-  DateTime Function(Note note) getFilterDateTime;
+  final int Function(Note a, Note b) sortComparison;
+  DateTime Function(Note note) getComparisonDateTime;
   BoxedValue<bool>? _cancelFiltering;
 
   bool _isManualSelection = false;
@@ -126,7 +126,7 @@ class GuiManager {
     if (filters.value.text.isNotEmpty) {
       wordsSearcher = WordsSearcher(filters.value.text);
     }
-    DateTime noteDateTime = getFilterDateTime(note);
+    DateTime noteDateTime = getComparisonDateTime(note);
     return (!filters.value.favorites || note.favorite.value) &&
         (!filters.value.crossedOut || note.isCrossedOut.value) &&
         (filters.value.from == null || !noteDateTime.isBefore(filters.value.from!)) &&

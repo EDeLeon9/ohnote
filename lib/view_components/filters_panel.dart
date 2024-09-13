@@ -84,12 +84,12 @@ class _FiltersPanelState extends State<FiltersPanel> {
                               color: Theme.of(context).colorScheme.shadow.withOpacity(0.5),
                             ),
                           ],
-                          color: Theme.of(context).colorScheme.surface,
+                          color: Theme.of(context).colorScheme.tertiaryContainer,
                         )
                       : null,
                 ),
                 Container(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
                   child: AnimatedSize(
                     duration: c.animationDuration,
                     child: Padding(
@@ -144,7 +144,7 @@ class _FiltersPanelState extends State<FiltersPanel> {
                                         ),
                                       ),
                                       IconButton(
-                                        style: const ButtonStyle(padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 5.0))),
+                                        style: const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 5.0))),
                                         tooltip: widget.useFilterChips ? 'Close' : 'Clear',
                                         visualDensity: const VisualDensity(horizontal: -4.0, vertical: -1.5),
                                         icon: widget.useFilterChips

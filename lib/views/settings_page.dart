@@ -6,9 +6,9 @@ import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animated_growth.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/tools/option_tiles.dart';
-import 'package:ohnote/view_components/change_wallpaper_dialog.dart';
+import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
-import 'package:ohnote/view_components/style_colorpicker_dialog.dart';
+import 'package:ohnote/views/dialogs/style_colorpicker_dialog.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
 
@@ -54,11 +54,11 @@ class _SettingsPageState extends State<SettingsPage> {
           c.defaultDivider,
           _defaultNumberOfLines(),
           c.defaultDivider,
-          _resetSettingsToDefault(),
+          _resetSettingsToDefault(context),
           c.defaultDivider,
-          _resetDontShowAgain(),
+          _resetDontShowAgain(context),
           c.defaultDivider,
-          _restartStartupHelp(),
+          _restartStartupHelp(context),
         ],
       ),
     );
@@ -246,7 +246,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _resetSettingsToDefault() {
+  Widget _resetSettingsToDefault(BuildContext context) {
     return ListTile(
       title: Text('Reset above settings to default', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       onTap: () {
@@ -276,14 +276,16 @@ class _SettingsPageState extends State<SettingsPage> {
               Settings.maxHistory,
               Settings.useCreationDateTime,
             ]);
-            t.showCustomToast('Settings were reset to default values.', context);
+            if (context.mounted) {
+              t.showCustomToast('Settings were reset to default values.', context);
+            }
           }
         });
       },
     );
   }
 
-  Widget _restartStartupHelp() {
+  Widget _restartStartupHelp(BuildContext context) {
     return ListTile(
       title: Text('Restart startup help', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       onTap: () {
@@ -307,14 +309,16 @@ class _SettingsPageState extends State<SettingsPage> {
               AppData.firstAccesses.entries.map((e) => e.key).where((e) => e.name.endsWith('SC')).toList(),
               false,
             );
-            t.showCustomToast('Startup help was restarted.', context);
+            if (context.mounted) {
+              t.showCustomToast('Startup help was restarted.', context);
+            }
           }
         });
       },
     );
   }
 
-  Widget _resetDontShowAgain() {
+  Widget _resetDontShowAgain(BuildContext context) {
     return ListTile(
       title: Text('Reset "Don\'t show this message again" checks', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       onTap: () {
@@ -343,7 +347,9 @@ class _SettingsPageState extends State<SettingsPage> {
               Settings.hideRemoveLabelDialog,
               Settings.hideDetachLabelDialog,
             ]);
-            t.showCustomToast('Checks were reset', context);
+            if (context.mounted) {
+              t.showCustomToast('Checks were reset', context);
+            }
           }
         });
       },

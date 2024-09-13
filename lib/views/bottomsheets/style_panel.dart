@@ -135,7 +135,7 @@ class _StylePanelState extends State<StylePanel> {
       showCaseKey: MainScaffold.of(context).crossOutSCK,
       description: 'You can also toggle a\nstrikethrough style for\nselected notes by tapping\nthis button.',
       child: ElevatedButton(
-        style: Theme.of(context).elevatedButtonTheme.style!.copyWith(padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 15.0))),
+        style: Theme.of(context).elevatedButtonTheme.style!.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 15.0))),
         onPressed: () {
           var selectedNotes = AppData.notesManager.getSelectedNotes();
           if (selectedNotes.isNotEmpty) {

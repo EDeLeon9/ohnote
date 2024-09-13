@@ -76,7 +76,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
     return AlertDialog(
       clipBehavior: Clip.antiAlias,
       titlePadding: EdgeInsets.zero,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 15.0),
+      contentPadding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 10.0),
       title: HeaderContainer(
         child: Padding(
           padding: const EdgeInsets.only(left: 30.0, top: 18.0, bottom: 8.0),
@@ -116,9 +116,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.pop(context, _filters);
-          },
+          onPressed: () => Navigator.pop(context, _filters),
           child: const Text('APPLY'),
         ),
         TextButton(

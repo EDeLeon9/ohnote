@@ -25,7 +25,6 @@ class DetailsDialog extends StatefulWidget {
 
 class _DetailsDialogState extends State<DetailsDialog> {
   final _detailsDialogSCK = ShowCaseKey(FirstAccess.detailsDialogSC);
-  bool restoreNote = false;
 
   @override
   void initState() {
@@ -44,11 +43,9 @@ class _DetailsDialogState extends State<DetailsDialog> {
     var subtitleTextStyle = TextStyle(fontSize: 14.0, color: theme.colorScheme.primary);
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop && !CustomShowCase.next(context)) {
-          Navigator.pop(context, restoreNote);
-        } else {
-          restoreNote = false;
+          Navigator.pop(context, result);
         }
       },
       child: AlertDialog(
@@ -59,7 +56,7 @@ class _DetailsDialogState extends State<DetailsDialog> {
         actionsPadding: const EdgeInsets.fromLTRB(15.0, 7.0, 15.0, 15.0),
         title: HeaderContainer(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 12.0),
+            padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 2.0),
             child: Row(
               children: [
                 Expanded(
@@ -73,7 +70,7 @@ class _DetailsDialogState extends State<DetailsDialog> {
                         TextSpan(text: widget.note.localFormatModifDateTime, style: titleTextStyle),
                       ],
                     ),
-                    maxLines: 5, //Helps to size the SelectableText.
+                    maxLines: 6, //Helps to size the SelectableText.
                     showCursor: true,
                   ),
                 ),
@@ -110,10 +107,7 @@ class _DetailsDialogState extends State<DetailsDialog> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              restoreNote = true;
-              Navigator.maybePop(context, true);
-            },
+            onPressed: () => Navigator.maybePop(context, true),
             child: const Text('RESTORE NOTE'),
           ),
           TextButton(

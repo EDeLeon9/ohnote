@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:ohnote/data/filters.dart';
 import 'package:ohnote/data/label.dart';
+import 'package:ohnote/data/sort_by.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:ohnote/data/app_theme.dart';
 import 'package:ohnote/data/settings.dart';
@@ -40,19 +41,28 @@ class AppData {
   static Future<void> Function()? precacheWallpaperAsset;
   static final Map<Settings, ValueNotifier<String>> settings = Map.fromEntries(Settings.values.map((e) => MapEntry(e, ValueNotifier(''))));
   static final Map<FirstAccess, bool> firstAccesses = Map.fromEntries(FirstAccess.values.map((e) => MapEntry(e, true)));
-  static List<Label> labels = [];
   static final notesManager = GuiManager(
     sortComparison: (a, b) => a.userOrder.compareTo(b.userOrder),
-    getFilterDateTime: (note) => note.modifDateTime,
+    getComparisonDateTime: (note) => note.modifDateTime,
   );
 
-  //Public using get
+  //Public using get and set
   static String? _dbPath;
   static Future<String> get dbPath async {
     _dbPath ??= p.join(await getDatabasesPath(), 'ohnote.db');
     return _dbPath!;
   }
 
+  static List<Label> _labels = [];
+  static List<int> _labelIds = [];
+  static List<int> get labelIds => _labelIds;
+  static List<Label> get labels => _labels;
+  static set labels(List<Label> value) {
+    _labels = value;
+    _labelIds = value.map((e) => e.id).toList();
+  }
+
+  //Functions
   static Future<void> _deleteDb() async {
     var dbFile = File(await dbPath);
     if (await dbFile.exists()) {
@@ -71,12 +81,7 @@ class AppData {
       await openDatabase(
         await dbPath,
         //TODO: Set version to 1
-        version: 5,
-        onUpgrade: (db, oldVersion, newVersion) async {
-          if (oldVersion < 5) {
-            await db.rawDelete('ALTER TABLE notes RENAME COLUMN history_parent_id TO parent_id');
-          }
-        },
+        version: 9,
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '
@@ -88,6 +93,7 @@ class AppData {
           await db.insert('settings', {'param': Settings.defaultNumberOfLines.name, 'value': '1'});
           await db.insert('settings', {'param': Settings.maxHistory.name, 'value': '5'});
           await db.insert('settings', {'param': Settings.useCreationDateTime.name, 'value': false.toString()});
+          await db.insert('settings', {'param': Settings.lastSortBy.name, 'value': SortByOrder.asc.name});
           await db.insert('settings', {'param': Settings.hideSendToTrashDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideArchiveNotesDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideRemovePermanentlyDialog.name, 'value': false.toString()});
@@ -169,7 +175,8 @@ class AppData {
     appliedWallpaper.value = AssetImage(settings[Settings.wallpaper]!.value);
     var useCreationDateTime = AppData.settings[Settings.useCreationDateTime]!;
     void onUseCreationDateTimeChanged() {
-      notesManager.getFilterDateTime = useCreationDateTime.value == true.toString() ? (note) => note.creationDateTime : (note) => note.modifDateTime;
+      notesManager.getComparisonDateTime =
+          useCreationDateTime.value == true.toString() ? (note) => note.creationDateTime : (note) => note.modifDateTime;
       notesManager.requestFilterList();
     }
 
@@ -195,7 +202,8 @@ class AppData {
     query = await iDb.db.query('notes_user_order', columns: ['data']);
     String notesUserOrderData = query.map((e) => e['data']).first;
     if (notesUserOrderData.isNotEmpty) {
-      _notesUserOrder = notesUserOrderData.split(',').map((e) => int.parse(e)).toList();
+      //ToSet() just in case there were some error.
+      _notesUserOrder = notesUserOrderData.split(',').map((e) => int.parse(e)).toSet().toList();
     }
 
     //Recovering draft note in case application was closed during a note edition
@@ -255,31 +263,28 @@ class AppData {
       ],
       where: where,
     );
-    var notes = query.map((e) => Note.fromDbQuery(e, guiManager)).sorted(guiManager.sortComparison);
+    var notes = query.map((e) => Note.fromDbQuery(e, guiManager)).toList();
     //User order and label ids don't apply to history.
     //User order and label ids are set for trash and archive in case note is restored.
     if (notes.any((e) => e.historyDateTime == null)) {
-      var notesWithoutUserOrderDueSomeError = notes.where((e) => !_notesUserOrder.contains(e.id)).toList();
-      if (notesWithoutUserOrderDueSomeError.isNotEmpty) {
-        _notesUserOrder.insertAll(0, notesWithoutUserOrderDueSomeError.map((e) => e.id));
+      //User order
+      var noUserOrder = notes.where((e) => !_notesUserOrder.contains(e.id)).toList();
+      //Validation in case there were some error.
+      if (noUserOrder.isNotEmpty) {
+        _notesUserOrder.insertAll(0, noUserOrder.map((e) => e.id).sorted((a, b) => a.compareTo(b)));
         await _updateDbNotesUserOrder(iDb);
       }
-      var labelIds = labels.map((e) => e.id).toList();
       for (var note in notes) {
-        var userOrder = _notesUserOrder.indexOf(note.id);
-        if (userOrder < 0) {
-          userOrder = 0;
-          _notesUserOrder.insert(0, note.id);
-        }
-        note.userOrder = userOrder;
-        var idLength = note.labelIds.length;
+        note.userOrder = _notesUserOrder.indexOf(note.id);
+        //Label ids
+        var labelIdsLength = note.labelIds.length;
         note.labelIds.removeWhere((e) => !labelIds.contains(e));
-        if (note.labelIds.length != idLength) {
+        if (note.labelIds.length != labelIdsLength) {
           await iDb.db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
         }
       }
     }
-    return notes.sorted(guiManager.sortComparison); //Sorts again by userOrder when necessary
+    return notes.sorted(guiManager.sortComparison);
   }
 
   static Future<void> _recoverFromDraft(_IndexedDatabase iDb) async {
@@ -654,21 +659,64 @@ class AppData {
     }
     HomeWidgetManager.updateWidget(notesManager.allList);
     notesManager.displayList.notifyListeners();
-    //Updating the db.
     var iDb = await _openDb();
     await _updateDbNotesUserOrder(iDb);
     await _closeDb(iDb);
   }
 
+  static void sortNotes(int Function(Note a, Note b) sortByComparison, SortByOrder order) async {
+    AppData.settings[Settings.lastSortBy]!.value = order.name;
+    int Function(Note a, Note b) comparison = sortByComparison;
+    if (order == SortByOrder.desc) {
+      comparison = (a, b) => sortByComparison(b, a);
+    }
+    notesManager.allList.sort((a, b) {
+      var result = comparison(a, b);
+      if (result != 0) {
+        return result;
+      }
+      return notesManager.sortComparison(a, b);
+    });
+    HomeWidgetManager.updateWidget(notesManager.allList);
+    int i = 0;
+    var notesIds = notesManager.allList.map((e) => e.id).toList();
+    List<int> newOrder = [];
+    for (var id in _notesUserOrder) {
+      if (notesIds.contains(id)) {
+        if (notesIds.isNotEmpty) {
+          newOrder.add(notesIds[i]);
+          i++;
+        }
+      } else {
+        newOrder.add(id);
+      }
+    }
+    //Validation in case there were some error.
+    for (i; i < notesIds.length; i++) {
+      newOrder.add(notesIds[i]);
+    }
+    _notesUserOrder = newOrder;
+    for (var note in notesManager.allList) {
+      note.userOrder = _notesUserOrder.indexOf(note.id);
+    }
+    notesManager.requestFilterList();
+    var iDb = await _openDb();
+    await _updateDbNotesUserOrder(iDb);
+    var count = await iDb.db.update('settings', {'value': order.name}, where: 'param = ?', whereArgs: [Settings.lastSortBy.name]);
+    if (count <= 0) {
+      _error('ERROR');
+    }
+    await _closeDb(iDb);
+  }
+
   static Future<void> _updateDbNotesUserOrder(_IndexedDatabase iDb, [bool closeDb = false]) async {
-    var count = await iDb.db.rawUpdate('UPDATE notes_user_order SET data = \'${_notesUserOrder.join(',')}\'');
+    var count = await iDb.db.update('notes_user_order', {'data': _notesUserOrder.join(',')});
     if (count <= 0) {
       _error('ERROR');
     }
     if (closeDb) {
       await _closeDb(iDb);
     }
-    return;
   }
 
   static void validateMaxHistory() async {
