@@ -6,7 +6,7 @@ import 'package:ohnote/tools/single_async.dart';
 import 'package:ohnote/view_components/label_container.dart';
 
 class LabelNoteDialog extends StatefulWidget {
-  const LabelNoteDialog._({super.key, required this.selectedLabelsId});
+  const LabelNoteDialog._({required this.selectedLabelsId});
 
   final List<int> selectedLabelsId;
 

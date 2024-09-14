@@ -81,7 +81,7 @@ class AppData {
       await openDatabase(
         await dbPath,
         //TODO: Set version to 1
-        version: 9,
+        version: 10,
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '

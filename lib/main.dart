@@ -9,7 +9,7 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Sort by (y para Trash can y Archive) (y guardar Sort usado en db) (recordar deshabilitar reordering).
+//Wallpapers
 //Homescreen widget.
 //Anuncios.
 //Solicitar Rate us.

@@ -62,6 +62,7 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
             builder: (context, selectionQuantity, child) {
               return LayoutBuilder(
                 builder: (context, constraints) {
+                  var appBarPercent = _appBarPercent(constraints.maxHeight);
                   return FlexibleSpaceBar(
                     expandedTitleScale: 1.3,
                     background: Stack(
@@ -90,7 +91,7 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                                         color: Colors.transparent,
                                         child: InkWell(
                                           onLongPress: () {
-                                            if (_appBarPercent(constraints.maxHeight) > 0.0) {
+                                            if (appBarPercent > 0.0) {
                                               HapticFeedback.vibrate();
                                               ChangeWallpaperDialog.show(
                                                 context: context,
@@ -119,8 +120,16 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                         trueText: 'OhNote',
                         falseText: '$selectionQuantity selected',
                         condition: selectionQuantity == null,
-                        textStyle:
-                            Theme.of(context).appBarTheme.titleTextStyle!.copyWith(color: _foregroundColor(Theme.of(context), constraints.maxHeight)),
+                        textStyle: Theme.of(context).appBarTheme.titleTextStyle!.copyWith(
+                          color: _foregroundColor(Theme.of(context), constraints.maxHeight),
+                          shadows: [
+                            Shadow(
+                              color: Theme.of(context).colorScheme.shadow.withOpacity(appBarPercent),
+                              blurRadius: 6.0,
+                              offset: const Offset(-1.0, 1.0),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );

@@ -5,8 +5,6 @@ import 'package:ohnote/data/sort_by.dart';
 import 'package:ohnote/view_components/header_container.dart';
 import 'package:ohnote/constants.dart' as c;
 
-//TODO: CustomShowCase
-
 class SortByDialog extends StatefulWidget {
   const SortByDialog._();
 
@@ -42,49 +40,55 @@ class _SortByDialogState extends State<SortByDialog> {
           ),
         ),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: RadioListTile(
-                  contentPadding: const EdgeInsets.only(left: 12.0),
-                  visualDensity: const VisualDensity(horizontal: -4.0),
-                  title: Text('Ascending', style: Theme.of(context).textTheme.bodyMedium),
-                  value: SortByOrder.asc,
-                  groupValue: _order,
-                  onChanged: (value) {
-                    setState(() {
-                      _order = value;
-                    });
-                  },
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height,
+          maxWidth: MediaQuery.of(context).size.width,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: RadioListTile(
+                    contentPadding: const EdgeInsets.only(left: 12.0),
+                    visualDensity: const VisualDensity(horizontal: -4.0),
+                    title: Text('Ascending', style: Theme.of(context).textTheme.bodyMedium),
+                    value: SortByOrder.asc,
+                    groupValue: _order,
+                    onChanged: (value) {
+                      setState(() {
+                        _order = value;
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Expanded(
-                child: RadioListTile(
-                  contentPadding: const EdgeInsets.only(right: 22.0),
-                  visualDensity: const VisualDensity(horizontal: -4.0),
-                  title: Text('Descending', style: Theme.of(context).textTheme.bodyMedium),
-                  value: SortByOrder.desc,
-                  groupValue: _order,
-                  onChanged: (value) {
-                    setState(() {
-                      _order = value;
-                    });
-                  },
+                Expanded(
+                  child: RadioListTile(
+                    contentPadding: const EdgeInsets.only(right: 22.0),
+                    visualDensity: const VisualDensity(horizontal: -4.0),
+                    title: Text('Descending', style: Theme.of(context).textTheme.bodyMedium),
+                    value: SortByOrder.desc,
+                    groupValue: _order,
+                    onChanged: (value) {
+                      setState(() {
+                        _order = value;
+                      });
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          c.defaultDivider,
-          ...SortBy.values.map<Widget>((e) {
-            return ListTile(
-              title: _formatedText(e.caption),
-              onTap: () => _setAndPop(context, e),
-            );
-          }),
-        ],
+              ],
+            ),
+            c.defaultDivider,
+            ...SortBy.values.map<Widget>((e) {
+              return ListTile(
+                title: _formatedText(e.caption),
+                onTap: () => _setAndPop(context, e),
+              );
+            }),
+          ],
+        ),
       ),
       actions: [
         TextButton(
