@@ -9,13 +9,12 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Wallpapers
+//Verificar texto grande desde el teléfono, Dark mode, en horizontal (que no haya overflow), y en Dark mode con horizontal.
 //Homescreen widget.
+//Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.
 //Anuncios.
 //Solicitar Rate us.
 //Autenticación google para guardar base de datos (como sería en iPhone? tambien google?).
-//Verificar texto grande desde el teléfono, Dark mode, en horizontal (que no haya overflow), y en Dark mode con horizontal.
-//Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.
 //About page (investigar que se debe o que se recomienda poner ahí).
 //Ver si no es complicado de implementar, sino puede esperar: Error handling (enviar errores a desarrollador).
 //---------------Puede esperar:

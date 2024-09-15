@@ -30,6 +30,7 @@ class LinearFadeOutMask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(fixedStops != null || percentStops != null, 'You have to provide percentStops or fixedStops parameter for LinearFadeOutMask');
     return ShaderMask(
       shaderCallback: (bounds) {
         var stops = fixedStops != null ? fixedStops!(bounds) : percentStops!;

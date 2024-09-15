@@ -80,8 +80,7 @@ class AppData {
       openDbId,
       await openDatabase(
         await dbPath,
-        //TODO: Set version to 1
-        version: 10,
+        version: 1,
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '

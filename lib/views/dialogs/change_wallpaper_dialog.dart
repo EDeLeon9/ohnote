@@ -25,7 +25,7 @@ class ChangeWallpaperDialog {
                   spacing: 10.0,
                   runSpacing: 20.0,
                   alignment: WrapAlignment.center,
-                  children: List.generate(8, (i) => i + 1).map((e) {
+                  children: List.generate(12, (i) => i + 1).map((e) {
                     return Stack(
                       alignment: Alignment.center,
                       children: [
@@ -37,8 +37,7 @@ class ChangeWallpaperDialog {
                               width: 52.0,
                               decoration: BoxDecoration(
                                 borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                                color:
-                                    AppData.settings[Settings.wallpaper]!.value.contains(e.toString()) ? Theme.of(context).colorScheme.primary : null,
+                                color: AppData.settings[Settings.wallpaper]!.value.contains('_$e.jpg') ? Theme.of(context).colorScheme.primary : null,
                               ),
                             );
                           },

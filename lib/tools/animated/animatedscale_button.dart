@@ -7,6 +7,7 @@ class AnimatedScaleButton extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     this.color,
+    this.shadows,
     required this.onPressed,
     this.isVisible = true,
     this.isEnabled = true,
@@ -16,6 +17,7 @@ class AnimatedScaleButton extends StatelessWidget {
   final String tooltip;
   final IconData icon;
   final Color? color;
+  final List<Shadow>? shadows;
   final void Function() onPressed;
   final bool isVisible;
   final bool isEnabled;
@@ -34,7 +36,11 @@ class AnimatedScaleButton extends StatelessWidget {
         //Just horizontal -0.2 is required, but using symmetric densities avoid bluring icons.
         visualDensity: const VisualDensity(horizontal: -0.2, vertical: -0.2),
         highlightColor: buttonColor.withOpacity(0.1),
-        icon: Icon(icon, color: isEnabled ? buttonColor : Theme.of(context).colorScheme.outline),
+        icon: Icon(
+          icon,
+          color: isEnabled ? buttonColor : Theme.of(context).colorScheme.outline,
+          shadows: shadows,
+        ),
         onPressed: isEnabled
             ? () {
                 if (isVisible) {

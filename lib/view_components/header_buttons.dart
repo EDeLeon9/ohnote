@@ -52,6 +52,7 @@ class HeaderButton {
 
   Widget build({
     Color? color,
+    List<Shadow>? shadows,
     required void Function() onPressed,
     bool? isVisible,
   }) {
@@ -61,6 +62,7 @@ class HeaderButton {
         tooltip: details.caption,
         icon: details.icon,
         color: color,
+        shadows: shadows,
         isVisible: isVisible != false,
         onPressed: onPressed,
       );
@@ -82,6 +84,7 @@ class HeaderButtons extends StatelessWidget {
     super.key,
     this.title,
     this.color,
+    this.shadows,
     required this.guiManager,
     required this.buttons,
     this.padding,
@@ -90,6 +93,7 @@ class HeaderButtons extends StatelessWidget {
 
   final String? title;
   final Color? color;
+  final List<Shadow>? shadows;
   final GuiManager guiManager;
   final List<HeaderButton> buttons;
   final EdgeInsets? padding;
@@ -137,17 +141,20 @@ class HeaderButtons extends StatelessWidget {
                                 HeaderButtons.selectionModeButton(
                                   context: context,
                                   color: color,
+                                  shadows: shadows,
                                   guiManager: guiManager,
                                   button: buttonsMap[HeaderButtonDetails.selectionMode],
                                 ),
                                 searchTextButton(
                                   color: color,
+                                  shadows: shadows,
                                   guiManager: guiManager,
                                   button: buttonsMap[HeaderButtonDetails.searchText],
                                 ),
                                 moreButton(
                                   context: context,
                                   color: color,
+                                  shadows: shadows,
                                   button: buttonsMap[HeaderButtonDetails.more],
                                   moreButtons: [
                                     buttonsMap[HeaderButtonDetails.sortBy],
@@ -192,7 +199,10 @@ class HeaderButtons extends StatelessWidget {
                       trueText: title!,
                       falseText: '$selectionQuantity selected',
                       condition: selectionQuantity == null,
-                      textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(color: color ?? Theme.of(context).colorScheme.primary),
+                      textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                            color: color ?? Theme.of(context).colorScheme.primary,
+                            shadows: shadows,
+                          ),
                     )
                   : const SizedBox.shrink(),
             ],
@@ -213,6 +223,7 @@ class HeaderButtons extends StatelessWidget {
             width: largeMainButtons ? 56.0 : null,
             child: button.build(
               color: color,
+              shadows: shadows,
               isVisible: isVisible,
               onPressed: () {
                 Scaffold.of(context).openDrawer();
@@ -225,6 +236,7 @@ class HeaderButtons extends StatelessWidget {
   Widget _backButton({
     required isVisible,
     required HeaderButton? button,
+    List<Shadow>? shadows,
   }) {
     return button != null
         ? SizedBox(
@@ -232,6 +244,7 @@ class HeaderButtons extends StatelessWidget {
             width: largeMainButtons ? 56.0 : null,
             child: button.build(
               color: color,
+              shadows: shadows,
               isVisible: isVisible,
               onPressed: () {
                 guiManager.selectionQuantity.value = null;
@@ -245,6 +258,7 @@ class HeaderButtons extends StatelessWidget {
   static Widget selectionModeButton({
     required BuildContext context,
     Color? color,
+    List<Shadow>? shadows,
     required GuiManager guiManager,
     required HeaderButton? button,
   }) {
@@ -259,6 +273,7 @@ class HeaderButtons extends StatelessWidget {
                     children: [
                       button.build(
                         color: color,
+                        shadows: shadows,
                         isVisible: selectionQuantity == null,
                         onPressed: () {
                           guiManager.isManualSelection = true;
@@ -266,6 +281,7 @@ class HeaderButtons extends StatelessWidget {
                       ),
                       HeaderButton(HeaderButtonDetails.selectAll).build(
                         color: color,
+                        shadows: shadows,
                         isVisible: selectionQuantity != null && !isAllSelected,
                         onPressed: () {
                           guiManager.setIsCheckedToAll(true);
@@ -274,6 +290,7 @@ class HeaderButtons extends StatelessWidget {
                       ),
                       HeaderButton(HeaderButtonDetails.deselectAll).build(
                         color: color,
+                        shadows: shadows,
                         isVisible: selectionQuantity != null && isAllSelected,
                         onPressed: () {
                           guiManager.setIsCheckedToAll(false);
@@ -291,12 +308,14 @@ class HeaderButtons extends StatelessWidget {
 
   static Widget searchTextButton({
     Color? color,
+    List<Shadow>? shadows,
     required GuiManager guiManager,
     required HeaderButton? button,
   }) {
     return button != null
         ? button.build(
             color: color,
+            shadows: shadows,
             onPressed: () {
               guiManager.showSearchText.value = true;
               guiManager.searchTextFocusNode.requestFocus();
@@ -308,6 +327,7 @@ class HeaderButtons extends StatelessWidget {
   static Widget moreButton({
     required BuildContext context,
     Color? color,
+    List<Shadow>? shadows,
     required List<HeaderButton> moreButtons,
     required void Function(HeaderButtonDetails? selected) onSelected,
     required HeaderButton? button,
@@ -317,6 +337,7 @@ class HeaderButtons extends StatelessWidget {
             childButtonBuilder: (showButtonMenuAction) {
               return button.build(
                 color: color,
+                shadows: shadows,
                 onPressed: showButtonMenuAction,
               );
             },

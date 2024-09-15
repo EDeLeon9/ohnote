@@ -17,6 +17,8 @@ class MainAppBar extends StatefulWidget {
 }
 
 class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
+  static const expandedHeight = 160.0;
+
   @override
   void initState() {
     //To enable didChangeAppLifecycleState()
@@ -50,19 +52,22 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
       stretch: true,
       forceElevated: true, //Shadow.
       toolbarHeight: Theme.of(context).appBarTheme.toolbarHeight!,
-      expandedHeight: 160.0,
-      flexibleSpace: Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          //Remember there might exist a flutter error when scrolling from bottom to top having lot of notes, but don't mind about it:
-          //"Another exception was thrown: 'package:flutter/src/material/flexible_space_bar.dart': Failed assertion:
-          //line 464 pos 12: 'needsCompositing': is not true."
-          ValueListenableBuilder(
-            valueListenable: AppData.notesManager.selectionQuantity,
-            builder: (context, selectionQuantity, child) {
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  var appBarPercent = _appBarPercent(constraints.maxHeight);
+      expandedHeight: expandedHeight,
+      flexibleSpace: LayoutBuilder(
+        builder: (context, constraints) {
+          var paddingOfTop = MediaQuery.paddingOf(context).top;
+          var maxAppBarHeight = expandedHeight + paddingOfTop;
+          var minAppBarHeight = kToolbarHeight + paddingOfTop - 1.0;
+          var appBarPercent = (constraints.maxHeight - minAppBarHeight) / (maxAppBarHeight - minAppBarHeight);
+          return Stack(
+            alignment: Alignment.bottomLeft,
+            children: [
+              //Remember there might exist a flutter error when scrolling from bottom to top having lot of notes, but don't mind about it:
+              //"Another exception was thrown: 'package:flutter/src/material/flexible_space_bar.dart': Failed assertion:
+              //line 464 pos 12: 'needsCompositing': is not true."
+              ValueListenableBuilder(
+                valueListenable: AppData.notesManager.selectionQuantity,
+                builder: (context, selectionQuantity, child) {
                   return FlexibleSpaceBar(
                     expandedTitleScale: 1.3,
                     background: Stack(
@@ -71,19 +76,36 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                         ValueListenableBuilder(
                           valueListenable: AppData.appliedWallpaper,
                           builder: (context, appliedWallpaper, child) {
+                            var shadowColor = Theme.of(context).colorScheme.shadow;
                             return appliedWallpaper != null
                                 ? Stack(
                                     fit: StackFit.expand,
                                     children: [
                                       AnimatedOpacityChange(
                                         duration: Duration(milliseconds: c.animationDuration.inMilliseconds * 2),
-                                        transitionColor: Theme.of(context).colorScheme.shadow,
+                                        transitionColor: shadowColor,
                                         //The image is outside the InkWell to avoid the issue with opacity effect.
                                         child: Image(
                                           key: Key('wallpaper_${appliedWallpaper.assetName}'),
                                           width: 600.0,
                                           image: appliedWallpaper,
                                           fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.bottomCenter,
+                                            end: Alignment.topCenter,
+                                            stops: const [0.075, 0.15, 0.25, 0.3, 0.35],
+                                            colors: [
+                                              shadowColor.withOpacity(0.8),
+                                              shadowColor.withOpacity(0.6),
+                                              shadowColor.withOpacity(0.15),
+                                              shadowColor.withOpacity(0.05),
+                                              Colors.transparent,
+                                            ],
+                                          ),
                                         ),
                                       ),
                                       //Material enables the splash effect that the image hides.
@@ -117,30 +139,23 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                       widthFactor: 0.65,
                       child: AnimatedScaleText(
                         duration: c.animationDuration,
+                        //trueText: '$appBarPercent\n${constraints.maxHeight}\n$kToolbarHeight\n$paddingOfTop',
                         trueText: 'OhNote',
                         falseText: '$selectionQuantity selected',
                         condition: selectionQuantity == null,
+                        //textStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
                         textStyle: Theme.of(context).appBarTheme.titleTextStyle!.copyWith(
-                          color: _foregroundColor(Theme.of(context), constraints.maxHeight),
-                          shadows: [
-                            Shadow(
-                              color: Theme.of(context).colorScheme.shadow.withOpacity(appBarPercent),
-                              blurRadius: 6.0,
-                              offset: const Offset(-1.0, 1.0),
+                              color: _foregroundColor(Theme.of(context), appBarPercent),
+                              shadows: _shadows(Theme.of(context), appBarPercent),
                             ),
-                          ],
-                        ),
                       ),
                     ),
                   );
                 },
-              );
-            },
-          ),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return HeaderButtons(
-                color: _foregroundColor(Theme.of(context), constraints.maxHeight),
+              ),
+              HeaderButtons(
+                color: _foregroundColor(Theme.of(context), appBarPercent),
+                shadows: _shadows(Theme.of(context), appBarPercent),
                 guiManager: AppData.notesManager,
                 buttons: [
                   HeaderButton(HeaderButtonDetails.back),
@@ -164,20 +179,26 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                   HeaderButton(HeaderButtonDetails.archive),
                   HeaderButton(HeaderButtonDetails.sendToTrash),
                 ],
-              );
-            },
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  //Sliver app bar min height = 79.0 and max height = 184.0 (verify with print(appBarHeight),
-  //these values might change if something like padding is added).
-  double _appBarPercent(double appBarHeight) => (appBarHeight - 79.0) / 105.0;
+  Color _foregroundColor(ThemeData theme, double appBarPercent) {
+    return Color.lerp(
+        theme.colorScheme.primary, theme.brightness == Brightness.dark ? theme.colorScheme.onSurface : theme.colorScheme.onPrimary, appBarPercent)!;
+  }
 
-  Color _foregroundColor(ThemeData theme, double appBarHeight) {
-    return Color.lerp(theme.colorScheme.primary, theme.brightness == Brightness.dark ? theme.colorScheme.onSurface : theme.colorScheme.onPrimary,
-        _appBarPercent(appBarHeight))!;
+  List<Shadow> _shadows(ThemeData theme, double appBarPercent) {
+    return [
+      Shadow(
+        color: theme.colorScheme.shadow.withOpacity(appBarPercent >= 0.5 ? appBarPercent - 0.5 : 0),
+        blurRadius: 6.0,
+        offset: const Offset(-1.0, 1.0),
+      ),
+    ];
   }
 }
