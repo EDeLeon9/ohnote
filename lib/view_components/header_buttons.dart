@@ -79,8 +79,8 @@ class HeaderButton {
   }
 }
 
-class HeaderButtons extends StatelessWidget {
-  HeaderButtons({
+class HeaderButtons extends StatefulWidget {
+  const HeaderButtons({
     super.key,
     this.title,
     this.color,
@@ -98,119 +98,9 @@ class HeaderButtons extends StatelessWidget {
   final List<HeaderButton> buttons;
   final EdgeInsets? padding;
   final bool largeMainButtons;
-  late final buttonsMap = Map.fromEntries(buttons.map((e) => MapEntry(e.details, e)));
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: padding ?? EdgeInsets.zero,
-      child: ValueListenableBuilder(
-        valueListenable: guiManager.selectionQuantity,
-        builder: (context, selectionQuantity, child) {
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              ValueListenableBuilder(
-                valueListenable: AppData.dataInitialized, //Used by HeaderButton class.
-                builder: (context, dataInitialized, child) {
-                  return ValueListenableBuilder(
-                    valueListenable: guiManager.showSearchText,
-                    builder: (context, showSearchText, child) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          SizedBox(width: largeMainButtons ? 0.0 : 1.4),
-                          Stack(
-                            children: [
-                              _navMenuButton(
-                                isVisible: selectionQuantity == null && !showSearchText,
-                                context: context,
-                                button: buttonsMap[HeaderButtonDetails.navMenu],
-                              ),
-                              _backButton(
-                                isVisible: selectionQuantity != null || showSearchText,
-                                button: buttonsMap[HeaderButtonDetails.back],
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Padding(
-                            padding: largeMainButtons ? const EdgeInsets.only(bottom: 4.0) : EdgeInsets.zero,
-                            child: Row(
-                              children: [
-                                HeaderButtons.selectionModeButton(
-                                  context: context,
-                                  color: color,
-                                  shadows: shadows,
-                                  guiManager: guiManager,
-                                  button: buttonsMap[HeaderButtonDetails.selectionMode],
-                                ),
-                                searchTextButton(
-                                  color: color,
-                                  shadows: shadows,
-                                  guiManager: guiManager,
-                                  button: buttonsMap[HeaderButtonDetails.searchText],
-                                ),
-                                moreButton(
-                                  context: context,
-                                  color: color,
-                                  shadows: shadows,
-                                  button: buttonsMap[HeaderButtonDetails.more],
-                                  moreButtons: [
-                                    buttonsMap[HeaderButtonDetails.sortBy],
-                                    buttonsMap[HeaderButtonDetails.filters],
-                                    buttonsMap[HeaderButtonDetails.style],
-                                    buttonsMap[HeaderButtonDetails.favorite],
-                                    buttonsMap[HeaderButtonDetails.archive],
-                                    buttonsMap[HeaderButtonDetails.sendToTrash],
-                                    buttonsMap[HeaderButtonDetails.discardHistory],
-                                  ].whereNotNull().toList(),
-                                  onSelected: (selected) {
-                                    if (selected == HeaderButtonDetails.sortBy) {
-                                      _sortByPressed(context: context, guiManager: guiManager);
-                                    } else if (selected == HeaderButtonDetails.filters) {
-                                      filtersPressed(context: context, guiManager: guiManager);
-                                    } else if (selected == HeaderButtonDetails.style) {
-                                      _stylePressed(guiManager: guiManager);
-                                    } else if (selected == HeaderButtonDetails.favorite) {
-                                      _favoritePressed(context: context);
-                                    } else if (selected == HeaderButtonDetails.archive) {
-                                      _archivePressed(context: context);
-                                    } else if (selected == HeaderButtonDetails.sendToTrash) {
-                                      _sendToTrashPressed(context: context);
-                                    } else if (selected == HeaderButtonDetails.discardHistory) {
-                                      _discardHistoryPressed(context: context);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 1.4),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-              title != null
-                  ? AnimatedScaleText(
-                      duration: c.animationDuration,
-                      trueText: title!,
-                      falseText: '$selectionQuantity selected',
-                      condition: selectionQuantity == null,
-                      textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            color: color ?? Theme.of(context).colorScheme.primary,
-                            shadows: shadows,
-                          ),
-                    )
-                  : const SizedBox.shrink(),
-            ],
-          );
-        },
-      ),
-    );
-  }
+  State<HeaderButtons> createState() => _HeaderButtonsState();
 
   Widget _navMenuButton({
     required BuildContext context,
@@ -511,5 +401,121 @@ class HeaderButtons extends StatelessWidget {
         itemsNoun: 'history',
       );
     });
+  }
+}
+
+class _HeaderButtonsState extends State<HeaderButtons> {
+  late final buttonsMap = Map.fromEntries(widget.buttons.map((e) => MapEntry(e.details, e)));
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: widget.padding ?? EdgeInsets.zero,
+      child: ValueListenableBuilder(
+        valueListenable: widget.guiManager.selectionQuantity,
+        builder: (context, selectionQuantity, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: AppData.dataInitialized, //Used by HeaderButton class.
+                builder: (context, dataInitialized, child) {
+                  return ValueListenableBuilder(
+                    valueListenable: widget.guiManager.showSearchText,
+                    builder: (context, showSearchText, child) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SizedBox(width: widget.largeMainButtons ? 0.0 : 1.4),
+                          Stack(
+                            children: [
+                              widget._navMenuButton(
+                                isVisible: selectionQuantity == null && !showSearchText,
+                                context: context,
+                                button: buttonsMap[HeaderButtonDetails.navMenu],
+                              ),
+                              widget._backButton(
+                                isVisible: selectionQuantity != null || showSearchText,
+                                button: buttonsMap[HeaderButtonDetails.back],
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Padding(
+                            padding: widget.largeMainButtons ? const EdgeInsets.only(bottom: 4.0) : EdgeInsets.zero,
+                            child: Row(
+                              children: [
+                                HeaderButtons.selectionModeButton(
+                                  context: context,
+                                  color: widget.color,
+                                  shadows: widget.shadows,
+                                  guiManager: widget.guiManager,
+                                  button: buttonsMap[HeaderButtonDetails.selectionMode],
+                                ),
+                                HeaderButtons.searchTextButton(
+                                  color: widget.color,
+                                  shadows: widget.shadows,
+                                  guiManager: widget.guiManager,
+                                  button: buttonsMap[HeaderButtonDetails.searchText],
+                                ),
+                                HeaderButtons.moreButton(
+                                  context: context,
+                                  color: widget.color,
+                                  shadows: widget.shadows,
+                                  button: buttonsMap[HeaderButtonDetails.more],
+                                  moreButtons: [
+                                    buttonsMap[HeaderButtonDetails.filters],
+                                    buttonsMap[HeaderButtonDetails.sortBy],
+                                    buttonsMap[HeaderButtonDetails.style],
+                                    buttonsMap[HeaderButtonDetails.favorite],
+                                    buttonsMap[HeaderButtonDetails.archive],
+                                    buttonsMap[HeaderButtonDetails.sendToTrash],
+                                    buttonsMap[HeaderButtonDetails.discardHistory],
+                                  ].whereNotNull().toList(),
+                                  onSelected: (selected) {
+                                    if (selected == HeaderButtonDetails.filters) {
+                                      HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager);
+                                    } else if (selected == HeaderButtonDetails.sortBy) {
+                                      widget._sortByPressed(context: context, guiManager: widget.guiManager);
+                                    } else if (selected == HeaderButtonDetails.style) {
+                                      widget._stylePressed(guiManager: widget.guiManager);
+                                    } else if (selected == HeaderButtonDetails.favorite) {
+                                      widget._favoritePressed(context: context);
+                                    } else if (selected == HeaderButtonDetails.archive) {
+                                      widget._archivePressed(context: context);
+                                    } else if (selected == HeaderButtonDetails.sendToTrash) {
+                                      widget._sendToTrashPressed(context: context);
+                                    } else if (selected == HeaderButtonDetails.discardHistory) {
+                                      widget._discardHistoryPressed(context: context);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 1.4),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+              widget.title != null
+                  ? AnimatedScaleText(
+                      duration: c.animationDuration,
+                      trueText: widget.title!,
+                      falseText: '$selectionQuantity selected',
+                      condition: selectionQuantity == null,
+                      textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                            color: widget.color ?? Theme.of(context).colorScheme.primary,
+                            shadows: widget.shadows,
+                          ),
+                    )
+                  : const SizedBox.shrink(),
+            ],
+          );
+        },
+      ),
+    );
   }
 }

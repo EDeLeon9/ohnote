@@ -136,7 +136,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
             ),
             const Divider(height: 0.0),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
               child: Text('Notes are kept in trash can up to 30 days.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
             ),
             FiltersPanel(guiManager: widget.trashManager),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/filters.dart';
 import 'package:ohnote/data/gui_manager.dart';
+import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/tools/single_async.dart';
 import 'dart:math' as math;
 import 'package:ohnote/constants.dart' as c;
@@ -121,25 +122,33 @@ class _FiltersPanelState extends State<FiltersPanel> {
                                     children: [
                                       Text('Search: ', style: Theme.of(context).textTheme.bodyLarge),
                                       Expanded(
-                                        child: TextField(
+                                        child: LandscapeTextField(
                                           controller: _searchTextController,
                                           focusNode: widget.guiManager.searchTextFocusNode,
-                                          style: Theme.of(context).textTheme.bodyMedium,
-                                          decoration: const InputDecoration(
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          onChanged: (value) {
-                                            if (widget.guiManager.filters.value.text != value) {
-                                              widget.guiManager.filters.value.text = value;
-                                              widget.guiManager.filters.notifyListeners();
-                                              if (widget.updateDbFilters) {
-                                                _updateDbFiltersAsync.runLast(750, () {
-                                                  AppData.updateDbFilters();
-                                                });
-                                              }
-                                            }
+                                          textFieldBuilder: (controller, focusNode, readOnly) {
+                                            return TextField(
+                                              showCursor: true,
+                                              controller: controller,
+                                              focusNode: focusNode,
+                                              readOnly: readOnly,
+                                              style: Theme.of(context).textTheme.bodyMedium,
+                                              decoration: const InputDecoration(
+                                                isDense: true,
+                                                contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                                                border: OutlineInputBorder(),
+                                              ),
+                                              onChanged: (value) {
+                                                if (widget.guiManager.filters.value.text != value) {
+                                                  widget.guiManager.filters.value.text = value;
+                                                  widget.guiManager.filters.notifyListeners();
+                                                  if (widget.updateDbFilters) {
+                                                    _updateDbFiltersAsync.runLast(750, () {
+                                                      AppData.updateDbFilters();
+                                                    });
+                                                  }
+                                                }
+                                              },
+                                            );
                                           },
                                         ),
                                       ),

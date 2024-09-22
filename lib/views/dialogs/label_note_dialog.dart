@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/tools/single_async.dart';
 import 'package:ohnote/view_components/label_container.dart';
 
@@ -112,13 +113,22 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextField(
+                        child: LandscapeTextField(
                           controller: _textController,
-                          maxLength: 25,
-                          decoration: InputDecoration(
-                            hintText: 'New label',
-                            hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35)),
-                          ),
+                          textFieldBuilder: (controller, focusNode, readOnly) {
+                            return TextField(
+                              showCursor: true,
+                              controller: controller,
+                              focusNode: focusNode,
+                              readOnly: readOnly,
+                              maxLength: 25,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                hintText: 'New label',
+                                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35)),
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(width: 10.0),
@@ -170,16 +180,16 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.maybePop(context, _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList()),
-                    child: const Text('APPLY'),
-                  ),
-                  const SizedBox(width: 5.0),
-                  TextButton(
                     onPressed: () {
                       _labelsMap.updateAll((key, value) => false);
                       setState(() {});
                     },
                     child: const Text('CLEAR ALL'),
+                  ),
+                  const SizedBox(width: 5.0),
+                  TextButton(
+                    onPressed: () => Navigator.maybePop(context, _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList()),
+                    child: const Text('APPLY'),
                   ),
                   const SizedBox(width: 5.0),
                   TextButton(

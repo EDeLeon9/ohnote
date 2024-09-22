@@ -7,6 +7,7 @@ import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animatedscale_button.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/label_container.dart';
 import 'package:ohnote/views/dialogs/label_note_dialog.dart';
@@ -308,29 +309,38 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
   }
 
   Widget _textField() {
-    Widget result = TextField(
+    Widget result = LandscapeTextField(
       controller: _textController,
-      maxLines: null,
-      expands: true,
-      keyboardType: TextInputType.multiline,
-      autofocus: _showCaseKeys.every((e) => AppData.firstAccesses[e.value]!) && _isNewNote,
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero, //Required to correct hero animation.
-        hintText: 'Enter your note',
-        hintStyle: TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.5,
-          wordSpacing: 1.5,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
-        ),
-      ),
-      onChanged: (value) {
-        widget.note.text = value;
-        _saveDraft();
+      textFieldBuilder: (controller, focusNode, readOnly) {
+        return TextField(
+          maxLines: null,
+          expands: true,
+          keyboardType: TextInputType.multiline,
+          showCursor: true,
+          readOnly: readOnly,
+          focusNode: focusNode,
+          controller: controller,
+          autofocus: _showCaseKeys.every((e) => AppData.firstAccesses[e.value]!) && _isNewNote,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.zero, //Required to correct hero animation.
+            hintText: 'Enter your note',
+            hintStyle: TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
+              wordSpacing: 1.5,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
+            ),
+          ),
+          onChanged: (value) {
+            widget.note.text = value;
+            _saveDraft();
+          },
+        );
       },
     );
+
     if (_heroTag != null) {
       result = Hero(
         tag: _heroTag!,
@@ -375,6 +385,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
                       setState(() {
                         widget.note.labelIds.remove(e.id);
                       });
+                      _saveDraft();
                     }
                   });
                 },

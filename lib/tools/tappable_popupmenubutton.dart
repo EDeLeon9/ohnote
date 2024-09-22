@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TappablePopupMenuButton<T> extends StatelessWidget {
-  TappablePopupMenuButton({
+class TappablePopupMenuButton<T> extends StatefulWidget {
+  const TappablePopupMenuButton({
     super.key,
     required this.childButtonBuilder,
     required this.items,
@@ -9,22 +9,27 @@ class TappablePopupMenuButton<T> extends StatelessWidget {
     this.isVisible = true,
   });
 
-  final GlobalKey<PopupMenuButtonState> _popupMenuButtonKey = GlobalKey();
-
   final bool isVisible;
   final Widget Function(void Function() showButtonMenuAction) childButtonBuilder;
   final List<PopupMenuItem<T>> items;
   final void Function(T? value) onSelected;
 
   @override
+  State<TappablePopupMenuButton> createState() => _TappablePopupMenuButtonState<T>();
+}
+
+class _TappablePopupMenuButtonState<T> extends State<TappablePopupMenuButton<T>> {
+  final GlobalKey<PopupMenuButtonState> _popupMenuButtonKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
-    var child = childButtonBuilder(() => _popupMenuButtonKey.currentState!.showButtonMenu());
+    var child = widget.childButtonBuilder(() => _popupMenuButtonKey.currentState!.showButtonMenu());
     return Visibility(
-      visible: isVisible,
+      visible: widget.isVisible,
       child: PopupMenuButton<T>(
         key: _popupMenuButtonKey,
-        itemBuilder: (context) => items,
-        onSelected: onSelected,
+        itemBuilder: (context) => widget.items,
+        onSelected: widget.onSelected,
         child: child,
       ),
     );

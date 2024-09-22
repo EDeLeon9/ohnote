@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
+import 'package:ohnote/tools/landscape_textfield.dart';
 
 class EditLabelDialog extends StatefulWidget {
   const EditLabelDialog._({this.text});
@@ -23,6 +24,12 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
   late final _textController = TextEditingController()..text = widget.text ?? '';
 
   @override
+  void initState() {
+    _textController.selection = TextSelection.fromPosition(TextPosition(offset: _textController.text.length));
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _textController.dispose();
     super.dispose();
@@ -30,7 +37,6 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _textController.selection = TextSelection.fromPosition(TextPosition(offset: _textController.text.length));
     return AlertDialog(
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.all(24.0),
@@ -45,10 +51,19 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
           width: MediaQuery.of(context).size.width,
           child: Padding(
             padding: const EdgeInsets.only(top: 10.0),
-            child: TextField(
+            child: LandscapeTextField(
               controller: _textController,
-              autofocus: true,
-              maxLength: 25,
+              textFieldBuilder: (controller, focusNode, readOnly) {
+                return TextField(
+                  showCursor: true,
+                  focusNode: focusNode,
+                  controller: controller,
+                  readOnly: readOnly,
+                  autofocus: true,
+                  maxLength: 25,
+                  decoration: const InputDecoration(border: OutlineInputBorder()),
+                );
+              },
             ),
           ),
         ),

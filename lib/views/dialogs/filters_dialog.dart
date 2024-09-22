@@ -4,6 +4,7 @@ import 'package:ohnote/data/filters.dart';
 import 'package:ohnote/data/gui_manager.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/tools/custom_holodatepicker/holo_datepicker.dart';
+import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
 import 'package:ohnote/view_components/header_container.dart';
 import 'package:ohnote/constants.dart' as c;
@@ -218,16 +219,24 @@ class _FiltersDialogState extends State<FiltersDialog> {
           const Text(Filters.BY_TEXT),
           Padding(
             padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
-            child: TextField(
+            child: LandscapeTextField(
               controller: _textController,
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                _filters.text = value.trim();
+              textFieldBuilder: (controller, focusNode, readOnly) {
+                return TextField(
+                  showCursor: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  readOnly: readOnly,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    _filters.text = value.trim();
+                  },
+                );
               },
             ),
           ),

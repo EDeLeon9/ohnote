@@ -8,6 +8,7 @@ import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
 import 'package:ohnote/constants.dart' as c;
+import 'package:ohnote/tools/custom_toast.dart' as t;
 
 class MainAppBar extends StatefulWidget {
   const MainAppBar({super.key});
@@ -112,6 +113,9 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                                       Material(
                                         color: Colors.transparent,
                                         child: InkWell(
+                                          onTap: () {
+                                            t.showCustomToast('Long-press to change wallpaper.', context);
+                                          },
                                           onLongPress: () {
                                             if (appBarPercent > 0.0) {
                                               HapticFeedback.vibrate();
@@ -135,19 +139,21 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                       ],
                     ),
                     titlePadding: const EdgeInsets.only(left: 72.0, bottom: 10.0),
-                    title: FractionallySizedBox(
-                      widthFactor: 0.65,
-                      child: AnimatedScaleText(
-                        duration: c.animationDuration,
-                        //trueText: '$appBarPercent\n${constraints.maxHeight}\n$kToolbarHeight\n$paddingOfTop',
-                        trueText: 'OhNote',
-                        falseText: '$selectionQuantity selected',
-                        condition: selectionQuantity == null,
-                        //textStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        textStyle: Theme.of(context).appBarTheme.titleTextStyle!.copyWith(
-                              color: _foregroundColor(Theme.of(context), appBarPercent),
-                              shadows: _shadows(Theme.of(context), appBarPercent),
-                            ),
+                    title: IgnorePointer(
+                      child: FractionallySizedBox(
+                        widthFactor: 0.65,
+                        child: AnimatedScaleText(
+                          duration: c.animationDuration,
+                          //trueText: '$appBarPercent\n${constraints.maxHeight}\n$kToolbarHeight\n$paddingOfTop',
+                          trueText: 'OhNote',
+                          falseText: '$selectionQuantity selected',
+                          condition: selectionQuantity == null,
+                          //textStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          textStyle: Theme.of(context).appBarTheme.titleTextStyle!.copyWith(
+                                color: _foregroundColor(Theme.of(context), appBarPercent),
+                                shadows: _shadows(Theme.of(context), appBarPercent),
+                              ),
+                        ),
                       ),
                     ),
                   );
@@ -172,8 +178,8 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = MainScaffold.of(context).moreSCK
                     ..showCaseDescription = 'Tap here to view more\nactions you can do\nwith your notes.',
-                  HeaderButton(HeaderButtonDetails.sortBy),
                   HeaderButton(HeaderButtonDetails.filters),
+                  HeaderButton(HeaderButtonDetails.sortBy),
                   HeaderButton(HeaderButtonDetails.style),
                   HeaderButton(HeaderButtonDetails.favorite),
                   HeaderButton(HeaderButtonDetails.archive),
