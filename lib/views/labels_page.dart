@@ -93,33 +93,35 @@ class _LabelsPageState extends State<LabelsPage> {
             )
           ],
         ),
-        body: Column(
-          verticalDirection: VerticalDirection.up,
-          children: [
-            ValueListenableBuilder(
-              valueListenable: labelsManager.displayList,
-              builder: (context, displayList, child) {
-                return Expanded(
-                  child: displayList != null
-                      ? ListView.builder(
-                          itemCount: displayList.length,
-                          itemBuilder: (context, index) {
-                            var label = displayList[index];
-                            return LabelTile(
-                              key: Key('label_${label.id}'),
-                              label: label,
-                            );
-                          },
-                        )
-                      : const Center(child: CircularProgressIndicator()),
-                );
-              },
-            ),
-            FiltersPanel(
-              guiManager: labelsManager,
-              useFilterChips: false,
-            ),
-          ],
+        body: SafeArea(
+          child: Column(
+            verticalDirection: VerticalDirection.up,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: labelsManager.displayList,
+                builder: (context, displayList, child) {
+                  return Expanded(
+                    child: displayList != null
+                        ? ListView.builder(
+                            itemCount: displayList.length,
+                            itemBuilder: (context, index) {
+                              var label = displayList[index];
+                              return LabelTile(
+                                key: Key('label_${label.id}'),
+                                label: label,
+                              );
+                            },
+                          )
+                        : const Center(child: CircularProgressIndicator()),
+                  );
+                },
+              ),
+              FiltersPanel(
+                guiManager: labelsManager,
+                useFilterChips: false,
+              ),
+            ],
+          ),
         ),
       ),
     );

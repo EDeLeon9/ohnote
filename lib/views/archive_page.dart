@@ -80,56 +80,58 @@ class _ArchivePageState extends State<ArchivePage> {
             ),
           ],
         ),
-        body: Column(
-          verticalDirection: VerticalDirection.up,
-          children: [
-            ValueListenableBuilder(
-              valueListenable: widget.archiveManager.displayList,
-              builder: (context, archiveList, child) {
-                return Expanded(
-                  child: archiveList != null
-                      ? ListView.builder(
-                          itemCount: archiveList.length,
-                          itemBuilder: (context, index) {
-                            var archivedNote = archiveList[index];
-                            return NoteTile(
-                              key: Key('archive_${archivedNote.id}'),
-                              note: archivedNote,
-                              onTap: () {
-                                DetailsDialog.show(
-                                  context: context,
-                                  note: archivedNote,
-                                ).then((value) {
-                                  if (value == true) {
-                                    Future.delayed(
-                                      const Duration(milliseconds: 150),
-                                      () {
-                                        a.runFirst(() async {
-                                          await widget.archiveManager.startSlideAnimation(
-                                            context: context,
-                                            notesToUse: [archivedNote],
-                                            slideAnimationState: -1,
-                                            afterAnimationStateAction: (selectedNotes) {
-                                              AppData.restoreNotes(selectedNotes);
-                                              AppData.removeNotesFromLists(selectedNotes, widget.archiveManager);
-                                            },
-                                            successMessage: 'Your note were restored.',
-                                          );
-                                        });
-                                      },
-                                    );
-                                  }
-                                });
-                              },
-                            );
-                          },
-                        )
-                      : const Center(child: CircularProgressIndicator()),
-                );
-              },
-            ),
-            FiltersPanel(guiManager: widget.archiveManager),
-          ],
+        body: SafeArea(
+          child: Column(
+            verticalDirection: VerticalDirection.up,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: widget.archiveManager.displayList,
+                builder: (context, archiveList, child) {
+                  return Expanded(
+                    child: archiveList != null
+                        ? ListView.builder(
+                            itemCount: archiveList.length,
+                            itemBuilder: (context, index) {
+                              var archivedNote = archiveList[index];
+                              return NoteTile(
+                                key: Key('archive_${archivedNote.id}'),
+                                note: archivedNote,
+                                onTap: () {
+                                  DetailsDialog.show(
+                                    context: context,
+                                    note: archivedNote,
+                                  ).then((value) {
+                                    if (value == true) {
+                                      Future.delayed(
+                                        const Duration(milliseconds: 150),
+                                        () {
+                                          a.runFirst(() async {
+                                            await widget.archiveManager.startSlideAnimation(
+                                              context: context,
+                                              notesToUse: [archivedNote],
+                                              slideAnimationState: -1,
+                                              afterAnimationStateAction: (selectedNotes) {
+                                                AppData.restoreNotes(selectedNotes);
+                                                AppData.removeNotesFromLists(selectedNotes, widget.archiveManager);
+                                              },
+                                              successMessage: 'Your note were restored.',
+                                            );
+                                          });
+                                        },
+                                      );
+                                    }
+                                  });
+                                },
+                              );
+                            },
+                          )
+                        : const Center(child: CircularProgressIndicator()),
+                  );
+                },
+              ),
+              FiltersPanel(guiManager: widget.archiveManager),
+            ],
+          ),
         ),
       ),
     );

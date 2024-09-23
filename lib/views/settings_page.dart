@@ -40,26 +40,28 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        children: [
-          _theme(),
-          c.defaultDivider,
-          _wallpaper(),
-          c.defaultDivider,
-          _maxHistory(),
-          c.defaultDivider,
-          _useCreationDateCheck(),
-          c.defaultDivider,
-          _defaultNoteColor(),
-          c.defaultDivider,
-          _defaultNumberOfLines(),
-          c.defaultDivider,
-          _resetSettingsToDefault(context),
-          c.defaultDivider,
-          _resetDontShowAgain(context),
-          c.defaultDivider,
-          _restartStartupHelp(context),
-        ],
+      body: SafeArea(
+        child: ListView(
+          children: [
+            _theme(),
+            c.defaultDivider,
+            _wallpaper(),
+            c.defaultDivider,
+            _maxHistory(),
+            c.defaultDivider,
+            _useCreationDateCheck(),
+            c.defaultDivider,
+            _defaultNoteColor(),
+            c.defaultDivider,
+            _defaultNumberOfLines(),
+            c.defaultDivider,
+            _resetSettingsToDefault(context),
+            c.defaultDivider,
+            _resetDontShowAgain(context),
+            c.defaultDivider,
+            _restartStartupHelp(context),
+          ],
+        ),
       ),
     );
   }

@@ -98,26 +98,29 @@ class MainScaffoldState extends State<MainScaffold> {
                     AppData.notesManager.showSearchText.value = false;
                   }
                 },
-                body: Builder(
-                  builder: (context) {
-                    _scaffoldContext = context;
-                    return Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        AnimatedPadding(
-                          duration: c.animationDuration,
-                          padding: EdgeInsets.only(bottom: stylePanelHeight - bottomIndent),
-                          child: custom.BouncingNestedScrollView(
-                            headerSliverBuilder: (context, innerBoxIsScrolled) {
-                              return [_header(nestedScrollViewContext: context)];
-                            },
-                            body: _body(bottomIndent: bottomIndent),
+                body: SafeArea(
+                  top: false,
+                  child: Builder(
+                    builder: (context) {
+                      _scaffoldContext = context;
+                      return Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          AnimatedPadding(
+                            duration: c.animationDuration,
+                            padding: EdgeInsets.only(bottom: stylePanelHeight - bottomIndent),
+                            child: custom.BouncingNestedScrollView(
+                              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                                return [_header(nestedScrollViewContext: context)];
+                              },
+                              body: _body(bottomIndent: bottomIndent),
+                            ),
                           ),
-                        ),
-                        _stylePanel(stylePanelHeight: stylePanelHeight),
-                      ],
-                    );
-                  },
+                          _stylePanel(stylePanelHeight: stylePanelHeight),
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 resizeToAvoidBottomInset: false,
                 floatingActionButton: _fab(stylePanelHeight: stylePanelHeight),
@@ -152,34 +155,29 @@ class MainScaffoldState extends State<MainScaffold> {
   }
 
   Widget _body({required double bottomIndent}) {
-    //Is used SafeArea with slivers to avoid any horizontal disturbances (e.g. the "notch" on iOS when the phone is horizontal).
-    return SafeArea(
-      top: false,
-      bottom: false,
-      //Builder required to get proper context for SliverOverlapInjector.
-      child: Builder(
-        builder: (context) {
-          return CustomScrollView(
-            //The "controller" and "primary" members should be left unset, so that the NestedScrollView can control this inner
-            //scroll view. If the "controller" property is set, then this scroll view will not be associated with the NestedScrollView.
-            slivers: [
-              custom.SliverOverlapInjector(handle: custom.NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-              ...(AppData.dataInitialized.value
-                  ? [
-                      SliverToBoxAdapter(
-                        child: FiltersPanel(
-                          guiManager: AppData.notesManager,
-                          updateDbFilters: true,
-                        ),
+    //Builder required to get proper context for SliverOverlapInjector.
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          //The "controller" and "primary" members should be left unset, so that the NestedScrollView can control this inner
+          //scroll view. If the "controller" property is set, then this scroll view will not be associated with the NestedScrollView.
+          slivers: [
+            custom.SliverOverlapInjector(handle: custom.NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+            ...(AppData.dataInitialized.value
+                ? [
+                    SliverToBoxAdapter(
+                      child: FiltersPanel(
+                        guiManager: AppData.notesManager,
+                        updateDbFilters: true,
                       ),
-                      const MainList(),
-                    ]
-                  : [const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))]),
-              SliverToBoxAdapter(child: SizedBox(height: bottomIndent)),
-            ],
-          );
-        },
-      ),
+                    ),
+                    const MainList(),
+                  ]
+                : [const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))]),
+            SliverToBoxAdapter(child: SizedBox(height: bottomIndent)),
+          ],
+        );
+      },
     );
   }
 

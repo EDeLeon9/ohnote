@@ -10,7 +10,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Aplicar SafeArea en todos los Views (tanto Drawers, BottomSheets, etc., (ver si por defecto tienen SafeArea en sus parámetros como en los AlertDialogs).
 //Ícono de la app.
 //Homescreen widget.
 //Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.

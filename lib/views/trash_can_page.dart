@@ -86,61 +86,63 @@ class _TrashCanPageState extends State<TrashCanPage> {
             ),
           ],
         ),
-        body: Column(
-          verticalDirection: VerticalDirection.up,
-          children: [
-            ValueListenableBuilder(
-              valueListenable: widget.trashManager.displayList,
-              builder: (context, trashList, child) {
-                return Expanded(
-                  child: trashList != null
-                      ? ListView.builder(
-                          itemCount: trashList.length,
-                          itemBuilder: (context, index) {
-                            var trashNote = trashList[index];
-                            return NoteTile(
-                              key: Key('trash_${trashNote.id}'),
-                              note: trashNote,
-                              onTap: () {
-                                DetailsDialog.show(
-                                  context: context,
-                                  note: trashNote,
-                                ).then((value) {
-                                  if (value == true) {
-                                    Future.delayed(
-                                      const Duration(milliseconds: 150),
-                                      () {
-                                        a.runFirst(() async {
-                                          await widget.trashManager.startSlideAnimation(
-                                            context: context,
-                                            notesToUse: [trashNote],
-                                            slideAnimationState: -1,
-                                            afterAnimationStateAction: (selectedNotes) {
-                                              AppData.restoreNotes(selectedNotes);
-                                              AppData.removeNotesFromLists(selectedNotes, widget.trashManager);
-                                            },
-                                            successMessage: 'Your note were restored.',
-                                          );
-                                        });
-                                      },
-                                    );
-                                  }
-                                });
-                              },
-                            );
-                          },
-                        )
-                      : const Center(child: CircularProgressIndicator()),
-                );
-              },
-            ),
-            const Divider(height: 0.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
-              child: Text('Notes are kept in trash can up to 30 days.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-            ),
-            FiltersPanel(guiManager: widget.trashManager),
-          ],
+        body: SafeArea(
+          child: Column(
+            verticalDirection: VerticalDirection.up,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: widget.trashManager.displayList,
+                builder: (context, trashList, child) {
+                  return Expanded(
+                    child: trashList != null
+                        ? ListView.builder(
+                            itemCount: trashList.length,
+                            itemBuilder: (context, index) {
+                              var trashNote = trashList[index];
+                              return NoteTile(
+                                key: Key('trash_${trashNote.id}'),
+                                note: trashNote,
+                                onTap: () {
+                                  DetailsDialog.show(
+                                    context: context,
+                                    note: trashNote,
+                                  ).then((value) {
+                                    if (value == true) {
+                                      Future.delayed(
+                                        const Duration(milliseconds: 150),
+                                        () {
+                                          a.runFirst(() async {
+                                            await widget.trashManager.startSlideAnimation(
+                                              context: context,
+                                              notesToUse: [trashNote],
+                                              slideAnimationState: -1,
+                                              afterAnimationStateAction: (selectedNotes) {
+                                                AppData.restoreNotes(selectedNotes);
+                                                AppData.removeNotesFromLists(selectedNotes, widget.trashManager);
+                                              },
+                                              successMessage: 'Your note were restored.',
+                                            );
+                                          });
+                                        },
+                                      );
+                                    }
+                                  });
+                                },
+                              );
+                            },
+                          )
+                        : const Center(child: CircularProgressIndicator()),
+                  );
+                },
+              ),
+              const Divider(height: 0.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
+                child: Text('Notes are kept in trash can up to 30 days.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              ),
+              FiltersPanel(guiManager: widget.trashManager),
+            ],
+          ),
         ),
       ),
     );

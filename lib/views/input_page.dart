@@ -111,13 +111,15 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
             _moreButton(),
           ],
         ),
-        body: Column(
-          children: [
-            _configBar(),
-            const Divider(height: 0.0),
-            _textField(),
-            _labels(),
-          ],
+        body: SafeArea(
+          child: Column(
+            children: [
+              _configBar(),
+              const Divider(height: 0.0),
+              _textField(),
+              _labels(),
+            ],
+          ),
         ),
       ),
     );
