@@ -8,7 +8,6 @@ import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
 import 'package:ohnote/constants.dart' as c;
-import 'package:ohnote/tools/custom_toast.dart' as t;
 
 class MainAppBar extends StatefulWidget {
   const MainAppBar({super.key});
@@ -18,7 +17,7 @@ class MainAppBar extends StatefulWidget {
 }
 
 class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
-  static const expandedHeight = 160.0;
+  static const _expandedHeight = 160.0;
 
   @override
   void initState() {
@@ -53,11 +52,11 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
       stretch: true,
       forceElevated: true, //Shadow.
       toolbarHeight: Theme.of(context).appBarTheme.toolbarHeight!,
-      expandedHeight: expandedHeight,
+      expandedHeight: _expandedHeight,
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
           var paddingOfTop = MediaQuery.paddingOf(context).top;
-          var maxAppBarHeight = expandedHeight + paddingOfTop;
+          var maxAppBarHeight = _expandedHeight + paddingOfTop;
           var minAppBarHeight = kToolbarHeight + paddingOfTop - 1.0;
           var appBarPercent = (constraints.maxHeight - minAppBarHeight) / (maxAppBarHeight - minAppBarHeight);
           return Stack(
