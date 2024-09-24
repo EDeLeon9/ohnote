@@ -107,8 +107,13 @@ class _MainDrawerState extends State<MainDrawer> {
             children: [
               HeaderContainer(
                 child: ListTile(
-                  //TODO: what to do or place in this icon? also try CircleAvatar() class.
-                  leading: Icon(Icons.account_circle, size: 50.0, color: fontColor),
+                  //TODO: try CircleAvatar() class to show google account photo.
+                  //leading: Icon(Icons.account_circle, size: 50.0, color: fontColor),
+                  leading: const Image(
+                    height: 45.0,
+                    width: 45.0,
+                    image: AssetImage('assets/icon/icon_blue.png'),
+                  ),
                   tileColor: fontColor,
                   contentPadding: const EdgeInsets.fromLTRB(15.0, 30.0, 15.0, 6.0),
                   title: Column(

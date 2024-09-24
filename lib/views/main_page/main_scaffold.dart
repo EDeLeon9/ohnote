@@ -74,8 +74,8 @@ class MainScaffoldState extends State<MainScaffold> {
                     AppData.validateMaxHistory();
                     var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
                     Future.delayed(const Duration(milliseconds: 300), () {
-                      if (AppData.appliedWallpaper.value?.assetName != settingsWallpaper) {
-                        AppData.appliedWallpaper.value = AssetImage(settingsWallpaper);
+                      if (AppData.appliedWallpaper.value?.assetName.endsWith(settingsWallpaper) == false) {
+                        AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
                       }
                       AppData.themeUpdatedFromSettings = false;
                     });

@@ -113,9 +113,6 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                                       Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          onTap: () {
-                                            t.showCustomToast('Long-press to change wallpaper.', context);
-                                          },
                                           onLongPress: () {
                                             if (appBarPercent > 0.0) {
                                               HapticFeedback.vibrate();
@@ -123,8 +120,8 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                                                 context: context,
                                               ).whenComplete(() {
                                                 var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
-                                                if (appliedWallpaper.assetName != settingsWallpaper) {
-                                                  AppData.appliedWallpaper.value = AssetImage(settingsWallpaper);
+                                                if (!appliedWallpaper.assetName.endsWith(settingsWallpaper)) {
+                                                  AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
                                                 }
                                               });
                                             }

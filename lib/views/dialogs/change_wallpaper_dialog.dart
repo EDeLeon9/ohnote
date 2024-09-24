@@ -29,13 +29,13 @@ class ChangeWallpaperDialog {
                     children: [
                       ValueListenableBuilder(
                         valueListenable: AppData.settings[Settings.wallpaper]!,
-                        builder: (context, value, child) {
+                        builder: (context, wallpaper, child) {
                           return Container(
                             height: 52.0,
                             width: 52.0,
                             decoration: BoxDecoration(
                               borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                              color: AppData.settings[Settings.wallpaper]!.value.contains('_$e.jpg') ? Theme.of(context).colorScheme.primary : null,
+                              color: wallpaper.contains('_$e.jpg') ? Theme.of(context).colorScheme.primary : null,
                             ),
                           );
                         },
@@ -47,10 +47,10 @@ class ChangeWallpaperDialog {
                           child: Ink.image(
                             height: 45.0,
                             width: 45.0,
-                            image: AssetImage('assets/sliver_banner_thumb_$e.jpg'),
+                            image: AssetImage('assets/wallpapers/sliver_banner_thumb_$e.jpg'),
                             child: InkWell(
                               onTap: () {
-                                AppData.settings[Settings.wallpaper]!.value = 'assets/sliver_banner_$e.jpg';
+                                AppData.settings[Settings.wallpaper]!.value = 'sliver_banner_$e.jpg';
                                 AppData.updateDbSettings([Settings.wallpaper]);
                                 Navigator.pop(context);
                               },

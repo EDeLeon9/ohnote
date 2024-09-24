@@ -171,7 +171,7 @@ class AppData {
     for (var row in query) {
       settings[Settings.values.firstWhere((e) => row['param'] == e.name)]!.value = row['value'];
     }
-    appliedWallpaper.value = AssetImage(settings[Settings.wallpaper]!.value);
+    appliedWallpaper.value = AssetImage('assets/wallpapers/${settings[Settings.wallpaper]!.value}');
     var useCreationDateTime = AppData.settings[Settings.useCreationDateTime]!;
     void onUseCreationDateTimeChanged() {
       notesManager.getComparisonDateTime =

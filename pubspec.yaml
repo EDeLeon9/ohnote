@@ -49,6 +49,8 @@ dependencies:
   flutter_holo_date_picker: ^1.1.3
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.14.0"
+  
   flutter_test:
     sdk: flutter
 
@@ -61,6 +63,33 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  #  image_path: "assets/icon/icon.png"
+  image_path_android: "assets/icon/icon.png"
+  image_path_ios: "assets/icon/icon.png"
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#132A38" # only available for Android 8.0 devices and above
+  adaptive_icon_foreground: "assets/icon/icon.png" # only available for Android 8.0 devices and above
+  adaptive_icon_foreground_inset: 16 # only available for Android 8.0 devices and above
+  #adaptive_icon_monochrome: "assets/icon/icon.png" # only available for Android 13 devices and above
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  remove_alpha_ios: true
+  background_color_ios: "#132A38"
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#132A38"
+    theme_color: "#132A38"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/icon/icon.png"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -76,6 +105,8 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/
+    - assets/wallpapers/
+    - assets/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
