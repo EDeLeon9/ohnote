@@ -214,7 +214,7 @@ class AppData {
       guiManager: notesManager,
       where: 'parent_id IS NULL AND history_date_time IS NULL AND trash_date_time IS NULL AND archive_date_time IS NULL',
     );
-    HomeWidgetManager.updateWidget(notesManager.allList);
+    _updateHomeWidget();
     notesManager.requestFilterList();
 
     validateTimeInTrash();
@@ -395,7 +395,7 @@ class AppData {
         _notesUserOrder.insert(0, note.id);
         //_closeDb(iDb); _updateDbNotesUserOrder closes the db.
         _updateDbNotesUserOrder(iDb, true); //It is required to not await to continue with code without waiting for db.
-        HomeWidgetManager.updateWidget(notesManager.allList);
+        _updateHomeWidget();
         notesManager.requestFilterList();
       } else {
         _closeDb(iDb);
@@ -416,7 +416,7 @@ class AppData {
       if (!notesManager.noteIsInFilter(note)) {
         notesManager.displayList.value!.remove(note);
       }
-      HomeWidgetManager.updateWidget(notesManager.allList);
+      _updateHomeWidget();
       iDb = await _openDb();
       await _addHistory(
         iDb,
@@ -482,7 +482,7 @@ class AppData {
       note.numberOfLines.value = history.numberOfLines.value;
       note.color.value = history.color.value;
     }
-    HomeWidgetManager.updateWidget(notesManager.allList);
+    _updateHomeWidget();
     //Updating the note in db.
     var iDb = await _openDb();
     var count = await iDb.db.update(
@@ -515,7 +515,7 @@ class AppData {
   static void archiveNotes(List<Note> notes) async {
     if (notes.isNotEmpty) {
       removeNotesFromLists(notes, notesManager);
-      HomeWidgetManager.updateWidget(notesManager.allList);
+      _updateHomeWidget();
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
           'UPDATE notes SET archive_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\' WHERE id IN (${notes.map((e) => e.id).join(',')})');
@@ -529,7 +529,7 @@ class AppData {
   static void sendNotesToTrash(List<Note> notes) async {
     if (notes.isNotEmpty) {
       removeNotesFromLists(notes, notesManager);
-      HomeWidgetManager.updateWidget(notesManager.allList);
+      _updateHomeWidget();
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
           'UPDATE notes SET trash_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN (${notes.map((e) => e.id).join(',')})');
@@ -565,7 +565,7 @@ class AppData {
         note.guiManager = notesManager;
       }
       notesManager.allList = [...notesManager.allList, ...notes].sorted(notesManager.sortComparison);
-      HomeWidgetManager.updateWidget(notesManager.allList);
+      _updateHomeWidget();
       notesManager.requestFilterList();
       var iDb = await _openDb();
       var count = await iDb.db
@@ -656,7 +656,7 @@ class AppData {
     for (var note in notesManager.allList) {
       note.userOrder = _notesUserOrder.indexOf(note.id);
     }
-    HomeWidgetManager.updateWidget(notesManager.allList);
+    _updateHomeWidget();
     notesManager.displayList.notifyListeners();
     var iDb = await _openDb();
     await _updateDbNotesUserOrder(iDb);
@@ -676,7 +676,7 @@ class AppData {
       }
       return notesManager.sortComparison(a, b);
     });
-    HomeWidgetManager.updateWidget(notesManager.allList);
+    _updateHomeWidget();
     int i = 0;
     var notesIds = notesManager.allList.map((e) => e.id).toList();
     List<int> newOrder = [];
@@ -816,6 +816,10 @@ class AppData {
     await update(filters.colors.map((e) => e.value).join(','), filters.colors.isNotEmpty, Filters.BY_COLOR);
     await update(true.toString(), filters.crossedOut, Filters.CROSSED_OUT);
     await _closeDb(iDb);
+  }
+
+  static void _updateHomeWidget() async {
+    await HomeWidgetManager.updateWidgetWithSerializable('_notelist', notesManager.allList);
   }
 
   static void _error(String msg) {

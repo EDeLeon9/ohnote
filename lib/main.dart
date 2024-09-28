@@ -11,6 +11,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
 //Homescreen widget.
+//cambiar com.example.ohnote a com.<empresa>.ohnote, esto seguro requiere hacer backup antes de desinstalar e instalar
 //Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.
 //Anuncios.
 //Solicitar Rate us.
@@ -26,9 +27,9 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized(); //Required by HomeWidgetManager and AppData.
   HomeWidgetManager.initialize(
     appSchemeName: 'ohnotewidget',
-    widgetProviderName: 'OhNoteWidgetProvider',
-    iOSWidgetProviderName: 'OhNoteWidgetProvider',
-    widgetDataName: '_widgetNotes',
+    appGroupId: 'ohnotewidgets',
+    androidWidgetName: 'OhNoteWidget',
+    iOSWidgetName: 'OhNoteWidget',
     runEnsureInitialized: false,
   );
   AppData.initData(runEnsureInitialized: false);

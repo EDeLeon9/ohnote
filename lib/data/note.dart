@@ -110,6 +110,8 @@ class Note {
 
   String? labelIdsString() => labelIds.isNotEmpty ? labelIds.join(',') : null;
 
+  Map<String, dynamic> toJson() => {'id': id, 'text': text}; //Used by jsonEncode in HomeWidgetManager.
+
   Note clone() {
     var note = Note(
       id: id,
