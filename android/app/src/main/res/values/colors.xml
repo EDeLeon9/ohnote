@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#132A38</color>
-    <color name="light_blue_50">#FFE1F5FE</color>
-    <color name="light_blue_200">#FF81D4FA</color>
-    <color name="light_blue_600">#FF039BE5</color>
-    <color name="light_blue_900">#FF01579B</color>
+    <color name="widget_background_color">#90F7EDE3</color>
+    <color name="widget_header_color">#FCF8F4</color>
+    <color name="widget_button_text_color">#FCF8F4</color>
+    <color name="widget_button_color">#006782</color>
+    <color name="widget_pressed_button_color">#58919F</color>
 </resources>

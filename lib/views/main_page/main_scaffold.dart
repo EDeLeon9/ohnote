@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
+import 'package:ohnote/tools/home_widget_manager.dart';
 import 'package:ohnote/tools/smooth_materialpageroute.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
@@ -13,6 +16,7 @@ import 'package:ohnote/views/input_page.dart';
 import 'package:ohnote/views/main_page/main_appbar.dart';
 import 'package:ohnote/views/main_page/main_list.dart';
 import 'package:ohnote/constants.dart' as c;
+import 'package:ohnote/tools/single_async.dart' as a;
 import 'package:ohnote/tools/custom_nestedscrollview/flutter_nestedscrollview.dart' as custom;
 
 class MainScaffold extends StatefulWidget {
@@ -39,11 +43,20 @@ class MainScaffoldState extends State<MainScaffold> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      while (!AppData.dataInitialized.value) {
-        await Future.delayed(const Duration(milliseconds: 10));
+    bool? launchedFromHomeWidget;
+    HomeWidgetManager.setClickFunction('opennote', (params) => _openNoteFromHomeWidget(int.tryParse(params['id'] ?? ''), context));
+    //Forces to run the click function because it was just set.
+    HomeWidgetManager.getFunctionIfLaunchedFromHomeWidget('opennote').then((onTapFunction) {
+      launchedFromHomeWidget = onTapFunction != null;
+      if (onTapFunction != null) {
+        onTapFunction();
       }
-      Future.delayed(Duration(milliseconds: 750 - CustomShowCase.delay.inMilliseconds), _startShowCase);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await _dataInitialized();
+      if (launchedFromHomeWidget == false) {
+        Future.delayed(Duration(milliseconds: 750 - CustomShowCase.delay.inMilliseconds), _startShowCase);
+      }
     });
     super.initState();
   }
@@ -191,40 +204,8 @@ class MainScaffoldState extends State<MainScaffold> {
         description: 'Tap here to add a new note.',
         child: FloatingActionButton(
           tooltip: 'New note',
+          onPressed: openNote,
           child: const Icon(Icons.add),
-          onPressed: () {
-            if (AppData.dataInitialized.value) {
-              if (AppData.notesManager.selectionQuantity.value != null) {
-                AppData.notesManager.selectionQuantity.value = null;
-              }
-              if (!AppData.notesManager.showSearchText.value) {
-                AppData.notesManager.showSearchText.value = false;
-              }
-              Navigator.push(
-                context,
-                SmoothMaterialPageRoute(
-                  builder: (context) {
-                    var colorStr = AppData.settings[Settings.defaultColor]!.value;
-                    return InputPage(
-                      note: Note(
-                        id: 0,
-                        text: '',
-                        guiManager: AppData.notesManager,
-                        numberOfLines: int.parse(AppData.settings[Settings.defaultNumberOfLines]!.value),
-                        color: colorStr != null.toString() ? Color(int.parse(colorStr)) : null,
-                      ),
-                    );
-                  },
-                ),
-              ).whenComplete(() {
-                if (AppData.notesManager.displayList.value?.isNotEmpty == true) {
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    _startShowCase();
-                  });
-                }
-              });
-            }
-          },
         ),
       ),
     );
@@ -259,6 +240,74 @@ class MainScaffoldState extends State<MainScaffold> {
             child: const StylePanel(),
           )
         : const SizedBox.shrink();
+  }
+
+  void openNote([Note? note]) {
+    if (context.mounted) {
+      if (AppData.notesManager.selectionQuantity.value != null) {
+        AppData.notesManager.selectionQuantity.value = null;
+      }
+      if (!AppData.notesManager.showSearchText.value) {
+        AppData.notesManager.showSearchText.value = false;
+      }
+      Navigator.push(
+        context,
+        note == null
+            ? SmoothMaterialPageRoute(
+                builder: (context) {
+                  var colorStr = AppData.settings[Settings.defaultColor]!.value;
+                  return InputPage(
+                    note: Note(
+                      id: 0,
+                      text: '',
+                      guiManager: AppData.notesManager,
+                      numberOfLines: int.parse(AppData.settings[Settings.defaultNumberOfLines]!.value),
+                      color: colorStr != null.toString() ? Color(int.parse(colorStr)) : null,
+                    ),
+                  );
+                },
+              )
+            : CupertinoPageRoute(builder: (context) => InputPage(note: note)),
+      ).whenComplete(() {
+        if (AppData.notesManager.displayList.value?.isNotEmpty == true) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            _startShowCase();
+          });
+        }
+      });
+    }
+  }
+
+  void _openNoteFromHomeWidget(int? id, BuildContext context) {
+    a.runFirst(
+      () async {
+        if (id != null) {
+          await _dataInitialized();
+          if (context.mounted) {
+            Navigator.popUntil(
+              context,
+              (route) {
+                return ModalRoute.isCurrentOf(context) == true;
+              },
+            );
+            if (id > 0) {
+              var note = AppData.notesManager.allList.where((e) => e.id == id).firstOrNull;
+              if (note != null) {
+                openNote(note);
+              }
+            } else {
+              openNote();
+            }
+          }
+        }
+      },
+    );
+  }
+
+  Future<void> _dataInitialized() async {
+    while (!AppData.dataInitialized.value) {
+      await Future.delayed(const Duration(milliseconds: 10));
+    }
   }
 
   void _startShowCase() {

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ohnote/data/app_data.dart';
@@ -6,7 +5,6 @@ import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/note_tile.dart';
 import 'package:ohnote/view_components/note_tile_proxy.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
-import 'package:ohnote/views/input_page.dart';
 
 class MainList extends StatelessWidget {
   const MainList({super.key});
@@ -49,7 +47,7 @@ class MainList extends StatelessWidget {
                 note: note,
                 enableLongPress: false,
                 onTap: () {
-                  Navigator.push(context, CupertinoPageRoute(builder: (context) => InputPage(note: note)));
+                  MainScaffold.of(context).openNote(note);
                 },
               );
               return ReorderableDelayedDragStartListener(

@@ -7,24 +7,24 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import com.example.ohnote.databinding.NotesWidgetConfigureBinding
+import com.example.ohnote.databinding.OhnoteWidgetConfigureBinding //layout/ohnote_widget_configure.xml
 
-/**
- * The configuration screen for the [NotesWidget] AppWidget.
+/*
+ * The configuration screen for the [OhNoteWidget] AppWidget.
  */
-class NotesWidgetConfigureActivity : Activity() {
+class OhNoteWidgetConfigureActivity : Activity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private lateinit var appWidgetText: EditText
     private var onClickListener = View.OnClickListener {
-        val context = this@NotesWidgetConfigureActivity
+        val context = this@OhNoteWidgetConfigureActivity
 
         // // When the button is clicked, store the string locally
         // val widgetText = appWidgetText.text.toString()
         // saveTitlePref(context, appWidgetId, widgetText)
 
         // It is the responsibility of the configuration activity to update the app widget
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        updateAppWidget(context, appWidgetManager, appWidgetId)
+        //val appWidgetManager = AppWidgetManager.getInstance(context)
+        //updateAppWidget(context, appWidgetManager, appWidgetId)
 
         // Make sure we pass back the original appWidgetId
         val resultValue = Intent()
@@ -32,7 +32,7 @@ class NotesWidgetConfigureActivity : Activity() {
         setResult(RESULT_OK, resultValue)
         finish()
     }
-    private lateinit var binding: NotesWidgetConfigureBinding
+    private lateinit var binding: OhnoteWidgetConfigureBinding
 
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
@@ -41,7 +41,7 @@ class NotesWidgetConfigureActivity : Activity() {
         // out of the widget placement if the user presses the back button.
         setResult(RESULT_CANCELED)
 
-        binding = NotesWidgetConfigureBinding.inflate(layoutInflater)
+        binding = OhnoteWidgetConfigureBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         appWidgetText = binding.appwidgetText as EditText
@@ -61,13 +61,10 @@ class NotesWidgetConfigureActivity : Activity() {
             finish()
             return
         }
-
-        //appWidgetText.setText(loadTitlePref(this@NotesWidgetConfigureActivity, appWidgetId))
     }
-
 }
 
-private const val PREFS_NAME = "com.example.ohnote.NotesWidget"
+// private const val PREFS_NAME = "com.example.ohnote"
 // private const val PREF_PREFIX_KEY = "appwidget_"
 
 // // Write the prefix to the SharedPreferences object for this widget
@@ -90,9 +87,3 @@ private const val PREFS_NAME = "com.example.ohnote.NotesWidget"
 //     prefs.remove(PREF_PREFIX_KEY + appWidgetId)
 //     prefs.apply()
 // }
-
-internal fun loadNotesPref(context: Context): String {
-    val prefs = context.getSharedPreferences(PREFS_NAME, 0)
-    val notesJson = prefs.getString("_widgetNoteList", null)
-    return notesJson ?: "[]"
-}

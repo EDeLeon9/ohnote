@@ -41,6 +41,7 @@ class AppData {
   static Future<void> Function()? precacheWallpaperAsset;
   static final Map<Settings, ValueNotifier<String>> settings = Map.fromEntries(Settings.values.map((e) => MapEntry(e, ValueNotifier(''))));
   static final Map<FirstAccess, bool> firstAccesses = Map.fromEntries(FirstAccess.values.map((e) => MapEntry(e, true)));
+  static List<Note> homeWidgetList = [];
   static final notesManager = GuiManager(
     sortComparison: (a, b) => a.userOrder.compareTo(b.userOrder),
     getComparisonDateTime: (note) => note.modifDateTime,
@@ -818,8 +819,10 @@ class AppData {
     await _closeDb(iDb);
   }
 
+  //TODO: Use a separated filtered list (filter will be asked when adding the widget to homescreen).
   static void _updateHomeWidget() async {
-    await HomeWidgetManager.updateWidgetWithSerializable('_notelist', notesManager.allList);
+    homeWidgetList = notesManager.allList;
+    await HomeWidgetManager.updateWidgetWithSerializable('_ohNoteWidgetList', homeWidgetList);
   }
 
   static void _error(String msg) {

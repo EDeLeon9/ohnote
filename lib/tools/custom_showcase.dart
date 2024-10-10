@@ -23,14 +23,15 @@ class CustomShowCase<T> extends StatelessWidget {
   final String description;
   final Widget child;
 
-  static void startShowCase<T>({
+  static bool startShowCase<T>({
     required BuildContext context,
     required List<ShowCaseKey<T>> showCaseKeys,
     required bool usePostFrameCallback,
     void Function()? onFinish,
   }) {
     var ofWidget = CustomShowCaseWidget.of<T>(context);
-    if (showCaseKeys.isNotEmpty && ofWidget._shownMap.isNotEmpty) {
+    assert(ofWidget._shownMap.isNotEmpty, 'CustomShowCaseWidgetState._shownMap is not loaded yet');
+    if (showCaseKeys.isNotEmpty) {
       List<ShowCaseKey<T>> validKeys = [];
       for (var key in showCaseKeys) {
         if (!ofWidget._shownMap[key.value]!) {
@@ -57,8 +58,10 @@ class CustomShowCase<T> extends StatelessWidget {
         } else {
           delayedStartShowCase();
         }
+        return true;
       }
     }
+    return false;
   }
 
   static bool next(BuildContext context) {
@@ -125,16 +128,16 @@ class CustomShowCaseWidgetState<T> extends State<CustomShowCaseWidget<T>> {
     return ShowCaseWidget(
       onFinish: () {
         List<T> shownKeyValues = [];
-        var requests = List.of(_onFinishRequests);
-        for (var request in requests) {
+        var onFinishRequests = List.of(_onFinishRequests);
+        for (var request in onFinishRequests) {
           for (var keyValue in request.shownKeyValues) {
             _shownMap[keyValue] = true;
           }
           shownKeyValues.addAll(request.shownKeyValues);
         }
-        for (var request in requests) {
-          _onFinishRequests.remove(request);
-          request.request(); //Must be called after setting shownKeyValues to true and finished to true.
+        for (var onFinishRequest in onFinishRequests) {
+          _onFinishRequests.remove(onFinishRequest);
+          onFinishRequest.request(); //Must be called after setting shownKeyValues to true and finished to true.
         }
         widget.onFinish?.call(shownKeyValues);
       },

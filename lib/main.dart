@@ -22,6 +22,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Idioma español.
 //Opciones para hacer share (por ejemplo enviar por correo o copiar al portapapeles).
 //Importar, exportar
+//Deslizar a la izquierda o derecha para cambiar de nota cuando se está en modo edición
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); //Required by HomeWidgetManager and AppData.

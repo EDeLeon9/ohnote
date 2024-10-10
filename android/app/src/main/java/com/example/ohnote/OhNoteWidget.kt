@@ -3,6 +3,7 @@ package com.example.ohnote // Your package name
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.SharedPreferences
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.net.Uri
@@ -13,6 +14,7 @@ import org.json.JSONObject
 import org.json.JSONTokener
 import org.json.JSONArray
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
+import es.antonborri.home_widget.HomeWidgetProvider
 
 private const val APP_SCHEME_NAME = "ohnotewidget"
 private const val EXTRA_NOTELIST = "com.example.ohnote.EXTRA_NOTELIST"
@@ -21,13 +23,19 @@ private const val OPEN_ACTION = "com.example.ohnote.OPEN_ACTION"
 
 /*
  * Implementation of App Widget functionality.
- * App Widget Configuration implemented in [NotesWidgetConfigureActivity]
+ * App Widget Configuration implemented in [OhNoteWidgetConfigureActivity]
  */
-class NotesWidget : AppWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+class OhNoteWidget : HomeWidgetProvider() {
+    override fun onUpdate(
+        context: Context, 
+        appWidgetManager: AppWidgetManager, 
+        appWidgetIds: IntArray,
+        widgetData: SharedPreferences
+    ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
+            println("-------------------------------------onUpdate")
+            updateAppWidget(context, appWidgetManager, appWidgetId, widgetData)
         }
     }
 
@@ -52,29 +60,37 @@ class NotesWidget : AppWidgetProvider() {
     }
 }
 
-internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+internal fun updateAppWidget(
+    context: Context, 
+    appWidgetManager: AppWidgetManager, 
+    appWidgetId: Int,
+    widgetData: SharedPreferences
+) {
     val listViewIntent = Intent(context, NoteListViewWidgetService::class.java).apply {
         // Add the widget ID to the intent extras.
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-        putExtra(EXTRA_NOTELIST, loadNotesPref(context))
+        putExtra(EXTRA_NOTELIST, widgetData.getString("_ohNoteWidgetList", "[]"))
         data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
     }
 
-    val views = RemoteViews(context.packageName, R.layout.notes_widget).apply {
+    val views = RemoteViews(context.packageName, R.layout.ohnote_widget).apply {
         // PendingIntent to open app on widget click
-        val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://opennote?id=0"))
-        setOnClickPendingIntent(R.id.notes_widget_root, pendingIntent)
+        val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
+        setOnClickPendingIntent(R.id.widgetRoot, pendingIntent)
+
+        val buttonPendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://opennote?id=0"))
+        setOnClickPendingIntent(R.id.addNoteButton, buttonPendingIntent)
         
         setRemoteAdapter(R.id.noteListView, listViewIntent)
 
         // The empty view is displayed when the collection has no items.
         // It must be in the same layout used to instantiate the RemoteViews object.
-        setEmptyView(R.id.noteListView, R.id.loadingTextView)
+        //setEmptyView(R.id.noteListView, R.id.loadingTextView)
 
         // This section makes it possible for items to have individualized. It does this by setting up a pending intent template.
         // Individuals items of a collection can't set up their own pending intents. Instead, the collection as a whole sets up a pending
         // intent template, and the individual items set a fillInIntent to create unique behavior on an item-by-item basis.
-        val pendingIntentTemplate = Intent(context, NotesWidget::class.java).run {
+        val pendingIntentTemplate = Intent(context, OhNoteWidget::class.java).run {
             action = OPEN_ACTION
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
@@ -99,8 +115,8 @@ class NoteListViewWidgetService : RemoteViewsService() {
 }
 
 class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
-    private var data: ArrayList<ListViewItem> = arrayListOf()
-    private val remoteViews = RemoteViews(context.packageName, R.layout.notes_widget_listview)
+    private var data: ArrayList<NoteItem> = arrayListOf()
+    private val views = RemoteViews(context.packageName, R.layout.ohnote_widget_listview)
         
     override fun onCreate() {
         // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
@@ -120,11 +136,11 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
         // from the network, etc., it is ok to do it here, synchronously. The widget will remain
         // in its current state while work is being done here, so you don't need to worry about
         // locking up the widget.
-        val list: ArrayList<ListViewItem> = arrayListOf()
+        val list: ArrayList<NoteItem> = arrayListOf()
         val jsonArray = JSONTokener(intent.getStringExtra(EXTRA_NOTELIST)).nextValue() as JSONArray
         for (i in 0 until jsonArray.length()) {
             val note = jsonArray.getJSONObject(i)
-            list.add(ListViewItem(note.getInt("id"), note.getString("text")))
+            list.add(NoteItem(note.getInt("id"), note.getString("text")))
         }
         data = list
     }
@@ -152,16 +168,16 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
     }
 
     override fun getViewAt(position: Int): RemoteViews {
-        remoteViews.setTextViewText(R.id.rowTextView, data[position].text)
+        views.setTextViewText(R.id.rowTextView, data[position].text)
         var bundle = Bundle().apply { 
             putInt(EXTRA_NOTEID, data[position].id)
         }
         val intent = Intent().apply {
             putExtras(bundle)
         }
-        remoteViews.setOnClickFillInIntent(R.id.rowTextView, intent)
-        return remoteViews
+        views.setOnClickFillInIntent(R.id.rowTextView, intent)
+        return views
     }
 
-    private class ListViewItem(val id: Int, val text: String);
+    private class NoteItem(val id: Int, val text: String)
 }
