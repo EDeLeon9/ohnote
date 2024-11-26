@@ -3,9 +3,22 @@
         <!-- Radius of the outer bound of widgets to make the rounded corners -->
         <item name="appWidgetRadius">0dp</item>
     </style>
+    <style name="Theme.Android.AppWidgetContainerParentLight" parent="@android:style/Theme.DeviceDefault.Light">
+        <item name="appWidgetRadius">0dp</item>
+    </style>
+    <style name="Theme.Android.AppWidgetContainerParentDark" parent="@android:style/Theme.DeviceDefault">
+        <item name="appWidgetRadius">0dp</item>
+        <item name="android:forceDarkAllowed">true</item>
+    </style>
 
     <style name="Theme.Android.AppWidgetContainer" parent="Theme.Android.AppWidgetContainerParent">
         <!-- Apply padding to avoid the content of the widget colliding with the rounded corners -->
+        <item name="appWidgetPadding">0dp</item>
+    </style>
+    <style name="Theme.Android.AppWidgetContainerLight" parent="Theme.Android.AppWidgetContainerParentLight">
+        <item name="appWidgetPadding">0dp</item>
+    </style>
+    <style name="Theme.Android.AppWidgetContainerDark" parent="Theme.Android.AppWidgetContainerParentDark">
         <item name="appWidgetPadding">0dp</item>
     </style>
 </resources>

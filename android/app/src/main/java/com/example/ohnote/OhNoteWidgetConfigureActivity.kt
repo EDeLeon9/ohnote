@@ -3,28 +3,53 @@ package com.example.ohnote
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.LayoutInflater
+import android.widget.ArrayAdapter
+import android.widget.TextView
+import android.widget.ListView
 import android.widget.EditText
+import android.net.Uri
+import org.json.JSONObject
+import org.json.JSONTokener
+import org.json.JSONArray
+import es.antonborri.home_widget.HomeWidgetLaunchIntent
+import es.antonborri.home_widget.HomeWidgetPlugin
 import com.example.ohnote.databinding.OhnoteWidgetConfigureBinding //layout/ohnote_widget_configure.xml
+
+internal const val OPEN_HOMEWIDGETCONFIGS = "openhomewidgetconfigs"
+internal const val PREF_CONFIG_IDS = "_ohNoteWidgetConfigIds"
+internal const val PREF_CONFIG_ID = "_ohNoteWidgetConfigId_"
+internal const val PREF_CONFIG = "_ohNoteWidgetConfig_"
+internal const val PREF_NOTELIST = "_ohNoteWidgetList_"
 
 /*
  * The configuration screen for the [OhNoteWidget] AppWidget.
  */
 class OhNoteWidgetConfigureActivity : Activity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
-    private lateinit var appWidgetText: EditText
-    private var onClickListener = View.OnClickListener {
+    private lateinit var binding: OhnoteWidgetConfigureBinding
+    // private lateinit var appWidgetText: EditText
+    private var selectedConfigId = -1
+    
+    private var onDoneClickListener = View.OnClickListener {
         val context = this@OhNoteWidgetConfigureActivity
 
         // // When the button is clicked, store the string locally
         // val widgetText = appWidgetText.text.toString()
         // saveTitlePref(context, appWidgetId, widgetText)
 
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val prefs = HomeWidgetPlugin.getData(context)
+
+        setConfigId(context, appWidgetId, selectedConfigId, prefs)
+        
         // It is the responsibility of the configuration activity to update the app widget
-        //val appWidgetManager = AppWidgetManager.getInstance(context)
-        //updateAppWidget(context, appWidgetManager, appWidgetId)
+        updateAppWidget(context, appWidgetManager, appWidgetId, prefs)
 
         // Make sure we pass back the original appWidgetId
         val resultValue = Intent()
@@ -32,7 +57,17 @@ class OhNoteWidgetConfigureActivity : Activity() {
         setResult(RESULT_OK, resultValue)
         finish()
     }
-    private lateinit var binding: OhnoteWidgetConfigureBinding
+
+    private var onNewConfigurationClickListener = View.OnClickListener {
+        val context = this@OhNoteWidgetConfigureActivity
+        val activity = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://$OPEN_HOMEWIDGETCONFIGS"))
+        activity.send()
+        finish()
+    }
+
+    private var onCancelClickListener = View.OnClickListener {
+        finish()
+    }
 
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
@@ -44,46 +79,181 @@ class OhNoteWidgetConfigureActivity : Activity() {
         binding = OhnoteWidgetConfigureBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        appWidgetText = binding.appwidgetText as EditText
-        binding.addButton.setOnClickListener(onClickListener)
+        getActionBar()?.setTitle(" Widget Configuration")
 
         // Find the widget id from the intent.
-        val intent = intent
-        val extras = intent.extras
-        if (extras != null) {
-            appWidgetId = extras.getInt(
-                AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID
-            )
+        if (intent?.extras != null) {
+            appWidgetId = intent!!.extras!!.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         }
-
         // If this activity was started with an intent without an app widget ID, finish with an error.
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish()
             return
+        }
+
+        val context = this@OhNoteWidgetConfigureActivity
+        val prefs = HomeWidgetPlugin.getData(context)
+        // appWidgetText = binding.appwidgetText as EditText
+
+        binding.doneButton.setOnClickListener(onDoneClickListener)
+        binding.newConfigurationButton.setOnClickListener(onNewConfigurationClickListener)
+        binding.cancelButton.setOnClickListener(onCancelClickListener)
+        
+        val configurationsArray = buildConfigurationsArray(prefs)
+        val configurationsAdapter = ConfigurationsListViewAdapter(context, configurationsArray)
+        binding.configListview.adapter = configurationsAdapter
+        binding.configListview.emptyView = binding.configEmpty
+        binding.configListview.choiceMode = ListView.CHOICE_MODE_SINGLE
+        binding.configListview.setOnItemClickListener { parent, view, position, id ->
+            binding.configListview.setItemChecked(position, true)
+            selectedConfigId = configurationsAdapter.selectConfigItem(position)
+            if (selectedConfigId > 0) {
+                binding.doneButton.isEnabled = true
+                binding.doneButton.isClickable = true
+            }
         }
     }
 }
 
-// private const val PREFS_NAME = "com.example.ohnote"
-// private const val PREF_PREFIX_KEY = "appwidget_"
+internal fun buildConfigurationsArray(prefs: SharedPreferences): ArrayList<ConfigurationItem> {
+    val arrayList: ArrayList<ConfigurationItem> = arrayListOf()
+    var configIdsString = prefs.getString(PREF_CONFIG_IDS, "[]")!!
+    if (configIdsString != "[]") {
+        configIdsString = configIdsString.substring(1, configIdsString.length - 1)
+        val configIds = configIdsString.split(",")
+        for (configId in configIds) {
+            val configItem = buildConfigurationItem(prefs.getString("$PREF_CONFIG$configId", "")!!)
+            if (configItem != null) {
+                arrayList.add(configItem!!)
+            }
+        }
+        arrayList.sortBy{ it.creationDateTime }
+    }
+    return arrayList
+}
 
-// // Write the prefix to the SharedPreferences object for this widget
-// internal fun saveTitlePref(context: Context, appWidgetId: Int, text: String) {
-//     val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
-//     prefs.putString(PREF_PREFIX_KEY + appWidgetId, text)
-//     prefs.apply()
+internal fun buildConfigurationItem(configString: String): ConfigurationItem? {
+    if (configString != ""){
+        val configJson = JSONTokener(configString).nextValue() as JSONObject
+        val filters = ArrayList<String>()
+        val filtersJsonArray = configJson.getJSONArray("filters")
+        for (i in 0 until filtersJsonArray.length()) {
+            filters.add(filtersJsonArray.getString(i))
+        }
+        return ConfigurationItem(
+            configJson.getInt("id"), 
+            configJson.getString("title"), 
+            configJson.getString("theme"), 
+            configJson.getInt("opacity"), 
+            configJson.getString("creation_datetime"),
+            filters)
+    }
+    return null
+}
+
+internal fun getNoteListString(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences): String {
+    return getStringAndSetIfRemoved(context, appWidgetId, configId, prefs, PREF_NOTELIST)
+}
+
+internal fun getConfigString(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences): String {
+    return getStringAndSetIfRemoved(context, appWidgetId, configId, prefs, PREF_CONFIG)
+}
+
+private fun getStringAndSetIfRemoved(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences, valueName: String): String {
+    //val defaultResult = "{\"title\":\"\",\"theme\":\"System default\",\"opacity\":100,\"list\":\"[]\"}"
+    if (configId > 0) {
+        val dataString = prefs.getString("$valueName$configId", "[]")
+        if (dataString != "\"[REMOVED]\"") {
+            return dataString!!
+        }
+        setConfigId(context, appWidgetId, 0, prefs)
+    }
+    return "[]"
+}
+
+internal fun getConfigId(context: Context, appWidgetId: Int, prefs: SharedPreferences): Int {
+    return prefs.getInt("$PREF_CONFIG_ID$appWidgetId", -1)
+}
+
+internal fun setConfigId(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences) {
+    val prefsEdit = prefs.edit()
+    prefsEdit.putInt("$PREF_CONFIG_ID$appWidgetId", configId)
+    prefsEdit.apply()
+}
+
+internal fun deleteConfigId(context: Context, appWidgetId: Int, prefs: SharedPreferences) {
+    val prefsEdit = prefs.edit()
+    prefsEdit.remove("$PREF_CONFIG_ID$appWidgetId")
+    prefsEdit.apply()
+}
+
+class ConfigurationItem(
+    val id: Int, 
+    val title: String, 
+    val theme: String, 
+    val opacity: Int, 
+    val creationDateTime: String, 
+    val filters: ArrayList<String>)
+
+class ConfigurationsListViewAdapter(context: Context, items: ArrayList<ConfigurationItem>) : ArrayAdapter<ConfigurationItem>(context, 0, items) {
+    private var selectedPosition: Int = -1
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.ohnote_widget_configure_listviewitem, parent, false)
+        val configItem = getItem(position)!!
+        view.findViewById<TextView>(R.id.row_title_textview).text = configItem.title
+        view.findViewById<TextView>(R.id.row_desc_textview).text = "${configItem.theme}, ${configItem.opacity}% opacity${getFiltersString(configItem.filters)}"
+        if (position == selectedPosition) {
+            view.setBackgroundColor(context.getColor(R.color.widget_selected_item))
+        } else {
+            view.setBackgroundColor(context.getColor(R.color.transparent))
+        }
+        return view
+    }
+
+    private fun getFiltersString(filters: ArrayList<String>): String {
+        if (filters.count() > 0) {
+            val joinedFilters = filters.joinToString(separator = ", ").lowercase()
+            return ", filters: $joinedFilters"
+        }
+        return ""
+    }
+
+    fun selectConfigItem(position: Int) : Int {
+        selectedPosition = position
+        notifyDataSetChanged() 
+        return getItem(position)!!.id
+    }
+}
+
+// //Service added in AndroidManifest.xml
+// class ConfigurationsListViewWidgetService : RemoteViewsService() {
+//     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
+//         return ConfigurationsListViewAdapter(this.applicationContext, intent)
+//     }
 // }
 
-// // Read the prefix from the SharedPreferences object for this widget.
-// // If there is no preference saved, get the default from a resource
-// internal fun loadTitlePref(context: Context, appWidgetId: Int): String {
-//     val prefs = context.getSharedPreferences(PREFS_NAME, 0)
-//     val titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null)
-//     return titleValue ?: context.getString(R.string.appwidget_text)
-// }
+// class ConfigurationsListViewAdapter(val context: Context, val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
+//     private var data: ArrayList<ConfigurationItem> = arrayListOf()
+//     private val views = RemoteViews(context.packageName, R.layout.ohnote_widget_configure_listviewitem)
 
-// internal fun deleteTitlePref(context: Context, appWidgetId: Int) {
-//     val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
-//     prefs.remove(PREF_PREFIX_KEY + appWidgetId)
-//     prefs.apply()
+//     override fun onCreate() {}
+
+//     override fun onDestroy() {}
+
+//     override fun onDataSetChanged() {
+//         data = getConfigurationsArray(intent.getStringExtra(EXTRA_CONFIGURATIONLIST))
+//     }
+
+//     override fun getLoadingView(): RemoteViews? { return null }
+
+//     override fun getViewTypeCount(): Int { return 1 }
+
+//     override fun hasStableIds(): Boolean { return true }
+
+//     override fun getCount(): Int { return data.size }
+
+//     override fun getItemId(position: Int): Long { return position.toLong() }
+
+//     override fun getViewAt(position: Int): RemoteViews { return views }
 // }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ohnote/data/app_data.dart';
+import 'package:ohnote/tools/datetime_to_str_converter.dart';
 
 class Filters {
   Filters({
@@ -75,30 +77,54 @@ class Filters {
     return filters;
   }
 
-  List<String> getAppliedCaptions() {
-    List<String> captions = [];
-    if (favorites) {
-      captions.add(FAVORITES);
+  bool hasApplied() => favorites || from != null || to != null || text.isNotEmpty || labelIds.isNotEmpty || colors.isNotEmpty || crossedOut;
+
+  List<String> getAppliedCaptions([bool detailed = false]) {
+    //TODO: test replaceAll('\r', '')
+    var textResult = text.split('\n')[0].replaceAll('\r', '');
+    if (textResult.length > 400) {
+      textResult = textResult.substring(0, 400);
     }
-    if (from != null || to != null) {
-      captions.add(BY_DATE);
-    }
-    if (text.isNotEmpty) {
-      captions.add(BY_TEXT);
-    }
-    if (labelIds.isNotEmpty) {
-      captions.add(BY_LABEL);
-    }
-    if (colors.isNotEmpty) {
-      captions.add(BY_COLOR);
-    }
-    if (crossedOut) {
-      captions.add(CROSSED_OUT);
-    }
-    return captions;
+    return detailed
+        ? _addAppliedToList(
+            'Filtered by favorites',
+            'Filtered by date:'
+                '${from != null ? ' from ${from!.parseDateToStr(DTToStrFormat.LOCALE)}' : ''}'
+                '${to != null ? ' to ${to!.parseDateToStr(DTToStrFormat.LOCALE)}' : ''}',
+            'Filtered by text: $textResult',
+            'Filtered by labels: ${[
+              ...labelIds.where((e) => e > 0).map((id) {
+                return AppData.labels.firstWhere((e) => e.id == id).text;
+              }),
+              labelIds.contains(0) ? 'Without label' : null,
+            ].where((e) => e != null).join(', ')}',
+            'Filtered by colors',
+            'Filtered by crossed out')
+        : _addAppliedToList(FAVORITES, BY_DATE, BY_TEXT, BY_LABEL, BY_COLOR, CROSSED_OUT);
   }
 
-  bool hasApplied() => favorites || from != null || to != null || text.isNotEmpty || labelIds.isNotEmpty || colors.isNotEmpty || crossedOut;
+  List<T> _addAppliedToList<T>(T ifFavorites, T ifDate, T ifText, T ifLabels, T ifColors, T ifCrossedOut) {
+    var list = <T>[];
+    if (favorites) {
+      list.add(ifFavorites);
+    }
+    if (from != null || to != null) {
+      list.add(ifDate);
+    }
+    if (text.isNotEmpty) {
+      list.add(ifText);
+    }
+    if (labelIds.isNotEmpty) {
+      list.add(ifLabels);
+    }
+    if (colors.isNotEmpty) {
+      list.add(ifColors);
+    }
+    if (crossedOut) {
+      list.add(ifCrossedOut);
+    }
+    return list;
+  }
 
   void copyFrom(Filters source) {
     favorites = source.favorites;

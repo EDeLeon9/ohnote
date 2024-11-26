@@ -55,6 +55,8 @@ class _LandscapeTextFieldState extends State<LandscapeTextField> {
         var readOnly = MediaQuery.of(context).orientation == Orientation.landscape;
         _textField = widget.textFieldBuilder(_controller, _focusNode, readOnly);
         assert(_textField!.showCursor == true);
+        assert(_textField!.controller == _controller);
+        assert(_textField!.focusNode == _focusNode);
         assert(_textField!.readOnly == readOnly);
         return _textField!;
       },
@@ -62,7 +64,7 @@ class _LandscapeTextFieldState extends State<LandscapeTextField> {
   }
 
   void _openOverlay() {
-    if (!overlayOpened && context.mounted && MediaQuery.of(context).orientation == Orientation.landscape && _textField?.focusNode!.hasFocus == true) {
+    if (!overlayOpened && mounted && MediaQuery.of(context).orientation == Orientation.landscape && _textField?.focusNode!.hasFocus == true) {
       overlayOpened = true;
       _focusNode.removeListener(_openOverlay);
       Navigator.push(
@@ -75,8 +77,7 @@ class _LandscapeTextFieldState extends State<LandscapeTextField> {
           },
         ),
       ).whenComplete(() {
-        // ignore: use_build_context_synchronously
-        if (context.mounted && MediaQuery.of(context).orientation == Orientation.landscape) {
+        if (mounted && MediaQuery.of(context).orientation == Orientation.landscape) {
           _focusNode.unfocus();
         }
         overlayOpened = false;

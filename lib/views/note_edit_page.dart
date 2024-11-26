@@ -10,7 +10,7 @@ import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/label_container.dart';
-import 'package:ohnote/views/dialogs/label_note_dialog.dart';
+import 'package:ohnote/views/dialogs/note_labels_dialog.dart';
 import 'package:ohnote/views/dialogs/style_colorpicker_dialog.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/views/bottomsheets/history_bottomsheet.dart';
@@ -18,21 +18,20 @@ import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
 import 'package:ohnote/tools/single_async.dart' as a;
 
-class InputPage extends StatefulWidget {
-  const InputPage({super.key, required this.note});
+class NoteEditPage extends StatefulWidget {
+  const NoteEditPage({super.key, required this.note});
 
   final Note note;
 
   @override
-  State<InputPage> createState() => _InputPageState();
+  State<NoteEditPage> createState() => _NoteEditPageState();
 }
 
-class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
+class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver {
   String? _heroTag;
   int? _draftId;
   late final bool _isNewNote;
-  late String _oldText;
-  late Color? _oldColor;
+  late Note _oldNote;
   final _textController = TextEditingController();
   final _autoSaver = a.SingleAsync();
   final GuiManager historyManager = GuiManager(
@@ -52,8 +51,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this); //For didChangeAppLifecycleState()
 
     _isNewNote = widget.note.id == 0;
-    _oldText = widget.note.text;
-    _oldColor = widget.note.color.value;
+    _oldNote = widget.note.clone();
     _textController.text = widget.note.text;
 
     if (!_isNewNote) {
@@ -103,7 +101,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
       onPopInvokedWithResult: (didPop, result) => _onPopInvoked(didPop, context),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_isNewNote ? 'New Note' : 'Edit Note'),
+          title: Text('${_isNewNote ? 'New' : 'Edit'} Note'),
           leading: _backButton(),
           actions: [
             _favoriteButton(),
@@ -132,16 +130,16 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
           Navigator.pop(context);
         } else {
           if (_isNewNote) {
-            if ((await AppData.newNoteFromInput(widget.note)) > 0) {
+            if ((await AppData.newNoteFromEdit(widget.note)) > 0) {
               setState(() {
                 _heroTag = 'noteHero_${widget.note.id}';
               });
             }
           } else {
             if (widget.note.text.trim().isNotEmpty) {
-              AppData.updateNoteFromInput(widget.note, _oldText, _oldColor);
+              AppData.updateNoteFromEdit(widget.note, _oldNote);
             } else {
-              widget.note.text = _oldText;
+              widget.note.text = _oldNote.text;
               AppData.sendNotesToTrash([widget.note]);
               t.showCustomToast('Text is empty. The note was moved to trash.', context);
             }
@@ -220,7 +218,7 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
         tooltip: 'Label note',
         icon: const Icon(Icons.label),
         onPressed: () {
-          LabelNoteDialog.show(
+          NoteLabelsDialog.show(
             context: context,
             selectedLabelsId: widget.note.labelIds,
           ).then((value) {
@@ -294,8 +292,8 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
                         const Spacer(),
                         Text(
                           AppData.settings[Settings.useCreationDateTime]!.value == true.toString()
-                              ? widget.note.localFormatCreationDateTime
-                              : widget.note.localFormatModifDateTime,
+                              ? widget.note.localeFormatCreationDateTime
+                              : widget.note.localeFormatModifDateTime,
                           style: TextStyle(color: widget.note.foregroundColor(context)),
                         ),
                       ],
@@ -315,13 +313,13 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
       controller: _textController,
       textFieldBuilder: (controller, focusNode, readOnly) {
         return TextField(
-          maxLines: null,
-          expands: true,
-          keyboardType: TextInputType.multiline,
           showCursor: true,
           readOnly: readOnly,
           focusNode: focusNode,
           controller: controller,
+          maxLines: null,
+          expands: true,
+          keyboardType: TextInputType.multiline,
           autofocus: _showCaseKeys.every((e) => AppData.firstAccesses[e.value]!) && _isNewNote,
           decoration: InputDecoration(
             border: InputBorder.none,
@@ -370,7 +368,6 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
             runSpacing: 10.0,
             children: AppData.labels.where((e) => widget.note.labelIds.contains(e.id)).map((e) {
               return LabelContainer(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
                 onLongPress: () {
                   ConfirmationDialog.show(
                     context: context,
@@ -410,20 +407,22 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
   void _saveDraft() async {
     _autoSaver.runLast(500, () async {
       if (_draftId != null && _draftId! > 0) {
-        await AppData.updateNoteFromInput(widget.note, widget.note.text, widget.note.color.value, _draftId);
+        await AppData.updateNoteFromEdit(widget.note, _oldNote, _draftId);
       } else {
-        _draftId = await AppData.newNoteFromInput(widget.note, true);
+        _draftId = await AppData.newNoteFromEdit(widget.note, true);
       }
     });
   }
 
   void _historyPressed() {
-    HistoryBottomSheet.show(context: context, historyManager: historyManager).then((value) {
+    HistoryBottomSheet.show(
+      context: context,
+      historyManager: historyManager,
+    ).then((value) {
       historyManager.selectionQuantity.value = null;
       if (value == true) {
         setState(() {
-          _oldText = widget.note.text;
-          _oldColor = widget.note.color.value;
+          _oldNote = widget.note.clone();
           _textController.text = widget.note.text;
         });
       }
@@ -448,16 +447,15 @@ class _InputPageState extends State<InputPage> with WidgetsBindingObserver {
         );
         if (sendToTrash) {
           if (widget.note.text.trim().isEmpty && !_isNewNote) {
-            widget.note.text = _oldText;
+            widget.note.text = _oldNote.text;
           }
-          bool success = true;
           if (_isNewNote) {
-            success = await AppData.newNoteFromInput(widget.note) > 0;
+            sendToTrash = await AppData.newNoteFromEdit(widget.note) > 0;
           } else {
-            AppData.updateNoteFromInput(widget.note, _oldText, _oldColor);
+            AppData.updateNoteFromEdit(widget.note, _oldNote);
           }
           if (context.mounted) {
-            if (success) {
+            if (sendToTrash) {
               AppData.sendNotesToTrash([widget.note]);
               AppData.notesManager.displayList.notifyListeners();
               t.showCustomToast('Note sent to trash.', context);

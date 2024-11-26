@@ -3,28 +3,29 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
-import 'package:ohnote/tools/single_async.dart';
+import 'package:ohnote/tools/scrollview_with_bar.dart';
 import 'package:ohnote/view_components/label_container.dart';
+import 'package:ohnote/tools/single_async.dart' as a;
 
-class LabelNoteDialog extends StatefulWidget {
-  const LabelNoteDialog._({required this.selectedLabelsId});
+class NoteLabelsDialog extends StatefulWidget {
+  const NoteLabelsDialog._({required this.selectedLabelsId});
 
   final List<int> selectedLabelsId;
 
   @override
-  State<LabelNoteDialog> createState() => _LabelNoteDialogState();
+  State<NoteLabelsDialog> createState() => _NoteLabelsDialogState();
 
   static Future<List<int>?> show({required BuildContext context, required List<int> selectedLabelsId}) async {
     return showDialog<List<int>>(
       context: context,
       builder: (context) {
-        return LabelNoteDialog._(selectedLabelsId: selectedLabelsId);
+        return NoteLabelsDialog._(selectedLabelsId: selectedLabelsId);
       },
     );
   }
 }
 
-class _LabelNoteDialogState extends State<LabelNoteDialog> {
+class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
   final _textController = TextEditingController();
   final _labelDialogSelectSCK = ShowCaseKey(FirstAccess.labelDialogSelectSC);
   final _labelDialogNewSCK = ShowCaseKey(FirstAccess.labelDialogNewSC);
@@ -69,34 +70,31 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
           child: CustomShowCase(
             showCaseKey: _labelDialogSelectSCK,
             description: 'Select the labels you want\nto attach to the note, then\npress "Done" to apply the\nlabels.',
-            child: SingleChildScrollView(
-              child: Padding(
-                //Padding avoids shadows to be hidden
-                padding: const EdgeInsets.all(3.0),
-                child: Wrap(
-                  spacing: 15.0,
-                  runSpacing: 10.0,
-                  children: AppData.labels.map((e) {
-                    var selected = _labelsMap[e.id]!;
-                    return LabelContainer(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      color: selected ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
-                      onTap: () {
-                        setState(() {
-                          _labelsMap[e.id] = !selected;
-                        });
-                      },
-                      content: Text(
-                        e.text,
-                        maxLines: 1,
-                        style: TextStyle(
-                          color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
-                          fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
-                        ),
+            child: ScrollViewWithBar(
+              //Padding avoids shadows to be hidden
+              paddng: const EdgeInsets.all(3.0),
+              child: Wrap(
+                spacing: 15.0,
+                runSpacing: 10.0,
+                children: AppData.labels.map((e) {
+                  var selected = _labelsMap[e.id]!;
+                  return LabelContainer(
+                    color: selected ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    onTap: () {
+                      setState(() {
+                        _labelsMap[e.id] = !selected;
+                      });
+                    },
+                    content: Text(
+                      e.text,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+                        fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -139,7 +137,7 @@ class _LabelNoteDialogState extends State<LabelNoteDialog> {
                         visualDensity: const VisualDensity(horizontal: -4.0, vertical: -4.0),
                         icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
                         onPressed: () {
-                          runFirst(() async {
+                          a.runFirst(() async {
                             _textController.text = _textController.text.trim();
                             if (AppData.labels.any((e) => e.text.toLowerCase() == _textController.text.toLowerCase())) {
                               showDialog(

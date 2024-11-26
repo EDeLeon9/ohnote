@@ -1,7 +1,19 @@
 <resources>
     <style name="Widget.Android.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
-        <item name="android:padding">?attr/appWidgetPadding</item>
-        <item name="android:background">@drawable/app_widget_background</item>
+        <!-- <item name="android:padding">?attr/appWidgetPadding</item> -->
+        <item name="android:padding">0dp</item>
+        <!-- <item name="android:background">@drawable/app_widget_background</item> -->
+        <item name="android:background">@color/widget_background</item>
+    </style>
+    <style name="Widget.Android.AppWidget.ContainerLight" parent="android:Widget">
+        <item name="android:id">@android:id/background</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:background">@color/widget_background_light</item>
+    </style>
+    <style name="Widget.Android.AppWidget.ContainerDark" parent="android:Widget">
+        <item name="android:id">@android:id/background</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:background">@color/widget_background_dark</item>
     </style>
 </resources>

@@ -19,11 +19,49 @@
     <style name="Widget.Android.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
         <!-- <item name="android:background">?android:attr/colorBackground</item> -->
-        <item name="android:background">@color/widget_background_color</item>
+        <item name="android:background">@color/widget_background</item>
+        <item name="android:padding">0dp</item>
+    </style>
+    <style name="Widget.Android.AppWidget.ContainerLight" parent="android:Widget">
+        <item name="android:id">@android:id/background</item>
+        <item name="android:background">@color/widget_background_light</item>
+        <item name="android:padding">0dp</item>
+    </style>
+    <style name="Widget.Android.AppWidget.ContainerDark" parent="android:Widget">
+        <item name="android:id">@android:id/background</item>
+        <item name="android:background">@color/widget_background_dark</item>
+        <item name="android:padding">0dp</item>
     </style>
 
     <!-- <style name="Widget.Android.AppWidget.InnerView" parent="android:Widget">
         <item name="android:background">?android:attr/colorBackground</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style> -->
+
+    <style name="WidgetConfigLayoutStyle">
+        <item name="android:textColor">@color/widget_text</item>
+        <item name="android:buttonStyle">@style/WidgetConfigButtonStyle</item>
+    </style>
+    <style name="WidgetConfigButtonStyle" parent="android:Widget.Button">
+        <item name="android:textColor">@color/widget_button_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingLeft">14dp</item>
+        <item name="android:paddingRight">14dp</item>
+        <item name="android:background">@drawable/app_widget_button</item>
+    </style>
+
+    <style name="WidgetConfigToolbarStyle" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/WidgetConfigActionBarStyle</item>
+        <item name="android:actionBarSize">55dp</item>
+    </style>
+    <style name="WidgetConfigActionBarStyle" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/widget_header</item>
+        <item name="android:titleTextStyle">@style/WidgetConfigTitleTextStyle</item>
+    </style>
+    <style name="WidgetConfigTitleTextStyle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/widget_header_text</item>
+        <item name="android:textSize">24sp</item>
+    </style>
 </resources>

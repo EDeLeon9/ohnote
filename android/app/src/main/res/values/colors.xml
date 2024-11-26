@@ -1,9 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="widget_background">#F7EDE3</color>
+    <color name="widget_text">#292929</color>
+    <color name="widget_header">#FCF8F4</color>
+    <color name="widget_header_text">#006782</color>
+    <color name="widget_button_text">#FCF8F4</color>
+    <color name="widget_button">#006782</color>
+    <color name="widget_pressed_button">#58919F</color>
+    <color name="widget_disabled_button">#B4B4B4</color>
+    <color name="widget_selected_item">#46006782</color>
+    <color name="widget_divider_config">#C0C8CC</color>
+    <color name="widget_divider">#609E9E9E</color>
+    <color name="transparent">#00FFFFFF</color>
     <color name="ic_launcher_background">#132A38</color>
-    <color name="widget_background_color">#90F7EDE3</color>
-    <color name="widget_header_color">#FCF8F4</color>
-    <color name="widget_button_text_color">#FCF8F4</color>
-    <color name="widget_button_color">#006782</color>
-    <color name="widget_pressed_button_color">#58919F</color>
+
+    <!-- Light -->
+    <color name="widget_background_light">#F7EDE3</color>
+    <color name="widget_text_light">#292929</color>
+    <color name="widget_header_light">#FCF8F4</color>
+    <color name="widget_button_text_light">#FCF8F4</color>
+    <color name="widget_button_light">#006782</color>
+    <color name="widget_pressed_button_light">#58919F</color>
+
+    <!-- Dark -->
+    <color name="widget_background_dark">#191F21</color>
+    <color name="widget_text_dark">#EAF1F3</color>
+    <color name="widget_header_dark">#2E2F2F</color>
+    <color name="widget_button_text_dark">#010F13</color>
+    <color name="widget_button_dark">#D0F2FF</color>
+    <color name="widget_pressed_button_dark">#C4DCE5</color>
 </resources>

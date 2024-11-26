@@ -4,9 +4,10 @@ import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/gui_manager.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/note_tile.dart';
-import 'package:ohnote/views/dialogs/details_dialog.dart';
+import 'package:ohnote/views/dialogs/note_details_dialog.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/single_async.dart' as a;
@@ -37,7 +38,7 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) => _didPop(didPop, context),
+      onPopInvokedWithResult: (didPop, result) => _onPopInvoked(didPop, context),
       child: Scaffold(
         appBar: AppBar(
           title: ValueListenableBuilder(
@@ -72,7 +73,7 @@ class _ArchivePageState extends State<ArchivePage> {
               ],
               onSelected: (selected) {
                 if (selected == HeaderButtonDetails.filters) {
-                  HeaderButtons.filtersPressed(context: context, guiManager: widget.archiveManager);
+                  HeaderButtons.filtersPressed(context: context, guiManager: widget.archiveManager, updateDb: false);
                 } else if (selected == HeaderButtonDetails.restore) {
                   HeaderButtons.restorePressed(context: context, guiManager: widget.archiveManager);
                 }
@@ -84,48 +85,39 @@ class _ArchivePageState extends State<ArchivePage> {
           child: Column(
             verticalDirection: VerticalDirection.up,
             children: [
-              ValueListenableBuilder(
-                valueListenable: widget.archiveManager.displayList,
-                builder: (context, archiveList, child) {
-                  return Expanded(
-                    child: archiveList != null
-                        ? ListView.builder(
-                            itemCount: archiveList.length,
-                            itemBuilder: (context, index) {
-                              var archivedNote = archiveList[index];
-                              return NoteTile(
-                                key: Key('archive_${archivedNote.id}'),
-                                note: archivedNote,
-                                onTap: () {
-                                  DetailsDialog.show(
-                                    context: context,
-                                    note: archivedNote,
-                                  ).then((value) {
-                                    if (value == true) {
-                                      Future.delayed(
-                                        const Duration(milliseconds: 150),
-                                        () {
-                                          a.runFirst(() async {
-                                            await widget.archiveManager.startSlideAnimation(
-                                              context: context,
-                                              notesToUse: [archivedNote],
-                                              slideAnimationState: -1,
-                                              afterAnimationStateAction: (selectedNotes) {
-                                                AppData.restoreNotes(selectedNotes);
-                                                AppData.removeNotesFromLists(selectedNotes, widget.archiveManager);
-                                              },
-                                              successMessage: 'Your note were restored.',
-                                            );
-                                          });
-                                        },
-                                      );
-                                    }
-                                  });
-                                },
-                              );
+              GuiListViewBuilder(
+                expand: true,
+                guiManager: widget.archiveManager,
+                itemBuilder: (context, index, archivedNote, displayList) {
+                  return NoteTile(
+                    key: Key('arc_${archivedNote.id}'),
+                    note: archivedNote,
+                    onTap: () {
+                      NoteDetailsDialog.show(
+                        context: context,
+                        note: archivedNote,
+                      ).then((value) {
+                        if (value == true) {
+                          Future.delayed(
+                            const Duration(milliseconds: 150),
+                            () {
+                              a.runFirst(() async {
+                                await widget.archiveManager.startSlideAnimation(
+                                  context: context,
+                                  notesToUse: [archivedNote],
+                                  slideAnimationState: -1,
+                                  afterAnimationStateAction: (selectedNotes) {
+                                    AppData.restoreNotes(selectedNotes);
+                                    AppData.removeNotesFromLists(selectedNotes, widget.archiveManager);
+                                  },
+                                  successMessage: 'Your note were restored.',
+                                );
+                              });
                             },
-                          )
-                        : const Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                      });
+                    },
                   );
                 },
               ),
@@ -137,7 +129,7 @@ class _ArchivePageState extends State<ArchivePage> {
     );
   }
 
-  void _didPop(bool didPop, BuildContext context) {
+  void _onPopInvoked(bool didPop, BuildContext context) {
     if (!didPop && !CustomShowCase.next(context)) {
       if (widget.archiveManager.selectionQuantity.value == null && !widget.archiveManager.showSearchText.value) {
         Navigator.pop(context);

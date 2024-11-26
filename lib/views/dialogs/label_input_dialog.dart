@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
 
-class EditLabelDialog extends StatefulWidget {
-  const EditLabelDialog._({this.text});
+class LabelInputDialog extends StatefulWidget {
+  const LabelInputDialog._({this.text});
 
   final String? text;
 
   @override
-  State<EditLabelDialog> createState() => _EditLabelDialogState();
+  State<LabelInputDialog> createState() => _LabelInputDialogState();
 
   static Future<String?> show({required BuildContext context, String? text}) async {
     return showDialog<String>(
       context: context,
       builder: (context) {
-        return EditLabelDialog._(text: text);
+        return LabelInputDialog._(text: text);
       },
     );
   }
 }
 
-class _EditLabelDialogState extends State<EditLabelDialog> {
+class _LabelInputDialogState extends State<LabelInputDialog> {
   late final _textController = TextEditingController()..text = widget.text ?? '';
 
   @override

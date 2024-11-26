@@ -5,6 +5,7 @@ import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/smooth_materialpageroute.dart';
 import 'package:ohnote/view_components/header_container.dart';
 import 'package:ohnote/views/archive_page.dart';
+import 'package:ohnote/views/home_widget_config_page.dart';
 import 'package:ohnote/views/labels_page.dart';
 import 'package:ohnote/views/settings_page.dart';
 import 'package:ohnote/views/trash_can_page.dart';
@@ -47,8 +48,8 @@ class _MainDrawerState extends State<MainDrawer> {
 
   @override
   void initState() {
-    _setTrashManagerList();
-    _setArchiveManagerList();
+    _setTrashManager();
+    _setArchiveManager();
     super.initState();
   }
 
@@ -62,7 +63,7 @@ class _MainDrawerState extends State<MainDrawer> {
           ListView(
             padding: EdgeInsets.zero,
             children: [
-              const SizedBox(height: 98.0), //Manual height applied doing tests.
+              const SizedBox(height: 93.0), //Height of the HeaderContainer.
               ListTile(
                 title: const Text('Labels'),
                 leading: Icon(Icons.label, color: fontColor),
@@ -84,6 +85,13 @@ class _MainDrawerState extends State<MainDrawer> {
                   _openPage(TrashCanPage(trashManager: trashManager), context);
                 },
               ),
+              ListTile(
+                title: const Text('Home Widget'),
+                leading: Icon(Icons.add_to_home_screen, color: fontColor),
+                onTap: () {
+                  _openPage(const HomeWidgetConfigPage(), context);
+                },
+              ),
               c.defaultDivider,
               ListTile(
                 title: const Text('Settings'),
@@ -102,7 +110,7 @@ class _MainDrawerState extends State<MainDrawer> {
               ),
             ],
           ),
-          //Header (it is required to be above the rest of the widgets body to show the shadow).
+          //Header is required to be above the rest of the widgets to spread the shadow.
           Column(
             children: [
               HeaderContainer(
@@ -141,7 +149,7 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
-  void _openPage<T>(Widget page, BuildContext context, [void Function(T? value)? whenCompletePage]) {
+  void _openPage<T>(Widget page, BuildContext context, [void Function(T? value)? whenClosingPage]) {
     Navigator.pop(context);
     _singleAsync.runFirst(() async {
       await Future.delayed(_drawerAnimationDuration);
@@ -150,28 +158,28 @@ class _MainDrawerState extends State<MainDrawer> {
           context,
           SmoothMaterialPageRoute<T>(builder: (context) => page),
         ).then((value) {
-          whenCompletePage?.call(value);
+          whenClosingPage?.call(value);
         });
       }
     });
   }
 
   //This starts loading the trash can notes to have it ready before opening the trash can page.
-  void _setTrashManagerList() async {
+  void _setTrashManager() async {
     await AppData.validateTimeInTrash();
     trashManager.allList = await AppData.queryNotes(
       guiManager: trashManager,
       where: 'trash_date_time IS NOT NULL',
     );
-    trashManager.requestFilterList();
+    trashManager.requestUpdateDisplayList();
   }
 
   //This starts loading archive notes to have it ready before opening the archive page.
-  void _setArchiveManagerList() async {
+  void _setArchiveManager() async {
     archiveManager.allList = await AppData.queryNotes(
       guiManager: archiveManager,
       where: 'archive_date_time IS NOT NULL',
     );
-    archiveManager.requestFilterList();
+    archiveManager.requestUpdateDisplayList();
   }
 }

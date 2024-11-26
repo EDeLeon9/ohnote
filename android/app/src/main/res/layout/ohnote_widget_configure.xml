@@ -1,28 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp"
+    android:background="@color/widget_background"
+    android:theme="@style/WidgetConfigLayoutStyle">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:labelFor="@id/appwidget_text"
-        android:text="@string/configure" />
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:textSize="18sp"
+        android:text="Select the configuration for your widget." />
 
-    <EditText
-        android:id="@+id/appwidget_text"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp">
+
+        <ListView
+            android:id="@+id/config_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@drawable/app_widget_divider_config"
+            android:dividerHeight="1dp" />
+        
+        <LinearLayout
+            android:id="@+id/config_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="There is no created configurations for your widget."
+                android:textStyle="italic"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_marginTop="1dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Let's create a new configuration! hit on New Config button."
+                android:textStyle="italic"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
+    
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text" />
-
-    <Button
-        android:id="@+id/add_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/add_widget" />
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:gravity="right|end">
+        <Button
+            android:id="@+id/done_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:clickable="false"
+            android:text="@string/Done" />
+        <Button
+            android:id="@+id/new_configuration_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="14dp"
+            android:text="@string/New_Configuration" />
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="14dp"
+            android:text="@string/Cancel" />
+    </LinearLayout>
 
 </LinearLayout>

@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="widget_background_color">#90191F21</color>
-    <color name="widget_header_color">#2E2F2F</color>
-    <color name="widget_button_text_color">#010F13</color>
-    <color name="widget_button_color">#D0F2FF</color>
-    <color name="widget_pressed_button_color">#C4DCE5</color>
+    <color name="widget_background">#191F21</color>
+    <color name="widget_text">#EAF1F3</color>
+    <color name="widget_header">#2E2F2F</color>
+    <color name="widget_header_text">#D0F2FF</color>
+    <color name="widget_button_text">#010F13</color>
+    <color name="widget_button">#D0F2FF</color>
+    <color name="widget_pressed_button">#C4DCE5</color>
+    <color name="widget_disabled_button">#5F5F5F</color>
+    <color name="widget_selected_item">#50D0F2FF</color>
+    <color name="widget_divider_config">#40484C</color>
 </resources>

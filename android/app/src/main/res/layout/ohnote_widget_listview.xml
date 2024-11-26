@@ -1,19 +1,26 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="17dp"
-    android:orientation="horizontal">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/rowTextView"
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:gravity="center_vertical"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="11sp" 
-        android:maxLines="1"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true" />
-</LinearLayout>
+        <ListView
+            android:id="@+id/noteListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@color/widget_divider"
+            android:dividerHeight="1dp" />
+        
+        <TextView
+            android:id="@+id/removedTextView"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:gravity="center_vertical"
+            android:textStyle="bold"
+            android:text="The configuration for this widget was removed. Replace this widget with a new one."
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="14sp" />
+    </FrameLayout>
+</merge>

@@ -24,4 +24,6 @@ enum FirstAccess {
   labelMoreSC,
   labelDialogSelectSC,
   labelDialogNewSC,
+  newHomeWidgetConfigSC,
+  homeWidgetConfigMoreSC,
 }

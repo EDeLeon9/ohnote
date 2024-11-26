@@ -11,4 +11,5 @@ enum Settings {
   hideRemovePermanentlyDialog,
   hideRemoveLabelDialog,
   hideDetachLabelDialog,
+  hideRemoveHomeWidgetConfigDialog,
 }

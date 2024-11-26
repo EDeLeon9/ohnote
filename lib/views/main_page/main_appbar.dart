@@ -4,6 +4,7 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedopacity_change.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
+import 'package:ohnote/tools/splash_overlay.dart';
 import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
@@ -78,56 +79,54 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                           builder: (context, appliedWallpaper, child) {
                             var shadowColor = Theme.of(context).colorScheme.shadow;
                             return appliedWallpaper != null
-                                ? Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      AnimatedOpacityChange(
-                                        duration: Duration(milliseconds: c.animationDuration.inMilliseconds * 2),
-                                        transitionColor: shadowColor,
-                                        //The image is outside the InkWell to avoid the issue with opacity effect.
-                                        child: Image(
-                                          key: Key('wallpaper_${appliedWallpaper.assetName}'),
-                                          width: 600.0,
-                                          image: appliedWallpaper,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.bottomCenter,
-                                            end: Alignment.topCenter,
-                                            stops: const [0.075, 0.15, 0.25, 0.3, 0.35],
-                                            colors: [
-                                              shadowColor.withOpacity(0.8),
-                                              shadowColor.withOpacity(0.6),
-                                              shadowColor.withOpacity(0.15),
-                                              shadowColor.withOpacity(0.05),
-                                              Colors.transparent,
-                                            ],
+                                ?
+                                //Material enables the splash effect that the image hides.
+                                SplashOverlay(
+                                    onLongPress: () {
+                                      if (appBarPercent > 0.0) {
+                                        HapticFeedback.vibrate();
+                                        ChangeWallpaperDialog.show(
+                                          context: context,
+                                        ).whenComplete(() {
+                                          var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
+                                          if (!appliedWallpaper.assetName.endsWith(settingsWallpaper)) {
+                                            AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
+                                          }
+                                        });
+                                      }
+                                    },
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        AnimatedOpacityChange(
+                                          duration: Duration(milliseconds: c.animationDuration.inMilliseconds * 2),
+                                          transitionColor: shadowColor,
+                                          //Reminder: Image inside InkWell creates issue with opacity effect, So SplashOverlay is used.
+                                          child: Image(
+                                            key: Key('wpp_${appliedWallpaper.assetName}'),
+                                            width: 600.0,
+                                            image: appliedWallpaper,
+                                            fit: BoxFit.cover,
                                           ),
                                         ),
-                                      ),
-                                      //Material enables the splash effect that the image hides.
-                                      Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onLongPress: () {
-                                            if (appBarPercent > 0.0) {
-                                              HapticFeedback.vibrate();
-                                              ChangeWallpaperDialog.show(
-                                                context: context,
-                                              ).whenComplete(() {
-                                                var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
-                                                if (!appliedWallpaper.assetName.endsWith(settingsWallpaper)) {
-                                                  AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
-                                                }
-                                              });
-                                            }
-                                          },
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.bottomCenter,
+                                              end: Alignment.topCenter,
+                                              stops: const [0.075, 0.15, 0.25, 0.3, 0.35],
+                                              colors: [
+                                                shadowColor.withOpacity(0.8),
+                                                shadowColor.withOpacity(0.6),
+                                                shadowColor.withOpacity(0.15),
+                                                shadowColor.withOpacity(0.05),
+                                                Colors.transparent,
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   )
                                 : const SizedBox.shrink();
                           },
@@ -140,11 +139,9 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                         widthFactor: 0.65,
                         child: AnimatedScaleText(
                           duration: c.animationDuration,
-                          //trueText: '$appBarPercent\n${constraints.maxHeight}\n$kToolbarHeight\n$paddingOfTop',
                           trueText: 'OhNote',
                           falseText: '$selectionQuantity selected',
                           condition: selectionQuantity == null,
-                          //textStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
                           textStyle: Theme.of(context).appBarTheme.titleTextStyle!.copyWith(
                                 color: _foregroundColor(Theme.of(context), appBarPercent),
                                 shadows: _shadows(Theme.of(context), appBarPercent),
@@ -159,6 +156,7 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                 color: _foregroundColor(Theme.of(context), appBarPercent),
                 shadows: _shadows(Theme.of(context), appBarPercent),
                 guiManager: AppData.notesManager,
+                updateDbFilters: true,
                 buttons: [
                   HeaderButton(HeaderButtonDetails.back),
                   HeaderButton(HeaderButtonDetails.navMenu)

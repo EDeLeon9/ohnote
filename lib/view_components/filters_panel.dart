@@ -143,7 +143,7 @@ class _FiltersPanelState extends State<FiltersPanel> {
                                                   widget.guiManager.filters.notifyListeners();
                                                   if (widget.updateDbFilters) {
                                                     _updateDbFiltersAsync.runLast(750, () {
-                                                      AppData.updateDbFilters();
+                                                      AppData.updateDbFilters(widget.guiManager.filters.value, true);
                                                     });
                                                   }
                                                 }
@@ -212,7 +212,7 @@ class _FiltersPanelState extends State<FiltersPanel> {
     }
     widget.guiManager.filters.notifyListeners();
     if (widget.updateDbFilters) {
-      AppData.updateDbFilters();
+      AppData.updateDbFilters(widget.guiManager.filters.value);
     }
   }
 }

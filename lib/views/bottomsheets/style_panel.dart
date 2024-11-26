@@ -3,7 +3,7 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
-import 'package:ohnote/view_components/style_panel_colors.dart';
+import 'package:ohnote/views/bottomsheets/style_panel_colors.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
 import 'package:ohnote/tools/custom_toast.dart' as t;
 
@@ -21,6 +21,7 @@ class _StylePanelState extends State<StylePanel> {
   @override
   Widget build(BuildContext context) {
     const divider = Divider(indent: 20.0, endIndent: 20.0, height: 0.0);
+    //SingleChildScrollView prevents overflow message when show and hide animation is performed
     return SingleChildScrollView(
       child: Column(
         children: [

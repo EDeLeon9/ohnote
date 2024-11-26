@@ -38,7 +38,7 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
           systemNavigationBarColor: colorScheme.surface,
           systemNavigationBarDividerColor: colorScheme.surface,
-          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark, //Navigation buttons.
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(

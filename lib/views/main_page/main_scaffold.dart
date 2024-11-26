@@ -11,12 +11,12 @@ import 'package:ohnote/tools/smooth_materialpageroute.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
 import 'package:ohnote/views/bottomsheets/style_panel.dart';
+import 'package:ohnote/views/home_widget_config_page.dart';
 import 'package:ohnote/views/main_page/main_drawer.dart';
-import 'package:ohnote/views/input_page.dart';
+import 'package:ohnote/views/note_edit_page.dart';
 import 'package:ohnote/views/main_page/main_appbar.dart';
 import 'package:ohnote/views/main_page/main_list.dart';
 import 'package:ohnote/constants.dart' as c;
-import 'package:ohnote/tools/single_async.dart' as a;
 import 'package:ohnote/tools/custom_nestedscrollview/flutter_nestedscrollview.dart' as custom;
 
 class MainScaffold extends StatefulWidget {
@@ -30,6 +30,7 @@ class MainScaffold extends StatefulWidget {
 
 class MainScaffoldState extends State<MainScaffold> {
   late BuildContext _scaffoldContext;
+  bool? _launchedFromHomeWidget;
   final _addNewNoteSCK = ShowCaseKey(FirstAccess.addNewNoteSC);
   final noteTileSCK = ShowCaseKey(FirstAccess.noteTileSC);
   final selectionModeSCK = ShowCaseKey(FirstAccess.selectionModeSC);
@@ -43,18 +44,40 @@ class MainScaffoldState extends State<MainScaffold> {
 
   @override
   void initState() {
-    bool? launchedFromHomeWidget;
-    HomeWidgetManager.setClickFunction('opennote', (params) => _openNoteFromHomeWidget(int.tryParse(params['id'] ?? ''), context));
-    //Forces to run the click function because it was just set.
-    HomeWidgetManager.getFunctionIfLaunchedFromHomeWidget('opennote').then((onTapFunction) {
-      launchedFromHomeWidget = onTapFunction != null;
+    HomeWidgetManager.setClickFunction('opennote', (params) {
+      _prepareOpenFromHomeWidget().then((value) {
+        var noteId = int.tryParse(params['id'] ?? '');
+        if (mounted && noteId != null) {
+          if (noteId > 0) {
+            var note = AppData.notesManager.allList.where((e) => e.id == noteId).firstOrNull;
+            if (note != null) {
+              openNote(note);
+            }
+          } else {
+            openNote();
+          }
+        }
+      });
+    });
+    HomeWidgetManager.setClickFunction('openhomewidgetconfigs', (params) {
+      _prepareOpenFromHomeWidget().then((value) {
+        if (mounted) {
+          Navigator.push(context, SmoothMaterialPageRoute(builder: (context) => const HomeWidgetConfigPage()));
+        }
+      });
+    });
+    //Forces to run the click function because setClickFunction was just called.
+    HomeWidgetManager.getFunctionIfLaunchedFromHomeWidget().then((onTapFunction) {
       if (onTapFunction != null) {
+        _launchedFromHomeWidget = true;
         onTapFunction();
+      } else {
+        _launchedFromHomeWidget = false;
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await _dataInitialized();
-      if (launchedFromHomeWidget == false) {
+      await _initialized();
+      if (_launchedFromHomeWidget == false) {
         Future.delayed(Duration(milliseconds: 750 - CustomShowCase.delay.inMilliseconds), _startShowCase);
       }
     });
@@ -82,35 +105,35 @@ class MainScaffoldState extends State<MainScaffold> {
                 }
               }
               return Scaffold(
-                drawer: MainDrawer(
-                  onSettingsClosed: () {
-                    AppData.validateMaxHistory();
-                    var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
-                    Future.delayed(const Duration(milliseconds: 300), () {
-                      if (AppData.appliedWallpaper.value?.assetName.endsWith(settingsWallpaper) == false) {
-                        AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
-                      }
-                      AppData.themeUpdatedFromSettings = false;
-                    });
-                    if (AppData.firstAccesses[FirstAccess.addNewNoteSC] == false) {
-                      //Delay for reload the list
-                      var listTemp = AppData.notesManager.displayList.value;
-                      AppData.notesManager.displayList.value = [];
-                      Future.delayed(const Duration(milliseconds: 10), () {
-                        AppData.notesManager.displayList.value = listTemp;
-                        _startShowCase();
-                      });
-                    }
-                  },
-                ),
+                drawer: dataInitialized
+                    ? MainDrawer(
+                        onSettingsClosed: () {
+                          AppData.validateMaxHistory();
+                          var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (AppData.appliedWallpaper.value?.assetName.endsWith(settingsWallpaper) == false) {
+                              AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
+                            }
+                            AppData.themeUpdatedFromSettings = false;
+                          });
+                          if (AppData.firstAccesses[FirstAccess.addNewNoteSC] == false) {
+                            //Delay for reload the list
+                            var listTemp = AppData.notesManager.displayList.value;
+                            AppData.notesManager.displayList.value = [];
+                            Future.delayed(const Duration(milliseconds: 10), () {
+                              AppData.notesManager.displayList.value = listTemp;
+                              _startShowCase();
+                            });
+                          }
+                        },
+                      )
+                    : null,
                 onDrawerChanged: (isOpened) {
-                  if (AppData.notesManager.selectionQuantity.value != null) {
-                    AppData.notesManager.selectionQuantity.value = null;
-                  }
-                  if (AppData.notesManager.showSearchText.value) {
-                    AppData.notesManager.showSearchText.value = false;
-                  }
+                  AppData.notesManager.selectionQuantity.value = null;
+                  AppData.notesManager.showSearchText.value = false;
                 },
+                resizeToAvoidBottomInset: false,
+                floatingActionButton: _fab(stylePanelHeight: stylePanelHeight),
                 body: SafeArea(
                   top: false,
                   child: Builder(
@@ -135,8 +158,6 @@ class MainScaffoldState extends State<MainScaffold> {
                     },
                   ),
                 ),
-                resizeToAvoidBottomInset: false,
-                floatingActionButton: _fab(stylePanelHeight: stylePanelHeight),
               );
             },
           ),
@@ -171,24 +192,29 @@ class MainScaffoldState extends State<MainScaffold> {
     //Builder required to get proper context for SliverOverlapInjector.
     return Builder(
       builder: (context) {
-        return CustomScrollView(
-          //The "controller" and "primary" members should be left unset, so that the NestedScrollView can control this inner
-          //scroll view. If the "controller" property is set, then this scroll view will not be associated with the NestedScrollView.
-          slivers: [
-            custom.SliverOverlapInjector(handle: custom.NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-            ...(AppData.dataInitialized.value
-                ? [
-                    SliverToBoxAdapter(
-                      child: FiltersPanel(
-                        guiManager: AppData.notesManager,
-                        updateDbFilters: true,
-                      ),
-                    ),
-                    const MainList(),
-                  ]
-                : [const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))]),
-            SliverToBoxAdapter(child: SizedBox(height: bottomIndent)),
-          ],
+        return ValueListenableBuilder(
+          valueListenable: AppData.notesManager.displayList,
+          builder: (context, noteList, child) {
+            return CustomScrollView(
+              //The "controller" and "primary" members should be left unset, so that the NestedScrollView can control this inner
+              //scroll view. If the "controller" property is set, then this scroll view will not be associated with the NestedScrollView.
+              slivers: [
+                custom.SliverOverlapInjector(handle: custom.NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+                ...(AppData.dataInitialized.value && noteList != null
+                    ? [
+                        SliverToBoxAdapter(
+                          child: FiltersPanel(
+                            guiManager: AppData.notesManager,
+                            updateDbFilters: true,
+                          ),
+                        ),
+                        MainList(noteList: noteList),
+                      ]
+                    : [const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))]),
+                SliverToBoxAdapter(child: SizedBox(height: bottomIndent)),
+              ],
+            );
+          },
         );
       },
     );
@@ -243,20 +269,16 @@ class MainScaffoldState extends State<MainScaffold> {
   }
 
   void openNote([Note? note]) {
-    if (context.mounted) {
-      if (AppData.notesManager.selectionQuantity.value != null) {
-        AppData.notesManager.selectionQuantity.value = null;
-      }
-      if (!AppData.notesManager.showSearchText.value) {
-        AppData.notesManager.showSearchText.value = false;
-      }
+    if (mounted) {
+      AppData.notesManager.selectionQuantity.value = null;
+      AppData.notesManager.showSearchText.value = false;
       Navigator.push(
         context,
         note == null
             ? SmoothMaterialPageRoute(
                 builder: (context) {
                   var colorStr = AppData.settings[Settings.defaultColor]!.value;
-                  return InputPage(
+                  return NoteEditPage(
                     note: Note(
                       id: 0,
                       text: '',
@@ -267,7 +289,7 @@ class MainScaffoldState extends State<MainScaffold> {
                   );
                 },
               )
-            : CupertinoPageRoute(builder: (context) => InputPage(note: note)),
+            : CupertinoPageRoute(builder: (context) => NoteEditPage(note: note)),
       ).whenComplete(() {
         if (AppData.notesManager.displayList.value?.isNotEmpty == true) {
           Future.delayed(const Duration(milliseconds: 100), () {
@@ -278,34 +300,20 @@ class MainScaffoldState extends State<MainScaffold> {
     }
   }
 
-  void _openNoteFromHomeWidget(int? id, BuildContext context) {
-    a.runFirst(
-      () async {
-        if (id != null) {
-          await _dataInitialized();
-          if (context.mounted) {
-            Navigator.popUntil(
-              context,
-              (route) {
-                return ModalRoute.isCurrentOf(context) == true;
-              },
-            );
-            if (id > 0) {
-              var note = AppData.notesManager.allList.where((e) => e.id == id).firstOrNull;
-              if (note != null) {
-                openNote(note);
-              }
-            } else {
-              openNote();
-            }
-          }
-        }
-      },
-    );
+  Future<void> _prepareOpenFromHomeWidget() async {
+    await _initialized();
+    if (mounted) {
+      Navigator.popUntil(
+        context,
+        (route) {
+          return ModalRoute.isCurrentOf(context) == true;
+        },
+      );
+    }
   }
 
-  Future<void> _dataInitialized() async {
-    while (!AppData.dataInitialized.value) {
+  Future<void> _initialized() async {
+    while (!AppData.dataInitialized.value || _launchedFromHomeWidget == null) {
       await Future.delayed(const Duration(milliseconds: 10));
     }
   }
@@ -315,7 +323,7 @@ class MainScaffoldState extends State<MainScaffold> {
     if (AppData.notesManager.displayList.value?.isNotEmpty == true) {
       showCaseKeys.addAll([noteTileSCK, selectionModeSCK, searchSCK, moreSCK, navMenuSCK]);
     }
-    if (context.mounted) {
+    if (mounted) {
       CustomShowCase.startShowCase(
         context: context,
         showCaseKeys: showCaseKeys,

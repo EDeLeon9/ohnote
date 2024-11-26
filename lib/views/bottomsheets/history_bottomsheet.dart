@@ -3,8 +3,9 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/gui_manager.dart';
 import 'package:ohnote/data/note.dart';
+import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_container.dart';
-import 'package:ohnote/views/dialogs/details_dialog.dart';
+import 'package:ohnote/views/dialogs/note_details_dialog.dart';
 import 'package:ohnote/view_components/note_tile.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
@@ -31,7 +32,7 @@ class HistoryBottomSheet {
         return Stack(
           children: [
             historyBottomSheet._body(sheetScrollController),
-            historyBottomSheet._header(), //Header is required to be above the rest of the widgets to show the shadow.
+            historyBottomSheet._header(), //Header is required to be above the rest of the widgets to spread the shadow.
           ],
         );
       },
@@ -41,7 +42,9 @@ class HistoryBottomSheet {
       if (selectedOption != null && selectedOption.startsWith('Restore')) {
         AppData.restoreHistory(historyToRestore, selectedOption.endsWith('style'));
         AppData.removeNotesFromLists([historyToRestore], historyManager);
-        if (context.mounted) t.showCustomToast('Note restored', context);
+        if (context.mounted) {
+          t.showCustomToast('Note restored', context);
+        }
         return true;
       }
     }
@@ -87,44 +90,34 @@ class HistoryBottomSheet {
   Widget _body(ScrollController sheetScrollController) {
     return Column(
       children: [
-        const SizedBox(height: 72.0), //Height of the header.
-        Expanded(
-          child: ValueListenableBuilder(
-            valueListenable: historyManager.displayList,
-            builder: (context, historyList, child) {
-              if (historyList != null) {
-                return ListView.builder(
-                  controller: sheetScrollController,
-                  itemCount: historyList.length,
-                  itemBuilder: (context, index) {
-                    var history = historyList[index];
-                    var noteTile = NoteTile(
-                      key: Key('history_${history.id}'),
-                      note: history,
-                      onTap: () {
-                        DetailsDialog.show(
-                          context: context,
-                          note: history,
-                        ).then((value) {
-                          if (value == true && context.mounted) {
-                            Navigator.pop(context, history);
-                          }
-                        });
-                      },
-                    );
-                    return index == 0
-                        ? CustomShowCase(
-                            showCaseKey: _historyTileSCK,
-                            description: 'Tap a note history to view\nthe details. You can also\nlong-press to select it and\nperform actions.',
-                            child: noteTile,
-                          )
-                        : noteTile;
-                  },
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-            },
-          ),
+        const SizedBox(height: 72.0), //Height of the HeaderContainer.
+        GuiListViewBuilder(
+          expand: true,
+          scrollController: sheetScrollController,
+          guiManager: historyManager,
+          itemBuilder: (context, index, history, displayList) {
+            var noteTile = NoteTile(
+              key: Key('hst_${history.id}'),
+              note: history,
+              onTap: () {
+                NoteDetailsDialog.show(
+                  context: context,
+                  note: history,
+                ).then((value) {
+                  if (value == true && context.mounted) {
+                    Navigator.pop(context, history);
+                  }
+                });
+              },
+            );
+            return index == 0
+                ? CustomShowCase(
+                    showCaseKey: _historyTileSCK,
+                    description: 'Tap a note history to view\nthe details. You can also\nlong-press to select it and\nperform actions.',
+                    child: noteTile,
+                  )
+                : noteTile;
+          },
         ),
       ],
     );

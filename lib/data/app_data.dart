@@ -2,10 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:ohnote/data/filters.dart';
+import 'package:ohnote/data/home_widget_config.dart';
 import 'package:ohnote/data/label.dart';
 import 'package:ohnote/data/sort_by.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:ohnote/data/app_theme.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/data/note.dart';
@@ -41,7 +42,7 @@ class AppData {
   static Future<void> Function()? precacheWallpaperAsset;
   static final Map<Settings, ValueNotifier<String>> settings = Map.fromEntries(Settings.values.map((e) => MapEntry(e, ValueNotifier(''))));
   static final Map<FirstAccess, bool> firstAccesses = Map.fromEntries(FirstAccess.values.map((e) => MapEntry(e, true)));
-  static List<Note> homeWidgetList = [];
+  static List<HomeWidgetConfig> homeWidgetConfigs = [];
   static final notesManager = GuiManager(
     sortComparison: (a, b) => a.userOrder.compareTo(b.userOrder),
     getComparisonDateTime: (note) => note.modifDateTime,
@@ -81,7 +82,24 @@ class AppData {
       openDbId,
       await openDatabase(
         await dbPath,
-        version: 1,
+        //TODO: set to version 1.
+        version: 5,
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 3) {
+            await db.execute('DELETE FROM first_access');
+            for (var firstAccess in FirstAccess.values) {
+              await db.insert('first_access', {'param': firstAccess.name});
+            }
+            await db.insert('settings', {'param': Settings.hideRemoveHomeWidgetConfigDialog.name, 'value': false.toString()});
+            await db.execute('CREATE TABLE home_widget_config('
+                'id INTEGER PRIMARY KEY, '
+                'title VARCHAR(30) NOT NULL, '
+                'theme VARCHAR(25) NOT NULL, '
+                'opacity INTEGER NOT NULL,'
+                'creation_date_time VARCHAR(25) NOT NULL)');
+            await db.execute('ALTER TABLE filters ADD COLUMN home_widget_config_id INTEGER');
+          }
+        },
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '
@@ -99,6 +117,7 @@ class AppData {
           await db.insert('settings', {'param': Settings.hideRemovePermanentlyDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideRemoveLabelDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideDetachLabelDialog.name, 'value': false.toString()});
+          await db.insert('settings', {'param': Settings.hideRemoveHomeWidgetConfigDialog.name, 'value': false.toString()});
           await db.execute('CREATE TABLE first_access('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '
               'param VARCHAR(25) NOT NULL, '
@@ -106,10 +125,17 @@ class AppData {
           for (var firstAccess in FirstAccess.values) {
             await db.insert('first_access', {'param': firstAccess.name});
           }
+          await db.execute('CREATE TABLE home_widget_config('
+              'id INTEGER PRIMARY KEY, '
+              'title VARCHAR(30) NOT NULL, '
+              'theme VARCHAR(25) NOT NULL, '
+              'opacity INTEGER NOT NULL,'
+              'creation_date_time VARCHAR(25) NOT NULL)');
           await db.execute('CREATE TABLE filters('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '
               'filter VARCHAR(15) NOT NULL, '
-              'value TEXT)');
+              'value TEXT, '
+              'home_widget_config_id INTEGER)');
           await db.insert('filters', {'filter': Filters.FAVORITES});
           await db.insert('filters', {'filter': Filters.BY_DATE});
           await db.insert('filters', {'filter': Filters.BY_TEXT});
@@ -157,6 +183,8 @@ class AppData {
   }
 
   static void initData({bool runEnsureInitialized = true}) async {
+    HomeWidgetManager.onError = _error;
+
     //Open db
     if (runEnsureInitialized) {
       WidgetsFlutterBinding.ensureInitialized(); //Avoid errors caused by flutter upgrade.
@@ -173,11 +201,11 @@ class AppData {
       settings[Settings.values.firstWhere((e) => row['param'] == e.name)]!.value = row['value'];
     }
     appliedWallpaper.value = AssetImage('assets/wallpapers/${settings[Settings.wallpaper]!.value}');
-    var useCreationDateTime = AppData.settings[Settings.useCreationDateTime]!;
+    var useCreationDateTime = settings[Settings.useCreationDateTime]!;
     void onUseCreationDateTimeChanged() {
       notesManager.getComparisonDateTime =
           useCreationDateTime.value == true.toString() ? (note) => note.creationDateTime : (note) => note.modifDateTime;
-      notesManager.requestFilterList();
+      notesManager.requestUpdateDisplayList();
     }
 
     useCreationDateTime.removeListener(onUseCreationDateTimeChanged);
@@ -190,9 +218,34 @@ class AppData {
       firstAccesses[FirstAccess.values.firstWhere((e) => row['param'] == e.name)] = false;
     }
 
+    //Home widget configurations
+    Map<int, List<Map<String, dynamic>>> filtersQuery = {};
+    query = await iDb.db.query('filters', columns: ['filter', 'value', 'home_widget_config_id']);
+    for (var filter in query.toList()) {
+      int homeWidgetConfigId = filter['home_widget_config_id'] ?? 0;
+      var filters = filtersQuery[homeWidgetConfigId];
+      if (filters == null) {
+        filters = [];
+        filtersQuery.addAll({homeWidgetConfigId: filters});
+      }
+      filters.add(filter);
+    }
+    query = await iDb.db.query('home_widget_config', columns: ['id', 'title', 'theme', 'opacity', 'creation_date_time']);
+    homeWidgetConfigs = query.map((e) {
+      int id = e['id'];
+      String themeString = e['theme'];
+      return HomeWidgetConfig(
+        id: id,
+        title: e['title'],
+        theme: AppThemeBrightness.values.where((e) => e.caption == themeString).first,
+        opacity: e['opacity'],
+        creationDateTime: DateTime.parse(e['creation_date_time']),
+        filters: Filters.fromDbQuery(filtersQuery[id]!),
+      );
+    }).toList();
+
     //Filters
-    query = await iDb.db.query('filters', columns: ['filter', 'value']);
-    notesManager.filters.value = Filters.fromDbQuery(query);
+    notesManager.filters.value = Filters.fromDbQuery(filtersQuery[0]!);
 
     //Labels
     query = await iDb.db.query('labels', columns: ['id', 'text']);
@@ -206,7 +259,7 @@ class AppData {
       _notesUserOrder = notesUserOrderData.split(',').map((e) => int.parse(e)).toSet().toList();
     }
 
-    //Recovering draft note in case application was closed during a note edition
+    //Recovering draft note in case application was closed during a note edition.
     await _recoverFromDraft(iDb);
 
     //Note list
@@ -215,8 +268,7 @@ class AppData {
       guiManager: notesManager,
       where: 'parent_id IS NULL AND history_date_time IS NULL AND trash_date_time IS NULL AND archive_date_time IS NULL',
     );
-    _updateHomeWidget();
-    notesManager.requestFilterList();
+    notesManager.requestUpdateDisplayList();
 
     validateTimeInTrash();
 
@@ -366,7 +418,7 @@ class AppData {
     return iDb.db.delete('notes', where: 'parent_id IS NOT NULL AND history_date_time IS NULL');
   }
 
-  static Future<int> newNoteFromInput(Note note, [bool isDraft = false]) async {
+  static Future<int> newNoteFromEdit(Note note, [bool isDraft = false]) async {
     var now = DateTime.now();
     var iDb = await _openDb();
     //var newUserOrder = mainManager.list.value!.map((e) => e.userOrder).fold(0, max) + 1; requires to import 'dart:math' to use max.
@@ -396,8 +448,8 @@ class AppData {
         _notesUserOrder.insert(0, note.id);
         //_closeDb(iDb); _updateDbNotesUserOrder closes the db.
         _updateDbNotesUserOrder(iDb, true); //It is required to not await to continue with code without waiting for db.
-        _updateHomeWidget();
-        notesManager.requestFilterList();
+        updateHomeWidget();
+        notesManager.requestUpdateDisplayList();
       } else {
         _closeDb(iDb);
       }
@@ -408,27 +460,31 @@ class AppData {
     return newId;
   }
 
-  static Future<void> updateNoteFromInput(Note note, String oldText, Color? oldColor, [int? draftId]) async {
+  static Future<void> updateNoteFromEdit(Note note, Note oldNote, [int? draftId]) async {
     _IndexedDatabase iDb;
     var now = DateTime.now();
-    if ((note.text != oldText || note.color.value != oldColor) && draftId == null) {
-      var noteCopy = note.clone(); //Cloning note to save asynchronously to history with the current values.
+    var modified = note.text != oldNote.text || note.color.value != oldNote.color.value;
+    var modifiedWithoutHistory = modified || note.favorite.value != oldNote.favorite.value || note.labelIds.join(',') != oldNote.labelIds.join(',');
+    if ((modified || modifiedWithoutHistory) && draftId == null) {
       note.modifDateTime = now;
       if (!notesManager.noteIsInFilter(note)) {
         notesManager.displayList.value!.remove(note);
       }
-      _updateHomeWidget();
+      updateHomeWidget();
+    }
+    if (modified && draftId == null) {
+      var noteCopy = note.clone(); //Cloning note to save asynchronously to history with the current values.
       iDb = await _openDb();
       await _addHistory(
         iDb,
         noteCopy.id,
         now.parseToStr(DTToStrFormat.DATABASE),
-        oldText,
+        oldNote.text,
         noteCopy.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
         noteCopy.creationDateTime.parseToStr(DTToStrFormat.DATABASE),
         noteCopy.isCrossedOut.value ? 1 : 0,
         noteCopy.numberOfLines.value,
-        oldColor?.value,
+        oldNote.color.value?.value,
       );
     } else {
       iDb = await _openDb();
@@ -483,7 +539,7 @@ class AppData {
       note.numberOfLines.value = history.numberOfLines.value;
       note.color.value = history.color.value;
     }
-    _updateHomeWidget();
+    updateHomeWidget();
     //Updating the note in db.
     var iDb = await _openDb();
     var count = await iDb.db.update(
@@ -516,7 +572,7 @@ class AppData {
   static void archiveNotes(List<Note> notes) async {
     if (notes.isNotEmpty) {
       removeNotesFromLists(notes, notesManager);
-      _updateHomeWidget();
+      updateHomeWidget();
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
           'UPDATE notes SET archive_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\' WHERE id IN (${notes.map((e) => e.id).join(',')})');
@@ -530,7 +586,7 @@ class AppData {
   static void sendNotesToTrash(List<Note> notes) async {
     if (notes.isNotEmpty) {
       removeNotesFromLists(notes, notesManager);
-      _updateHomeWidget();
+      updateHomeWidget();
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
           'UPDATE notes SET trash_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN (${notes.map((e) => e.id).join(',')})');
@@ -566,8 +622,8 @@ class AppData {
         note.guiManager = notesManager;
       }
       notesManager.allList = [...notesManager.allList, ...notes].sorted(notesManager.sortComparison);
-      _updateHomeWidget();
-      notesManager.requestFilterList();
+      updateHomeWidget();
+      notesManager.requestUpdateDisplayList();
       var iDb = await _openDb();
       var count = await iDb.db
           .rawUpdate('UPDATE notes SET trash_date_time = NULL, archive_date_time = NULL WHERE id IN (${notes.map((e) => e.id).join(',')})');
@@ -592,14 +648,14 @@ class AppData {
       _error('ERROR');
     }
     _closeDb(iDb);
-    labelsManager?.requestFilterList();
+    labelsManager?.requestUpdateDisplayList();
     return newId;
   }
 
   static void updateLabel(Label label, String value, GuiManager labelsManager) async {
     label.text = value;
     labelsManager.allList.sort(labelsManager.sortComparison);
-    labelsManager.requestFilterList();
+    labelsManager.requestUpdateDisplayList();
     var iDb = await _openDb();
     var count = await iDb.db.update('labels', {'text': value}, where: 'id = ?', whereArgs: [label.id]);
     if (count <= 0) {
@@ -608,22 +664,23 @@ class AppData {
     await _closeDb(iDb);
   }
 
-  static void removeLabels(List<Label> selectedLabels) async {
-    if (selectedLabels.isNotEmpty) {
-      var idString = selectedLabels.map((e) => e.id).join(',');
-      var relatedNotes = <Note>[];
-      for (var label in selectedLabels) {
-        labels.remove(label);
-        for (var note in notesManager.allList.where((e) => e.labelIds.contains(label.id)).toList()) {
-          note.labelIds.remove(label.id);
-          if (!relatedNotes.contains(note)) {
-            relatedNotes.add(note);
+  static void removeLabels(List<int> labelIds) async {
+    if (labelIds.isNotEmpty) {
+      var idString = labelIds.join(',');
+      var notesWithLabelIds = <Note>[];
+      for (var labelId in labelIds) {
+        for (var note in notesManager.allList.where((e) => e.labelIds.contains(labelId)).toList()) {
+          note.labelIds.remove(labelId);
+          if (!notesWithLabelIds.contains(note)) {
+            notesWithLabelIds.add(note);
           }
         }
       }
+      labels.removeWhere((e) => labelIds.contains(e.id));
+      updateHomeWidget();
       var iDb = await _openDb();
       var count = await iDb.db.rawDelete('DELETE FROM labels WHERE id IN ($idString)');
-      for (var note in relatedNotes) {
+      for (var note in notesWithLabelIds) {
         //Note: trash and archive labelIds will be removed from db when querying the notes (_queryNotes() function)
         await iDb.db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
       }
@@ -634,8 +691,56 @@ class AppData {
     }
   }
 
-  static void removeNotesFromLists(List<Note> selectedNotes, GuiManager guiManager) {
-    for (var note in selectedNotes) {
+  static void updateDbHomeWidgetConfig(HomeWidgetConfig homeWidgetConfig, bool isNew) async {
+    int dbResult;
+    var now = DateTime.now();
+    var iDb = await _openDb();
+    if (isNew) {
+      dbResult = await iDb.db.insert('home_widget_config', {
+        'id': homeWidgetConfig.id,
+        'title': homeWidgetConfig.title,
+        'theme': homeWidgetConfig.theme.caption,
+        'opacity': homeWidgetConfig.opacity,
+        'creation_date_time': now.parseToStr(DTToStrFormat.DATABASE),
+      });
+    } else {
+      dbResult = await iDb.db.update(
+        'home_widget_config',
+        {
+          'title': homeWidgetConfig.title,
+          'theme': homeWidgetConfig.theme.caption,
+          'opacity': homeWidgetConfig.opacity,
+        },
+        where: 'id = ?',
+        whereArgs: [homeWidgetConfig.id],
+      );
+    }
+    if (dbResult > 0) {
+      await _updateDbFilters(iDb, homeWidgetConfig.notesManager.filters.value, false, isNew, homeWidgetConfig.id);
+    } else {
+      _error('ERROR');
+    }
+    _closeDb(iDb);
+  }
+
+  static void removeHomeWidgetConfigs(List<int> homeWidgetConfigIds) async {
+    if (homeWidgetConfigIds.isNotEmpty) {
+      var idString = homeWidgetConfigIds.join(',');
+      homeWidgetConfigs.removeWhere((e) => homeWidgetConfigIds.contains(e.id));
+      var iDb = await _openDb();
+      var count = await iDb.db.rawDelete('DELETE FROM filters WHERE home_widget_config_id IN ($idString)');
+      if (count > 0) {
+        count = await iDb.db.rawDelete('DELETE FROM home_widget_config WHERE id IN ($idString)');
+      }
+      if (count <= 0) {
+        _error('ERROR');
+      }
+      _closeDb(iDb);
+    }
+  }
+
+  static void removeNotesFromLists(List<Note> notes, GuiManager guiManager) {
+    for (var note in notes) {
       guiManager.allList.remove(note);
       guiManager.displayList.value!.remove(note);
     }
@@ -657,7 +762,7 @@ class AppData {
     for (var note in notesManager.allList) {
       note.userOrder = _notesUserOrder.indexOf(note.id);
     }
-    _updateHomeWidget();
+    updateHomeWidget();
     notesManager.displayList.notifyListeners();
     var iDb = await _openDb();
     await _updateDbNotesUserOrder(iDb);
@@ -665,7 +770,7 @@ class AppData {
   }
 
   static void sortNotes(int Function(Note a, Note b) sortByComparison, SortByOrder order) async {
-    AppData.settings[Settings.lastSortBy]!.value = order.name;
+    settings[Settings.lastSortBy]!.value = order.name;
     int Function(Note a, Note b) comparison = sortByComparison;
     if (order == SortByOrder.desc) {
       comparison = (a, b) => sortByComparison(b, a);
@@ -677,7 +782,7 @@ class AppData {
       }
       return notesManager.sortComparison(a, b);
     });
-    _updateHomeWidget();
+    updateHomeWidget();
     int i = 0;
     var notesIds = notesManager.allList.map((e) => e.id).toList();
     List<int> newOrder = [];
@@ -699,7 +804,7 @@ class AppData {
     for (var note in notesManager.allList) {
       note.userOrder = _notesUserOrder.indexOf(note.id);
     }
-    notesManager.requestFilterList();
+    notesManager.requestUpdateDisplayList();
     var iDb = await _openDb();
     await _updateDbNotesUserOrder(iDb);
     var count = await iDb.db.update('settings', {'value': order.name}, where: 'param = ?', whereArgs: [Settings.lastSortBy.name]);
@@ -720,7 +825,7 @@ class AppData {
   }
 
   static void validateMaxHistory() async {
-    var maxHistory = int.parse(AppData.settings[Settings.maxHistory]!.value);
+    var maxHistory = int.parse(settings[Settings.maxHistory]!.value);
     var iDb = await _openDb();
     for (var parentNote in notesManager.allList) {
       await _validateMaxHistory(iDb, maxHistory, parentNote.id);
@@ -761,6 +866,57 @@ class AppData {
     }
   }
 
+  static void updateDbFilters(Filters filters, [bool onlyUpdateText = false]) async {
+    var iDb = await _openDb();
+    await _updateDbFilters(iDb, filters, onlyUpdateText);
+    await _closeDb(iDb);
+  }
+
+  static Future<void> _updateDbFilters(
+    _IndexedDatabase iDb,
+    Filters filters, [
+    bool onlyUpdateText = false,
+    bool insert = false,
+    int? homeWidgetConfigId,
+  ]) async {
+    var where = 'filter = ? AND home_widget_config_id ${homeWidgetConfigId != null ? '= ?' : 'IS NULL'}';
+    var filtersCopy = Filters()..copyFrom(filters);
+
+    Future<void> upsert(String filterName, String value, bool notNullCondition) async {
+      int dbResult;
+      if (insert) {
+        dbResult = await iDb.db.insert(
+          'filters',
+          {'filter': filterName, 'value': notNullCondition ? value : null, 'home_widget_config_id': homeWidgetConfigId},
+        );
+      } else {
+        dbResult = await iDb.db.update(
+          'filters',
+          {'value': notNullCondition ? value : null},
+          where: where,
+          whereArgs: homeWidgetConfigId != null ? [filterName, homeWidgetConfigId] : [filterName],
+        );
+      }
+      if (dbResult <= 0) {
+        _error('ERROR');
+      }
+    }
+
+    await upsert(Filters.BY_TEXT, filtersCopy.text, filtersCopy.text.isNotEmpty);
+    if (!onlyUpdateText) {
+      await upsert(Filters.FAVORITES, true.toString(), filtersCopy.favorites);
+      await upsert(
+        Filters.BY_DATE,
+        '${filtersCopy.from != null ? DateFormat('yyyyMMdd').format(filtersCopy.from!) : null.toString()}-'
+        '${filtersCopy.to != null ? DateFormat('yyyyMMdd').format(filtersCopy.to!) : null.toString()}',
+        filtersCopy.from != null || filtersCopy.to != null,
+      );
+      await upsert(Filters.BY_LABEL, filtersCopy.labelIds.join(','), filtersCopy.labelIds.isNotEmpty);
+      await upsert(Filters.BY_COLOR, filtersCopy.colors.map((e) => e.value).join(','), filtersCopy.colors.isNotEmpty);
+      await upsert(Filters.CROSSED_OUT, true.toString(), filtersCopy.crossedOut);
+    }
+  }
+
   static Future<void> validateTimeInTrash() async {
     var iDb = await _openDb();
     await iDb.db.rawDelete(
@@ -794,35 +950,31 @@ class AppData {
     }
   }
 
-  static void updateDbFilters() async {
-    var filters = Filters()..copyFrom(notesManager.filters.value);
-    var iDb = await _openDb();
-
-    Future<void> update(String value, bool condition, String filterName) async {
-      var count = await iDb.db.update('filters', {'value': condition ? value : null}, where: 'filter = ?', whereArgs: [filterName]);
-      if (count <= 0) {
-        _error('ERROR');
+  static void updateHomeWidget([bool updateConfigList = false, int? maxId]) async {
+    maxId ??= homeWidgetConfigs.map((e) => e.id).max;
+    List<Future> requests = [];
+    var allList = List.of(notesManager.allList);
+    for (var config in homeWidgetConfigs) {
+      config.notesManager.allList = allList;
+      requests.add(config.notesManager.requestUpdateDisplayList());
+    }
+    await Future.wait(requests);
+    var consecutiveIdsConfigs =
+        List.generate(maxId, (index) => homeWidgetConfigs.firstWhereOrNull((e) => e.id == index + 1) ?? HomeWidgetConfig(id: index + 1));
+    var serializableObjects = Map.fromEntries(consecutiveIdsConfigs.map((e) {
+      return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[REMOVED]');
+    }));
+    if (updateConfigList) {
+      serializableObjects.addAll({'_ohNoteWidgetConfigIds': homeWidgetConfigs.map((e) => e.id).toList()});
+      serializableObjects.addAll(Map.fromEntries(consecutiveIdsConfigs.map((e) {
+        return MapEntry('_ohNoteWidgetConfig_${e.id}', e.notesManager.displayList.value != null ? e : '[REMOVED]');
+      })));
+      for (var config in homeWidgetConfigs) {
+        config.notesManager.allList = allList;
+        requests.add(config.notesManager.requestUpdateDisplayList());
       }
     }
-
-    await update(true.toString(), filters.favorites, Filters.FAVORITES);
-    await update(
-      '${filters.from != null ? DateFormat('yyyyMMdd').format(filters.from!) : null.toString()}-'
-      '${filters.to != null ? DateFormat('yyyyMMdd').format(filters.to!) : null.toString()}',
-      filters.from != null || filters.to != null,
-      Filters.BY_DATE,
-    );
-    await update(filters.text, filters.text.isNotEmpty, Filters.BY_TEXT);
-    await update(filters.labelIds.join(','), filters.labelIds.isNotEmpty, Filters.BY_LABEL);
-    await update(filters.colors.map((e) => e.value).join(','), filters.colors.isNotEmpty, Filters.BY_COLOR);
-    await update(true.toString(), filters.crossedOut, Filters.CROSSED_OUT);
-    await _closeDb(iDb);
-  }
-
-  //TODO: Use a separated filtered list (filter will be asked when adding the widget to homescreen).
-  static void _updateHomeWidget() async {
-    homeWidgetList = notesManager.allList;
-    await HomeWidgetManager.updateWidgetWithSerializable('_ohNoteWidgetList', homeWidgetList);
+    await HomeWidgetManager.updateWidgetWithSerializable(serializableObjects);
   }
 
   static void _error(String msg) {

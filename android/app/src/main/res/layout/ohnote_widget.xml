@@ -1,19 +1,12 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widgetRoot"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    style="@style/Widget.Android.AppWidget.Container"
-    android:theme="@style/Theme.Android.AppWidgetContainer"
-    android:padding="0dp">
-
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <RelativeLayout
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:background="@drawable/app_widget_header_background"
@@ -21,44 +14,30 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:layout_marginTop="1dp"
                 android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="OhNote"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="13sp"
+                android:textSize="16sp"
                 android:textStyle="bold"/>
                 
             <Button
                 android:id="@+id/addNoteButton"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:minHeight="5dp"
+                android:paddingLeft="1dp"
+                android:paddingBottom="1dp"
                 android:layout_alignParentRight="true"
                 android:text="+"
-                android:textSize="12sp"
-                android:textColor="@color/widget_button_text_color"
-                android:background="@drawable/app_widget_add_button" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_button_text"
+                android:background="@drawable/app_widget_button_add" />
         </RelativeLayout>
             
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ListView
-                android:id="@+id/noteListView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:dividerHeight="2dp" />
-            
-            <!-- <TextView
-                android:id="@+id/loadingTextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textStyle="bold"
-                android:text="Loading..."
-                android:textSize="15sp" /> -->
-        </FrameLayout>
+        <include layout="@layout/ohnote_widget_listview" />
     </LinearLayout>
-</RelativeLayout>
+</merge>

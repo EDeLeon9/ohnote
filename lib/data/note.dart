@@ -85,11 +85,17 @@ class Note {
   bool performingHero = false;
   double? tileYPosition;
 
-  String get localFormatModifDateTime => modifDateTime.parseToStr(DTToStrFormat.LOCAL);
-  String get localFormatCreationDateTime => creationDateTime.parseToStr(DTToStrFormat.LOCAL);
-  String? get localFormatHistoryDateTime => historyDateTime?.parseToStr(DTToStrFormat.LOCAL);
-  String? get localFormatTrashDateTime => trashDateTime?.parseToStr(DTToStrFormat.LOCAL);
-  String? get localFormatArchiveDateTime => archiveDateTime?.parseToStr(DTToStrFormat.LOCAL);
+  String get localeFormatModifDateTime => _getLocaleFormatDateTime(modifDateTime);
+  String get localeFormatCreationDateTime => _getLocaleFormatDateTime(creationDateTime);
+  String? get localeFormatHistoryDateTime => historyDateTime != null ? _getLocaleFormatDateTime(historyDateTime!) : null;
+  String? get localeFormatTrashDateTime => trashDateTime != null ? _getLocaleFormatDateTime(trashDateTime!) : null;
+  String? get localeFormatArchiveDateTime => archiveDateTime != null ? _getLocaleFormatDateTime(archiveDateTime!) : null;
+
+  String _getLocaleFormatDateTime(DateTime dateTime) {
+    var result = dateTime.parseToStr(DTToStrFormat.LOCALE);
+    var amPm = result.substring(result.length - 2);
+    return '${result.substring(0, result.length - 6)} $amPm';
+  }
 
   Duration getTimeLeftInTrash() => trashDateTime != null ? const Duration(days: 30) - DateTime.now().difference(trashDateTime!) : Duration.zero;
 
@@ -122,7 +128,7 @@ class Note {
       numberOfLines: numberOfLines.value,
       color: color.value,
       favorite: favorite.value,
-      labelIds: labelIds,
+      labelIds: List.of(labelIds),
       parentId: parentId,
       historyDateTime: historyDateTime,
       trashDateTime: trashDateTime,
@@ -138,5 +144,12 @@ class Note {
   }
 
   //Used by jsonEncode in HomeWidgetManager.
-  Map<String, dynamic> toJson() => {'id': id, 'text': text};
+  Map<String, dynamic> toJson() {
+    //TODO: test replaceAll('\r', '')
+    var textResult = text.split('\n')[0].replaceAll('\r', '');
+    if (textResult.length > 400) {
+      textResult = textResult.substring(0, 400);
+    }
+    return {'id': id, 'text': textResult};
+  }
 }

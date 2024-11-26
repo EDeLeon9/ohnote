@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
+import 'package:ohnote/view_components/gui_item_tile.dart';
 import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animatedscale_button.dart';
-import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/constants.dart' as c;
 
 class NoteTile extends StatefulWidget {
@@ -46,14 +46,14 @@ class _NoteTileState extends State<NoteTile> {
       child: Container(
         decoration: BoxDecoration(border: _tileBorder()),
         child: AnimatedSize(
-          key: Key('asz${widget.note.id}'), //Key required to avoid wrong states when creating, deleting or dragging notes.
+          key: Key('nt_asz_${widget.note.id}'), //Key required to avoid wrong states when creating, deleting or dragging notes.
           duration: c.animationDuration,
           //It's being used AnimatedSize + SizedBox because height transition is from null to 0.0
           //and there will be no animation if AnimatedContainer were used.
           child: SizedBox(
             height: widget.note.slideAnimationState.abs() == 2 ? 0.0 : null,
             child: AnimatedSlide(
-              key: Key('asl${widget.note.id}'), //Key required to avoid wrong states when creating, deleting or dragging notes.
+              key: Key('nt_asl_${widget.note.id}'), //Key required to avoid wrong states when creating, deleting or dragging notes.
               duration: c.animationDuration,
               offset: widget.note.slideAnimationState == 0
                   ? Offset.zero
@@ -80,7 +80,7 @@ class _NoteTileState extends State<NoteTile> {
                         onTap: widget.onTap != null
                             ? () {
                                 if (widget.note.guiManager.selectionQuantity.value != null) {
-                                  _checkNote(!widget.note.isChecked.value);
+                                  GuiItemTile.checkItem(widget.note);
                                 } else {
                                   widget.onTap!();
                                 }
@@ -104,7 +104,8 @@ class _NoteTileState extends State<NoteTile> {
                                     Positioned.fill(
                                       child: Align(
                                         alignment: Alignment.centerLeft,
-                                        child: _checkbox(selectionQuantity != null),
+                                        child:
+                                            GuiItemTile.checkbox(widget.note, 'nt', selectionQuantity != null, widget.note.foregroundColor(context)),
                                       ),
                                     ),
                                     Builder(
@@ -138,28 +139,6 @@ class _NoteTileState extends State<NoteTile> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _checkbox(bool isVisible) {
-    return AnimatedOpacity(
-      duration: c.animationDuration,
-      opacity: isVisible ? 1.0 : 0.0,
-      child: AbsorbPointer(
-        absorbing: !isVisible,
-        child: ValueListenableBuilder(
-          valueListenable: widget.note.isChecked,
-          builder: (context, isChecked, child) {
-            return CustomCheckbox(
-              key: Key('chk${widget.note.id}'), //Key required to avoid wrong states when dragging note tiles.
-              checkboxVisualDensity: const VisualDensity(horizontal: -4.0, vertical: -4.0),
-              checkboxColor: widget.note.foregroundColor(context),
-              value: () => isChecked,
-              onChanged: _checkNote,
-            );
-          },
         ),
       ),
     );
@@ -253,11 +232,11 @@ class _NoteTileState extends State<NoteTile> {
                 builder: (context, useCreationDateTime, child) {
                   String dateTimeText;
                   if (widget.note.trashDateTime != null) {
-                    dateTimeText = widget.note.localFormatTrashDateTime!;
+                    dateTimeText = widget.note.localeFormatTrashDateTime!;
                   } else if (widget.note.historyDateTime == null && AppData.settings[Settings.useCreationDateTime]!.value == true.toString()) {
-                    dateTimeText = widget.note.localFormatCreationDateTime;
+                    dateTimeText = widget.note.localeFormatCreationDateTime;
                   } else {
-                    dateTimeText = widget.note.localFormatModifDateTime;
+                    dateTimeText = widget.note.localeFormatModifDateTime;
                   }
                   return Text(
                     dateTimeText,
@@ -297,14 +276,5 @@ class _NoteTileState extends State<NoteTile> {
   Border _tileBorder() {
     var borderSide = BorderSide(color: Theme.of(context).colorScheme.outlineVariant); //outlineVariant is used by Dividers.
     return Border(bottom: borderSide, left: widget.note.slideAnimationState != 0 ? borderSide : BorderSide.none);
-  }
-
-  void _checkNote(bool? value) {
-    widget.note.isChecked.value = value == true;
-    if (!widget.note.guiManager.isManualSelection && !widget.note.guiManager.displayList.value!.any((e) => e.isChecked.value)) {
-      widget.note.guiManager.selectionQuantity.value = null;
-    } else {
-      widget.note.guiManager.setSelectionQuantity();
-    }
   }
 }

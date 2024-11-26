@@ -19,8 +19,10 @@ class GuiManager {
         }
       }
     });
-    filters.addListener(requestFilterList);
+    filters.addListener(requestUpdateDisplayList);
   }
+
+  static final List<Stopwatch> _filterStopwatches = [];
 
   List<Note> allList = [];
   final displayList = ValueNotifierPlus<List<Note>?>(null);
@@ -78,17 +80,17 @@ class GuiManager {
     selectionQuantity.value = getSelectedNotes().length;
   }
 
-  void setStyleColors() {
+  void updateStyleColors() {
     styleColors = allList.where((e) => e.color.value != null).map((e) => e.color.value!).toSet().toList();
   }
 
-  void requestFilterList() {
+  Future<void> requestUpdateDisplayList() {
     _cancelFiltering?.value = true;
     _cancelFiltering = BoxedValue(false);
-    _filterList(_cancelFiltering!);
+    return _filterList(_cancelFiltering!);
   }
 
-  void _filterList(BoxedValue<bool> cancelFiltering) async {
+  Future<void> _filterList(BoxedValue<bool> cancelFiltering) async {
     if (selectionQuantity.value != null) {
       selectionQuantity.value = 0;
       if (displayList.value?.any((e) => e.isChecked.value) == true) {
@@ -98,14 +100,20 @@ class GuiManager {
     if (filters.value.hasApplied()) {
       List<Note> filteredList = [];
       var stopwatch = Stopwatch();
+      _filterStopwatches.add(stopwatch);
       stopwatch.start();
       for (var note in allList) {
         if (cancelFiltering.value) {
           break;
         }
         if (stopwatch.elapsedMilliseconds >= 10) {
+          //TODO: test with several home widget configs
+          stopwatch.stop();
           stopwatch.reset();
-          await Future.delayed(const Duration(milliseconds: 0));
+          do {
+            await Future.delayed(const Duration(milliseconds: 0));
+          } while (_filterStopwatches.any((e) => e.isRunning));
+          stopwatch.start();
           displayList.value = null; //Enables wait animation.
         }
         if (noteIsInFilter(note)) {
@@ -113,6 +121,7 @@ class GuiManager {
         }
       }
       stopwatch.stop();
+      _filterStopwatches.remove(stopwatch);
       if (!cancelFiltering.value) {
         displayList.value = filteredList;
       }
@@ -131,7 +140,7 @@ class GuiManager {
         (!filters.value.crossedOut || note.isCrossedOut.value) &&
         (filters.value.from == null || !noteDateTime.isBefore(filters.value.from!)) &&
         (filters.value.to == null || noteDateTime.isBefore(filters.value.to!.add(const Duration(days: 1)))) &&
-        (filters.value.labelIds.isEmpty || (note.labelIds.isNotEmpty && filters.value.labelIds.any((e) => note.labelIds.contains(e)))) &&
+        (filters.value.labelIds.isEmpty || filters.value.labelIds.any((e) => note.labelIds.contains(e) || (e == 0 && note.labelIds.isEmpty))) &&
         (filters.value.colors.isEmpty || (filters.value.colors.contains(note.color.value ?? Colors.transparent))) &&
         (filters.value.text == '' || wordsSearcher!.searchIn(note.text));
   }

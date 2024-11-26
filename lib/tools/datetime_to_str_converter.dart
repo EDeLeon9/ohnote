@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 enum DTToStrFormat {
   DATABASE, // ignore: constant_identifier_names
-  LOCAL, // ignore: constant_identifier_names
+  LOCALE, // ignore: constant_identifier_names
 }
 
 extension DateTimeToStr on DateTime {
@@ -10,7 +10,23 @@ extension DateTimeToStr on DateTime {
     if (format == DTToStrFormat.DATABASE) {
       return DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(this);
     } else {
-      return DateFormat.yMMMd().add_jm().format(this);
+      return DateFormat.yMMMd().add_jms().format(this);
+    }
+  }
+
+  String parseDateToStr(DTToStrFormat format) {
+    if (format == DTToStrFormat.DATABASE) {
+      return DateFormat('yyyy-MM-dd').format(this);
+    } else {
+      return DateFormat.yMMMd().format(this);
+    }
+  }
+
+  String parseTimeToStr(DTToStrFormat format) {
+    if (format == DTToStrFormat.DATABASE) {
+      return DateFormat('HH:mm:ss.SSS').format(this);
+    } else {
+      return DateFormat.jms().format(this);
     }
   }
 }

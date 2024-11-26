@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:ohnote/tools/scrollview_with_bar.dart';
 
 class StyleColorPickerDialog {
   const StyleColorPickerDialog._();
@@ -9,9 +10,10 @@ class StyleColorPickerDialog {
       context: context,
       builder: (context) {
         return AlertDialog(
-          contentPadding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
+          contentPadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0.0),
           actionsPadding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 15.0),
-          content: SingleChildScrollView(
+          content: ScrollViewWithBar(
+            paddng: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Transform.translate(
               offset: const Offset(0.0, 10.0),
               child: SlidePicker(

@@ -6,9 +6,10 @@ import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/note_tile.dart';
-import 'package:ohnote/views/dialogs/details_dialog.dart';
+import 'package:ohnote/views/dialogs/note_details_dialog.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/single_async.dart' as a;
@@ -39,7 +40,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) => _didPop(didPop, context),
+      onPopInvokedWithResult: (didPop, result) => _onPopInvoked(didPop, context),
       child: Scaffold(
         appBar: AppBar(
           title: ValueListenableBuilder(
@@ -76,7 +77,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
               ],
               onSelected: (selected) {
                 if (selected == HeaderButtonDetails.filters) {
-                  HeaderButtons.filtersPressed(context: context, guiManager: widget.trashManager);
+                  HeaderButtons.filtersPressed(context: context, guiManager: widget.trashManager, updateDb: false);
                 } else if (selected == HeaderButtonDetails.restore) {
                   HeaderButtons.restorePressed(context: context, guiManager: widget.trashManager);
                 } else if (selected == HeaderButtonDetails.removePermanently) {
@@ -90,48 +91,39 @@ class _TrashCanPageState extends State<TrashCanPage> {
           child: Column(
             verticalDirection: VerticalDirection.up,
             children: [
-              ValueListenableBuilder(
-                valueListenable: widget.trashManager.displayList,
-                builder: (context, trashList, child) {
-                  return Expanded(
-                    child: trashList != null
-                        ? ListView.builder(
-                            itemCount: trashList.length,
-                            itemBuilder: (context, index) {
-                              var trashNote = trashList[index];
-                              return NoteTile(
-                                key: Key('trash_${trashNote.id}'),
-                                note: trashNote,
-                                onTap: () {
-                                  DetailsDialog.show(
-                                    context: context,
-                                    note: trashNote,
-                                  ).then((value) {
-                                    if (value == true) {
-                                      Future.delayed(
-                                        const Duration(milliseconds: 150),
-                                        () {
-                                          a.runFirst(() async {
-                                            await widget.trashManager.startSlideAnimation(
-                                              context: context,
-                                              notesToUse: [trashNote],
-                                              slideAnimationState: -1,
-                                              afterAnimationStateAction: (selectedNotes) {
-                                                AppData.restoreNotes(selectedNotes);
-                                                AppData.removeNotesFromLists(selectedNotes, widget.trashManager);
-                                              },
-                                              successMessage: 'Your note were restored.',
-                                            );
-                                          });
-                                        },
-                                      );
-                                    }
-                                  });
-                                },
-                              );
+              GuiListViewBuilder(
+                expand: true,
+                guiManager: widget.trashManager,
+                itemBuilder: (context, index, trashNote, displayList) {
+                  return NoteTile(
+                    key: Key('tsh_${trashNote.id}'),
+                    note: trashNote,
+                    onTap: () {
+                      NoteDetailsDialog.show(
+                        context: context,
+                        note: trashNote,
+                      ).then((value) {
+                        if (value == true) {
+                          Future.delayed(
+                            const Duration(milliseconds: 150),
+                            () {
+                              a.runFirst(() async {
+                                await widget.trashManager.startSlideAnimation(
+                                  context: context,
+                                  notesToUse: [trashNote],
+                                  slideAnimationState: -1,
+                                  afterAnimationStateAction: (selectedNotes) {
+                                    AppData.restoreNotes(selectedNotes);
+                                    AppData.removeNotesFromLists(selectedNotes, widget.trashManager);
+                                  },
+                                  successMessage: 'Your note were restored.',
+                                );
+                              });
                             },
-                          )
-                        : const Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                      });
+                    },
                   );
                 },
               ),
@@ -174,7 +166,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
     });
   }
 
-  void _didPop(bool didPop, BuildContext context) {
+  void _onPopInvoked(bool didPop, BuildContext context) {
     if (!didPop && !CustomShowCase.next(context)) {
       if (widget.trashManager.selectionQuantity.value == null && !widget.trashManager.showSearchText.value) {
         Navigator.pop(context);

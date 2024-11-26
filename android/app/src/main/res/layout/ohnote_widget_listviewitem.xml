@@ -1,0 +1,19 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rowLayout"
+    android:layout_width="match_parent"
+    android:layout_height="20dp">
+
+    <TextView
+        android:id="@+id/rowTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="top"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:maxLines="1"
+        android:textSize="14sp" 
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true" />
+</LinearLayout>

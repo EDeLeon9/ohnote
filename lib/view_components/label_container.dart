@@ -5,16 +5,18 @@ class LabelContainer extends StatelessWidget {
   const LabelContainer({
     super.key,
     required this.content,
-    required this.padding,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
     this.onTap,
     this.onLongPress,
     this.color,
+    this.minWidth = 75.0,
   });
 
   final void Function()? onTap;
   final void Function()? onLongPress;
   final EdgeInsets padding;
   final Color? color;
+  final double minWidth;
   final Widget content;
 
   @override
@@ -34,7 +36,7 @@ class LabelContainer extends StatelessWidget {
           onTap: onTap,
           onLongPress: onLongPress,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 75.0),
+            constraints: BoxConstraints(minWidth: minWidth),
             child: Padding(
               padding: EdgeInsets.fromLTRB(padding.left, padding.top, padding.right + 8.0, padding.bottom),
               child: content,

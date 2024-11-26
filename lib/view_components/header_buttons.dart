@@ -36,7 +36,8 @@ enum HeaderButtonDetails {
   restore('Restore', Icons.restore_page),
   removePermanently('Remove permanently', Icons.delete_forever),
   searchLabel('Search label', Icons.search),
-  removeLabel('Remove label', Icons.delete_forever);
+  removeLabel('Remove label', Icons.delete_forever),
+  removeHomeWidgetConfig('Remove home widget\nconfiguration', Icons.delete_forever);
 
   final String caption;
   final IconData icon;
@@ -89,6 +90,7 @@ class HeaderButtons extends StatefulWidget {
     required this.buttons,
     this.padding,
     this.largeMainButtons = true,
+    this.updateDbFilters = false,
   });
 
   final String? title;
@@ -98,6 +100,7 @@ class HeaderButtons extends StatefulWidget {
   final List<HeaderButton> buttons;
   final EdgeInsets? padding;
   final bool largeMainButtons;
+  final bool updateDbFilters;
 
   @override
   State<HeaderButtons> createState() => _HeaderButtonsState();
@@ -248,7 +251,9 @@ class HeaderButtons extends StatefulWidget {
   }
 
   void _sortByPressed({required BuildContext context, required GuiManager guiManager}) {
-    SortByDialog.show(context: context).then((value) {
+    SortByDialog.show(
+      context: context,
+    ).then((value) {
       if (value != null) {
         int Function(Note a, Note b) comparison;
         switch (value.sortBy) {
@@ -281,16 +286,20 @@ class HeaderButtons extends StatefulWidget {
     });
   }
 
-  static void filtersPressed({required BuildContext context, required GuiManager guiManager}) {
-    guiManager.setStyleColors();
-    FiltersDialog.show(context: context, guiManager: guiManager).then((value) {
+  static void filtersPressed({required BuildContext context, required GuiManager guiManager, required bool updateDb}) {
+    FiltersDialog.show(
+      context: context,
+      guiManager: guiManager,
+    ).then((value) {
       if (value != null) {
         guiManager.filters.value.copyFrom(value);
         guiManager.filters.notifyListeners();
         if (guiManager.filters.value.text == '') {
           guiManager.showSearchText.value = false;
         }
-        AppData.updateDbFilters();
+        if (updateDb) {
+          AppData.updateDbFilters(guiManager.filters.value);
+        }
       }
     });
   }
@@ -311,7 +320,7 @@ class HeaderButtons extends StatefulWidget {
 
   void _stylePressed({required GuiManager guiManager}) {
     if (!guiManager.stylePanelOpened.value) {
-      guiManager.setStyleColors();
+      guiManager.updateStyleColors();
       guiManager.stylePanelOpened.value = true;
     }
     guiManager.isManualSelection = true;
@@ -474,7 +483,7 @@ class _HeaderButtonsState extends State<HeaderButtons> {
                                   ].whereNotNull().toList(),
                                   onSelected: (selected) {
                                     if (selected == HeaderButtonDetails.filters) {
-                                      HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager);
+                                      HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager, updateDb: widget.updateDbFilters);
                                     } else if (selected == HeaderButtonDetails.sortBy) {
                                       widget._sortByPressed(context: context, guiManager: widget.guiManager);
                                     } else if (selected == HeaderButtonDetails.style) {

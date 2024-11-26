@@ -1,18 +1,19 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/gui_manager.dart';
-import 'package:ohnote/data/label.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
-import 'package:ohnote/views/dialogs/edit_label_dialog.dart';
-import 'package:ohnote/view_components/label_tile.dart';
+import 'package:ohnote/view_components/label_container.dart';
+import 'package:ohnote/views/dialogs/label_input_dialog.dart';
+import 'package:ohnote/view_components/gui_item_tile.dart';
 import 'package:ohnote/tools/single_async.dart' as a;
 import 'package:ohnote/constants.dart' as c;
 
@@ -26,21 +27,21 @@ class LabelsPage extends StatefulWidget {
 class _LabelsPageState extends State<LabelsPage> {
   final _newLabelSCK = ShowCaseKey(FirstAccess.newLabelSC);
   final _labelMoreSCK = ShowCaseKey(FirstAccess.labelMoreSC);
-  final GuiManager labelsManager = GuiManager(
+  final GuiManager _labelsManager = GuiManager(
     sortComparison: (a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()),
     getComparisonDateTime: (note) => note.creationDateTime, //Not used.
   );
 
   @override
   void initState() {
-    labelsManager.allList = AppData.labels
+    _labelsManager.allList = AppData.labels
         .map((e) => Note(
               id: e.id,
               text: e.text,
-              guiManager: labelsManager,
+              guiManager: _labelsManager,
             ))
         .toList();
-    labelsManager.requestFilterList();
+    _labelsManager.requestUpdateDisplayList();
     CustomShowCase.startShowCase(
       context: context,
       showCaseKeys: [_newLabelSCK, _labelMoreSCK],
@@ -53,11 +54,11 @@ class _LabelsPageState extends State<LabelsPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) => _didPop(didPop, context),
+      onPopInvokedWithResult: (didPop, result) => _onPopInvoked(didPop, context),
       child: Scaffold(
         appBar: AppBar(
           title: ValueListenableBuilder(
-            valueListenable: labelsManager.selectionQuantity,
+            valueListenable: _labelsManager.selectionQuantity,
             builder: (context, selectionQuantity, child) {
               return AnimatedScaleText(
                 duration: c.animationDuration,
@@ -70,7 +71,7 @@ class _LabelsPageState extends State<LabelsPage> {
           actions: [
             HeaderButtons.selectionModeButton(
               context: context,
-              guiManager: labelsManager,
+              guiManager: _labelsManager,
               button: HeaderButton(HeaderButtonDetails.selectionMode),
             ),
             _newLabelButton(),
@@ -90,34 +91,54 @@ class _LabelsPageState extends State<LabelsPage> {
                   _removeLabel();
                 }
               },
-            )
+            ),
           ],
         ),
         body: SafeArea(
           child: Column(
             verticalDirection: VerticalDirection.up,
             children: [
-              ValueListenableBuilder(
-                valueListenable: labelsManager.displayList,
-                builder: (context, displayList, child) {
-                  return Expanded(
-                    child: displayList != null
-                        ? ListView.builder(
-                            itemCount: displayList.length,
-                            itemBuilder: (context, index) {
-                              var label = displayList[index];
-                              return LabelTile(
-                                key: Key('label_${label.id}'),
-                                label: label,
-                              );
-                            },
-                          )
-                        : const Center(child: CircularProgressIndicator()),
+              GuiListViewBuilder(
+                expand: true,
+                guiManager: _labelsManager,
+                itemBuilder: (context, index, label, displayList) {
+                  return GuiItemTile(
+                    key: Key('lbl_${label.id}'),
+                    item: label,
+                    keysPrefix: 'lbl',
+                    tilePadding: EdgeInsets.fromLTRB(16.0, index == 0 ? 10.0 : 0, 14.0, 10.0),
+                    contentbuilder: (onTapPerformed, onLongPress) {
+                      return LabelContainer(
+                        padding: const EdgeInsets.all(7.0),
+                        onTap: () {
+                          if (onTapPerformed()) {
+                            LabelInputDialog.show(
+                              context: context,
+                              text: label.text,
+                            ).then((value) {
+                              if (value != null) {
+                                label.text = value;
+                                AppData.updateLabel(AppData.labels.firstWhere((e) => e.id == label.id), value, _labelsManager);
+                              }
+                            });
+                          }
+                        },
+                        onLongPress: onLongPress,
+                        content: Text(
+                          label.text,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
               FiltersPanel(
-                guiManager: labelsManager,
+                guiManager: _labelsManager,
                 useFilterChips: false,
               ),
             ],
@@ -128,22 +149,18 @@ class _LabelsPageState extends State<LabelsPage> {
   }
 
   void _searchLabel() {
-    labelsManager.showSearchText.value = true;
-    labelsManager.searchTextFocusNode.requestFocus();
+    _labelsManager.showSearchText.value = true;
+    _labelsManager.searchTextFocusNode.requestFocus();
   }
 
-  void _removeLabel() async {
+  void _removeLabel() {
     a.runFirst(() async {
-      await labelsManager.startSlideAnimation(
+      await _labelsManager.startSlideAnimation(
         context: context,
         slideAnimationState: -1,
         afterAnimationStateAction: (selectedLabels) {
-          List<Label> labelsToRemove = [];
-          for (var label in selectedLabels) {
-            labelsToRemove.add(AppData.labels.firstWhere((e) => e.id == label.id));
-          }
-          AppData.removeLabels(labelsToRemove);
-          AppData.removeNotesFromLists(selectedLabels, labelsManager);
+          AppData.removeLabels(selectedLabels.map((e) => e.id).toList());
+          AppData.removeNotesFromLists(selectedLabels, _labelsManager);
         },
         successMessage: 'Selected labels were removed.',
         itemsNoun: 'labels',
@@ -164,15 +181,15 @@ class _LabelsPageState extends State<LabelsPage> {
     });
   }
 
-  void _didPop(bool didPop, BuildContext context) {
+  void _onPopInvoked(bool didPop, BuildContext context) {
     if (!didPop && !CustomShowCase.next(context)) {
-      if (labelsManager.selectionQuantity.value == null && !labelsManager.showSearchText.value) {
+      if (_labelsManager.selectionQuantity.value == null && !_labelsManager.showSearchText.value) {
         Navigator.pop(context);
       }
-      labelsManager.selectionQuantity.value = null;
-      labelsManager.showSearchText.value = false;
-      labelsManager.filters.value.text = '';
-      labelsManager.filters.notifyListeners();
+      _labelsManager.selectionQuantity.value = null;
+      _labelsManager.showSearchText.value = false;
+      _labelsManager.filters.value.text = '';
+      _labelsManager.filters.notifyListeners();
     }
   }
 
@@ -187,10 +204,10 @@ class _LabelsPageState extends State<LabelsPage> {
           icon: const Icon(Icons.add_home_rounded),
           onPressed: () {
             a.runFirst(() async {
-              labelsManager.selectionQuantity.value = null;
-              var value = await EditLabelDialog.show(context: context);
+              _labelsManager.selectionQuantity.value = null;
+              var value = await LabelInputDialog.show(context: context);
               if (value != null) {
-                await AppData.newLabel(value, labelsManager);
+                await AppData.newLabel(value, _labelsManager);
               }
             });
           },

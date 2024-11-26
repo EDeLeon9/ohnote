@@ -7,8 +7,8 @@ class CustomCheckbox extends StatefulWidget {
     required this.onChanged,
     this.caption,
     this.width,
-    this.backgroundColor,
-    this.checkboxColor,
+    this.fillColor,
+    this.borderColor,
     this.padding,
     this.checkboxVisualDensity,
   });
@@ -17,8 +17,8 @@ class CustomCheckbox extends StatefulWidget {
   final bool Function() value;
   final void Function(bool value) onChanged;
   final double? width;
-  final Color? backgroundColor;
-  final Color? checkboxColor;
+  final Color? fillColor;
+  final Color? borderColor;
   final EdgeInsets? padding;
   final VisualDensity? checkboxVisualDensity;
 
@@ -31,8 +31,9 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
     var themedCheckbox = Theme(
-      data: Theme.of(context).copyWith(colorScheme: colorScheme.copyWith(onSurfaceVariant: widget.checkboxColor ?? colorScheme.primary)),
+      data: Theme.of(context).copyWith(colorScheme: colorScheme.copyWith(onSurfaceVariant: widget.borderColor ?? colorScheme.primary)),
       child: Checkbox(
+        fillColor: WidgetStateProperty.resolveWith((states) => !states.contains(WidgetState.selected) ? widget.fillColor : null),
         visualDensity: widget.checkboxVisualDensity,
         value: widget.value(),
         onChanged: (value) {
@@ -44,7 +45,6 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
     );
     return Container(
       width: widget.width,
-      color: widget.backgroundColor,
       padding: widget.padding,
       child: widget.caption != null
           ? Row(

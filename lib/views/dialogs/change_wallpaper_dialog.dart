@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/settings.dart';
+import 'package:ohnote/tools/scrollview_with_bar.dart';
 
 class ChangeWallpaperDialog {
   const ChangeWallpaperDialog._();
@@ -10,13 +11,14 @@ class ChangeWallpaperDialog {
       context: context,
       builder: (context) {
         return AlertDialog(
-          contentPadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
+          contentPadding: const EdgeInsets.fromLTRB(13.0, 15.0, 13.0, 10.0),
           actionsPadding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 15.0),
           title: Text(
             'Select wallpaper:',
             style: Theme.of(context).textTheme.bodyLarge!,
           ),
-          content: SingleChildScrollView(
+          content: ScrollViewWithBar(
+            paddng: const EdgeInsets.symmetric(horizontal: 7.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 240.0),
               child: Wrap(

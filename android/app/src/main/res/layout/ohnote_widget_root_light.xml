@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Theme.Android.AppWidgetContainerLight"
+    style="@style/Widget.Android.AppWidget.ContainerLight">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background="@drawable/app_widget_header_background_light"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginTop="1dp"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="OhNote"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+                
+            <Button
+                android:id="@+id/addNoteButton"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:minHeight="5dp"
+                android:paddingLeft="1dp"
+                android:paddingBottom="1dp"
+                android:layout_alignParentRight="true"
+                android:text="+"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_button_text_light"
+                android:background="@drawable/app_widget_button_add_light" />
+        </RelativeLayout>
+            
+        <include layout="@layout/ohnote_widget_listview" />
+    </LinearLayout>
+</RelativeLayout>

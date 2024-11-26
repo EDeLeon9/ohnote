@@ -3,6 +3,11 @@
     <!-- Having themes.xml for v31 variant because @android:dimen/system_app_widget_background_radius
      and @android:dimen/system_app_widget_internal_padding requires API level 31 -->
     <style name="Theme.Android.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault.DayNight">
-        <item name="appWidgetRadius">@android:dimen/system_app_widget_background_radius</item>
+        <!-- <item name="appWidgetRadius">@android:dimen/system_app_widget_background_radius</item> -->
+    </style>
+    <style name="Theme.Android.AppWidgetContainerParentLight" parent="@android:style/Theme.DeviceDefault.Light">
+    </style>
+    <style name="Theme.Android.AppWidgetContainerParentDark" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:forceDarkAllowed">true</item>
     </style>
 </resources>

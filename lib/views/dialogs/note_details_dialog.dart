@@ -2,28 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/scrollview_with_bar.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
 import 'package:ohnote/view_components/header_container.dart';
 
-class DetailsDialog extends StatefulWidget {
-  const DetailsDialog._(this.note);
+class NoteDetailsDialog extends StatefulWidget {
+  const NoteDetailsDialog._(this.note);
 
   final Note note;
 
   @override
-  State<DetailsDialog> createState() => _DetailsDialogState();
+  State<NoteDetailsDialog> createState() => _NoteDetailsDialogState();
 
   static Future<bool?> show({required BuildContext context, required Note note}) async {
     return showDialog<bool>(
       context: context,
       builder: (context) {
-        return DetailsDialog._(note);
+        return NoteDetailsDialog._(note);
       },
     );
   }
 }
 
-class _DetailsDialogState extends State<DetailsDialog> {
+class _NoteDetailsDialogState extends State<NoteDetailsDialog> {
   final _detailsDialogSCK = ShowCaseKey(FirstAccess.detailsDialogSC);
 
   @override
@@ -52,7 +53,7 @@ class _DetailsDialogState extends State<DetailsDialog> {
         clipBehavior: Clip.antiAlias,
         titlePadding: EdgeInsets.zero,
         insetPadding: const EdgeInsets.all(24.0),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15.0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
         actionsPadding: const EdgeInsets.fromLTRB(15.0, 7.0, 15.0, 15.0),
         title: HeaderContainer(
           child: Padding(
@@ -65,9 +66,9 @@ class _DetailsDialogState extends State<DetailsDialog> {
                       style: Theme.of(context).textTheme.bodySmall, //Size of the cursor and spacing between lines.
                       children: [
                         TextSpan(text: 'Creation date\n', style: subtitleTextStyle),
-                        TextSpan(text: widget.note.localFormatCreationDateTime, style: titleTextStyle),
+                        TextSpan(text: widget.note.localeFormatCreationDateTime, style: titleTextStyle),
                         TextSpan(text: '\nModification date\n', style: subtitleTextStyle),
-                        TextSpan(text: widget.note.localFormatModifDateTime, style: titleTextStyle),
+                        TextSpan(text: widget.note.localeFormatModifDateTime, style: titleTextStyle),
                       ],
                     ),
                     maxLines: 6, //Helps to size the SelectableText.
@@ -81,27 +82,25 @@ class _DetailsDialogState extends State<DetailsDialog> {
             ),
           ),
         ),
-        content: SingleChildScrollView(
+        content: ScrollViewWithBar(
+          paddng: const EdgeInsets.only(left: 7.0, top: 10.0, right: 7.0),
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: Stack(
-                children: [
-                  CustomShowCase(
-                    showCaseKey: _detailsDialogSCK,
-                    description: 'You can select and copy\nthe details and even the\ndate if you need to.',
-                    child: const SizedBox(
-                      width: double.infinity,
-                      child: Text(' '),
-                    ),
+            child: Stack(
+              children: [
+                CustomShowCase(
+                  showCaseKey: _detailsDialogSCK,
+                  description: 'You can select and copy\nthe details and even the\ndate if you need to.',
+                  child: const SizedBox(
+                    width: double.infinity,
+                    child: Text(' '),
                   ),
-                  SelectableText(
-                    widget.note.text,
-                    showCursor: true,
-                  ),
-                ],
-              ),
+                ),
+                SelectableText(
+                  widget.note.text,
+                  showCursor: true,
+                ),
+              ],
             ),
           ),
         ),
