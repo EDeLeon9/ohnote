@@ -76,79 +76,83 @@ internal fun updateAppWidget(
     appWidgetId: Int,
     prefs: SharedPreferences
 ) {
-    val configId = getConfigId(context, appWidgetId, prefs)
-    if (configId != -1) {
-        
-        val noteListString = getNoteListString(context, appWidgetId, configId, prefs)
-        val configString = getConfigString(context, appWidgetId, configId, prefs)
-        val configItem = buildConfigurationItem(configString)
+    val widgetValues = getWidgetValues(context, appWidgetId, prefs)
 
-        var rootLayoutId = R.layout.ohnote_widget_root_100
-        var itemTextColor = -1
-        if (configItem != null) {
-            if (configItem.theme == "Light theme") {
-                rootLayoutId = R.layout.ohnote_widget_root_light
-                itemTextColor = context.getColor(R.color.widget_text_light)
-            } else if (configItem.theme == "Dark theme") {
-                rootLayoutId = R.layout.ohnote_widget_root_dark
-                itemTextColor = context.getColor(R.color.widget_text_dark)
-            }
+    var rootLayoutId = R.layout.ohnote_widget_root
+    var backgroundColor = -1
+    var rowTextColor = -1
+    if (widgetValues.configItem != null) {
+        if (widgetValues.configItem.theme == "Light theme") {
+            rootLayoutId = R.layout.ohnote_widget_root_light
+            backgroundColor = context.getColor(R.color.widget_background_light)
+            rowTextColor = context.getColor(R.color.widget_text_light)
+        } else if (widgetValues.configItem.theme == "Dark theme") {
+            rootLayoutId = R.layout.ohnote_widget_root_dark
+            backgroundColor = context.getColor(R.color.widget_background_dark)
+            rowTextColor = context.getColor(R.color.widget_text_dark)
+        } else {
+            rootLayoutId = getSystemDefaultRootLayoutId(widgetValues.configItem.opacity);
         }
-
-        val listViewIntent = Intent(context, NoteListViewWidgetService::class.java).apply {
-            // Add the widget ID to the intent extras.
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            putExtra(EXTRA_NOTELIST, noteListString)
-            putExtra(EXTRA_ITEM_TEXTCOLOR, itemTextColor)
-            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
-        }
-
-        val views = RemoteViews(context.packageName, rootLayoutId).apply {  
-            
-            setRemoteAdapter(R.id.noteListView, listViewIntent)
-            
-            println("------------------------------------Test if last config changes remains after delete")
-            // if (configItem != null) {
-            //     //setText(configItem.title)
-            //     var color: Int;
-            //     if (configItem.theme == "Light theme") {
-            //         color = context.getColor(R.color.widget_background_light)
-            //     } else if (configItem.theme == "Dark theme") {
-            //         color = context.getColor(R.color.widget_background_dark)
-            //     }
-            //     //setInt(R.id.widgetRoot, "setBackgroundColor", Color.argb(alpha.roundToInt(), Color.red(color), Color.green(color), Color.blue(color)))
-            //     //setInt(R.id.widgetRoot, "setBackgroundColor", color)
-            // }
-
-            if (configId == 0) {
-                setViewVisibility(R.id.removedTextView, View.VISIBLE)
-                // The empty view is displayed when the collection has no items.
-                setEmptyView(R.id.noteListView, R.id.removedTextView)
-            } else {
-                setViewVisibility(R.id.removedTextView, View.GONE)
-            }
-
-            // PendingIntent to open app on widget click
-            val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
-            setOnClickPendingIntent(R.id.widgetRoot, pendingIntent)
-
-            val buttonPendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=0"))
-            setOnClickPendingIntent(R.id.addNoteButton, buttonPendingIntent)
-
-            // This section makes it possible for items to have individualized. It does this by setting up a pending intent template.
-            // Individuals items of a collection can't set up their own pending intents. Instead, the collection as a whole sets up a pending
-            // intent template, and the individual items set a fillInIntent to create unique behavior on an item-by-item basis.
-            val pendingIntentTemplate = Intent(context, OhNoteWidget::class.java).run {
-                action = INTENT_OPEN_ACTION
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
-                PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
-            }
-            setPendingIntentTemplate(R.id.noteListView, pendingIntentTemplate)
-        }
-
-        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
+
+    val listViewIntent = Intent(context, NoteListViewWidgetService::class.java).apply {
+        // Add the widget ID to the intent extras.
+        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        putExtra(EXTRA_NOTELIST, widgetValues.noteListString)
+        putExtra(EXTRA_ITEM_TEXTCOLOR, rowTextColor)
+        data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+    }
+
+    val views = RemoteViews(context.packageName, rootLayoutId).apply {
+        setRemoteAdapter(R.id.noteListView, listViewIntent)
+        
+        if (widgetValues.configItem != null) {
+            setTextViewText(R.id.titleTextView, widgetValues.configItem.title)
+            if (widgetValues.configItem.opacity == 0) {
+                setInt(R.id.widgetRoot, "setBackgroundColor", Color.argb(0, 0, 0, 0))
+            } else if (backgroundColor != -1) {
+                var alpha = (widgetValues.configItem.opacity / 100.0) * 255.0
+                setInt(R.id.widgetRoot, "setBackgroundColor", 
+                    Color.argb(alpha.roundToInt(), Color.red(backgroundColor), Color.green(backgroundColor), Color.blue(backgroundColor)))
+            }
+            if (rowTextColor != -1) {
+                setTextColor(R.id.emptyTextView, rowTextColor)
+            }
+        }
+
+        // The empty view is displayed when the collection has no items.
+        if (widgetValues.configId > 0 ) {
+            setViewVisibility(R.id.emptyTextView, View.GONE)
+        } else {
+            if (widgetValues.configId == 0) {
+                setTextViewText(R.id.emptyTextView, "The configuration for this widget was removed. Replace this widget with a new one.")
+            } else {
+                setTextViewText(R.id.emptyTextView, "An error occured while loading the widget configuration data.")
+            }
+            setEmptyView(R.id.noteListView, R.id.emptyTextView)
+            setViewVisibility(R.id.emptyTextView, View.VISIBLE)
+        }
+
+        // PendingIntent to open app on widget click
+        val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
+        setOnClickPendingIntent(R.id.widgetRoot, pendingIntent)
+
+        val buttonPendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=0"))
+        setOnClickPendingIntent(R.id.addNoteButton, buttonPendingIntent)
+
+        // This section makes it possible for items to have individualized. It does this by setting up a pending intent template.
+        // Individuals items of a collection can't set up their own pending intents. Instead, the collection as a whole sets up a pending
+        // intent template, and the individual items set a fillInIntent to create unique behavior on an item-by-item basis.
+        val pendingIntentTemplate = Intent(context, OhNoteWidget::class.java).run {
+            action = INTENT_OPEN_ACTION
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+            PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+        }
+        setPendingIntentTemplate(R.id.noteListView, pendingIntentTemplate)
+    }
+
+    appWidgetManager.updateAppWidget(appWidgetId, views)
 }
 
 //Service added in AndroidManifest.xml
@@ -181,7 +185,7 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
         // from the network, etc., it is ok to do it here, synchronously. The widget will remain
         // in its current state while work is being done here, so you don't need to worry about
         // locking up the widget.
-        textColor = intent.getIntExtra(EXTRA_ITEM_TEXTCOLOR, -1);
+        textColor = intent.getIntExtra(EXTRA_ITEM_TEXTCOLOR, -1)
         val list: ArrayList<NoteItem> = arrayListOf()
         val noteListString = intent.getStringExtra(EXTRA_NOTELIST)
         val jsonArray = JSONTokener(noteListString).nextValue() as JSONArray
@@ -235,4 +239,30 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
     }
 
     private class NoteItem(val id: Int, val text: String)
+}
+
+private fun getSystemDefaultRootLayoutId(opacity: Int): Int {
+    return when (opacity) {
+        100 -> R.layout.ohnote_widget_root
+        95 -> R.layout.ohnote_widget_root_95
+        90 -> R.layout.ohnote_widget_root_90
+        85 -> R.layout.ohnote_widget_root_85
+        80 -> R.layout.ohnote_widget_root_80
+        75 -> R.layout.ohnote_widget_root_75
+        70 -> R.layout.ohnote_widget_root_70
+        65 -> R.layout.ohnote_widget_root_65
+        60 -> R.layout.ohnote_widget_root_60
+        55 -> R.layout.ohnote_widget_root_55
+        50 -> R.layout.ohnote_widget_root_50
+        45 -> R.layout.ohnote_widget_root_45
+        40 -> R.layout.ohnote_widget_root_40
+        35 -> R.layout.ohnote_widget_root_35
+        30 -> R.layout.ohnote_widget_root_30
+        25 -> R.layout.ohnote_widget_root_25
+        20 -> R.layout.ohnote_widget_root_20
+        15 -> R.layout.ohnote_widget_root_15
+        10 -> R.layout.ohnote_widget_root_10
+        5 -> R.layout.ohnote_widget_root_5
+        else -> R.layout.ohnote_widget_root
+    }
 }

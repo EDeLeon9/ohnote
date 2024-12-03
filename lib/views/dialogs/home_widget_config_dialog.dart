@@ -198,7 +198,7 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
           Slider(
             min: 0.0,
             max: 100.0,
-            divisions: 100,
+            divisions: 20,
             value: _homeWidgetConfigResult.opacity.toDouble(),
             onChanged: (value) {
               setState(() {

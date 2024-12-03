@@ -13,7 +13,7 @@
         android:paddingRight="12dp"
         android:maxLines="1"
         android:textSize="14sp" 
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@color/widget_text"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true" />
 </LinearLayout>

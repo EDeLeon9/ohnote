@@ -10,4 +10,25 @@
     <color name="widget_disabled_button">#5F5F5F</color>
     <color name="widget_selected_item">#50D0F2FF</color>
     <color name="widget_divider_config">#40484C</color>
+
+    <!-- System default -->
+    <color name="widget_background_95">#F2191F21</color>
+    <color name="widget_background_90">#E6191F21</color>
+    <color name="widget_background_85">#D9191F21</color>
+    <color name="widget_background_80">#CC191F21</color>
+    <color name="widget_background_75">#BF191F21</color>
+    <color name="widget_background_70">#B3191F21</color>
+    <color name="widget_background_65">#A6191F21</color>
+    <color name="widget_background_60">#99191F21</color>
+    <color name="widget_background_55">#8C191F21</color>
+    <color name="widget_background_50">#80191F21</color>
+    <color name="widget_background_45">#73191F21</color>
+    <color name="widget_background_40">#66191F21</color>
+    <color name="widget_background_35">#59191F21</color>
+    <color name="widget_background_30">#4D191F21</color>
+    <color name="widget_background_25">#40191F21</color>
+    <color name="widget_background_20">#33191F21</color>
+    <color name="widget_background_15">#26191F21</color>
+    <color name="widget_background_10">#1A191F21</color>
+    <color name="widget_background_5">#0D191F21</color>
 </resources>

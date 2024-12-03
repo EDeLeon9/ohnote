@@ -29,4 +29,25 @@
     <color name="widget_button_text_dark">#010F13</color>
     <color name="widget_button_dark">#D0F2FF</color>
     <color name="widget_pressed_button_dark">#C4DCE5</color>
+
+    <!-- System default -->
+    <color name="widget_background_95">#F2F7EDE3</color>
+    <color name="widget_background_90">#E6F7EDE3</color>
+    <color name="widget_background_85">#D9F7EDE3</color>
+    <color name="widget_background_80">#CCF7EDE3</color>
+    <color name="widget_background_75">#BFF7EDE3</color>
+    <color name="widget_background_70">#B3F7EDE3</color>
+    <color name="widget_background_65">#A6F7EDE3</color>
+    <color name="widget_background_60">#99F7EDE3</color>
+    <color name="widget_background_55">#8CF7EDE3</color>
+    <color name="widget_background_50">#80F7EDE3</color>
+    <color name="widget_background_45">#73F7EDE3</color>
+    <color name="widget_background_40">#66F7EDE3</color>
+    <color name="widget_background_35">#59F7EDE3</color>
+    <color name="widget_background_30">#4DF7EDE3</color>
+    <color name="widget_background_25">#40F7EDE3</color>
+    <color name="widget_background_20">#33F7EDE3</color>
+    <color name="widget_background_15">#26F7EDE3</color>
+    <color name="widget_background_10">#1AF7EDE3</color>
+    <color name="widget_background_5">#0DF7EDE3</color>
 </resources>

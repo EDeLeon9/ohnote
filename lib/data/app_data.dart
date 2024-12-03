@@ -243,6 +243,7 @@ class AppData {
         filters: Filters.fromDbQuery(filtersQuery[id]!),
       );
     }).toList();
+    homeWidgetConfigs.sort((a, b) => a.id.compareTo(b.id));
 
     //Filters
     notesManager.filters.value = Filters.fromDbQuery(filtersQuery[0]!);
@@ -950,7 +951,7 @@ class AppData {
     }
   }
 
-  static void updateHomeWidget([bool updateConfigList = false, int? maxId]) async {
+  static void updateHomeWidget([bool updateConfigurations = false, int? maxId]) async {
     maxId ??= homeWidgetConfigs.map((e) => e.id).max;
     List<Future> requests = [];
     var allList = List.of(notesManager.allList);
@@ -962,17 +963,13 @@ class AppData {
     var consecutiveIdsConfigs =
         List.generate(maxId, (index) => homeWidgetConfigs.firstWhereOrNull((e) => e.id == index + 1) ?? HomeWidgetConfig(id: index + 1));
     var serializableObjects = Map.fromEntries(consecutiveIdsConfigs.map((e) {
-      return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[REMOVED]');
+      return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[]');
     }));
-    if (updateConfigList) {
+    if (updateConfigurations) {
       serializableObjects.addAll({'_ohNoteWidgetConfigIds': homeWidgetConfigs.map((e) => e.id).toList()});
       serializableObjects.addAll(Map.fromEntries(consecutiveIdsConfigs.map((e) {
         return MapEntry('_ohNoteWidgetConfig_${e.id}', e.notesManager.displayList.value != null ? e : '[REMOVED]');
       })));
-      for (var config in homeWidgetConfigs) {
-        config.notesManager.allList = allList;
-        requests.add(config.notesManager.requestUpdateDisplayList());
-      }
     }
     await HomeWidgetManager.updateWidgetWithSerializable(serializableObjects);
   }

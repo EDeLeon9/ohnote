@@ -49,6 +49,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
               guiManager: _homeWidgetConfigManager,
             ))
         .toList();
+    _homeWidgetConfigManager.allList.sort(_homeWidgetConfigManager.sortComparison);
     _homeWidgetConfigManager.requestUpdateDisplayList();
     CustomShowCase.startShowCase(
       context: context,
@@ -131,7 +132,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
                         child: SplashOverlay(
                           onTap: () {
                             if (onTapPerformed()) {
-                              _openHomeWidgetConfig(homeWidgetConfig);
+                              _editHomeWidgetConfig(homeWidgetConfig);
                             }
                           },
                           onLongPress: onLongPress,
@@ -158,7 +159,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
     }
   }
 
-  void _openHomeWidgetConfig([HomeWidgetConfig? homeWidgetConfig]) {
+  void _editHomeWidgetConfig([HomeWidgetConfig? homeWidgetConfig]) {
     _homeWidgetConfigManager.selectionQuantity.value = null;
     HomeWidgetConfigDialog.show(
       context: context,
@@ -173,7 +174,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
           AppData.homeWidgetConfigs.sort((a, b) => a.id.compareTo(b.id));
           int id = (AppData.homeWidgetConfigs.lastWhereOrNull((e) => e.id == AppData.homeWidgetConfigs.indexOf(e) + 1)?.id ?? 0) + 1;
           homeWidgetConfig = HomeWidgetConfig(id: id, creationDateTime: DateTime.now());
-          AppData.homeWidgetConfigs.add(homeWidgetConfig!);
+          AppData.homeWidgetConfigs.insert(id - 1, homeWidgetConfig!);
           hwcNote = Note(
             id: id,
             text: value.title,
@@ -181,6 +182,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
             creationDateTime: homeWidgetConfig!.creationDateTime,
           );
           _homeWidgetConfigManager.allList.add(hwcNote);
+          _homeWidgetConfigManager.allList.sort(_homeWidgetConfigManager.sortComparison);
         } else {
           hwcNote = _homeWidgetConfigManager.allList.where((e) => e.id == homeWidgetConfig!.id).first;
           hwcNote.text = value.title;
@@ -232,7 +234,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
         tooltip: 'New home widget configuration',
         icon: const Icon(Icons.add_card),
         onPressed: () {
-          _openHomeWidgetConfig();
+          _editHomeWidgetConfig();
         },
       ),
     );

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:theme="@style/Theme.Android.AppWidgetContainer"
     style="@style/Widget.Android.AppWidget.Container"
-    android:background="@color/widget_background_50">
+    android:background="@color/widget_background_35">
 
     <include layout="@layout/ohnote_widget" />
 </RelativeLayout>

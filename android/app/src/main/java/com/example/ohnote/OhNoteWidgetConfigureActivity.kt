@@ -115,7 +115,7 @@ class OhNoteWidgetConfigureActivity : Activity() {
     }
 }
 
-internal fun buildConfigurationsArray(prefs: SharedPreferences): ArrayList<ConfigurationItem> {
+private fun buildConfigurationsArray(prefs: SharedPreferences): ArrayList<ConfigurationItem> {
     val arrayList: ArrayList<ConfigurationItem> = arrayListOf()
     var configIdsString = prefs.getString(PREF_CONFIG_IDS, "[]")!!
     if (configIdsString != "[]") {
@@ -132,7 +132,7 @@ internal fun buildConfigurationsArray(prefs: SharedPreferences): ArrayList<Confi
     return arrayList
 }
 
-internal fun buildConfigurationItem(configString: String): ConfigurationItem? {
+private fun buildConfigurationItem(configString: String): ConfigurationItem? {
     if (configString != ""){
         val configJson = JSONTokener(configString).nextValue() as JSONObject
         val filters = ArrayList<String>()
@@ -151,34 +151,30 @@ internal fun buildConfigurationItem(configString: String): ConfigurationItem? {
     return null
 }
 
-internal fun getNoteListString(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences): String {
-    return getStringAndSetIfRemoved(context, appWidgetId, configId, prefs, PREF_NOTELIST)
-}
-
-internal fun getConfigString(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences): String {
-    return getStringAndSetIfRemoved(context, appWidgetId, configId, prefs, PREF_CONFIG)
-}
-
-private fun getStringAndSetIfRemoved(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences, valueName: String): String {
-    //val defaultResult = "{\"title\":\"\",\"theme\":\"System default\",\"opacity\":100,\"list\":\"[]\"}"
-    if (configId > 0) {
-        val dataString = prefs.getString("$valueName$configId", "[]")
-        if (dataString != "\"[REMOVED]\"") {
-            return dataString!!
-        }
-        setConfigId(context, appWidgetId, 0, prefs)
-    }
-    return "[]"
-}
-
-internal fun getConfigId(context: Context, appWidgetId: Int, prefs: SharedPreferences): Int {
-    return prefs.getInt("$PREF_CONFIG_ID$appWidgetId", -1)
-}
-
-internal fun setConfigId(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences) {
+private fun setConfigId(context: Context, appWidgetId: Int, configId: Int, prefs: SharedPreferences) {
     val prefsEdit = prefs.edit()
     prefsEdit.putInt("$PREF_CONFIG_ID$appWidgetId", configId)
     prefsEdit.apply()
+}
+
+internal fun getWidgetValues(context: Context, appWidgetId: Int, prefs: SharedPreferences): WidgetValues {
+    var configString = ""
+    var noteListString = "[]"
+    var configItem: ConfigurationItem? = null
+    var configId = prefs.getInt("$PREF_CONFIG_ID$appWidgetId", -1)
+    if (configId > 0) {
+        configString = prefs.getString("$PREF_CONFIG$configId", "")!!
+        if (configString == "\"[REMOVED]\"") {
+            configId = 0
+            setConfigId(context, appWidgetId, 0, prefs)
+        } else if (configString == "") {
+            configId = -1
+        } else {
+            configItem = buildConfigurationItem(configString)
+            noteListString = prefs.getString("$PREF_NOTELIST$configId", "[]")!!
+        }
+    }
+    return WidgetValues(configId, configItem, noteListString)
 }
 
 internal fun deleteConfigId(context: Context, appWidgetId: Int, prefs: SharedPreferences) {
@@ -194,6 +190,11 @@ class ConfigurationItem(
     val opacity: Int, 
     val creationDateTime: String, 
     val filters: ArrayList<String>)
+
+class WidgetValues(
+    val configId: Int,
+    val configItem: ConfigurationItem?,
+    val noteListString: String)
 
 class ConfigurationsListViewAdapter(context: Context, items: ArrayList<ConfigurationItem>) : ArrayAdapter<ConfigurationItem>(context, 0, items) {
     private var selectedPosition: Int = -1

@@ -11,16 +11,16 @@
             android:dividerHeight="1dp" />
         
         <TextView
-            android:id="@+id/removedTextView"
+            android:id="@+id/emptyTextView"
             android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:textStyle="bold"
-            android:text="The configuration for this widget was removed. Replace this widget with a new one."
-            android:textColor="?android:attr/textColorPrimary"
+            android:text=""
+            android:textColor="@color/widget_text"
             android:textSize="14sp" />
     </FrameLayout>
 </merge>
