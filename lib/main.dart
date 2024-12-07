@@ -10,7 +10,7 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Borrar drawable/app_widget_divider.xml y drawable-v21/app_widget_background.xml si no son necesarios.
+//Deslizar a la izquierda o derecha para cambiar de nota cuando se está en modo edición
 //Mejorar ícono con transparencia (se ve una rayita arriba del lápiz al abrir la app).
 //Hacer el preview para mostrar cuando se va a agregar Homescreen widget, actualmente muestra el widget vacío (creo que tiene que usarse el android:previewImage en vez de android:previewLayout en ohnote_widget_info.xml).
 //cambiar com.example.ohnote a com.<empresa>.ohnote, esto seguro requiere hacer backup antes de desinstalar e instalar
@@ -20,13 +20,12 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Solicitar Rate us.
 //Autenticación google para guardar base de datos (como sería en iPhone? tambien google?).
 //About page (investigar que se debe o que se recomienda poner ahí).
-//Ver si no es complicado de implementar, sino puede esperar: Error handling (enviar errores a desarrollador).
+//Ver si no es complicado de implementar, sino puede esperar: Error handling (enviar errores periódicamente a desarrollador).
 //Verificar si hay cambios en nested_scroll_view.dart para flutter_nestedscrollview.dart y date_picker.dart del paquete flutter_holo_date_picker para HoloDatePicker
 //---------------Puede esperar:
 //Idioma español.
-//Opciones para hacer share (por ejemplo enviar por correo o copiar al portapapeles).
-//Importar, exportar
-//Deslizar a la izquierda o derecha para cambiar de nota cuando se está en modo edición
+//Opciones para hacer share de nota (por ejemplo enviar por correo o copiar al portapapeles).
+//Importar, exportar data (bd)
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); //Required by HomeWidgetManager and AppData.
@@ -37,7 +36,7 @@ void main() {
     iOSWidgetName: 'OhNoteWidget',
     runEnsureInitialized: false,
   );
-  AppData.initData(runEnsureInitialized: false);
+  AppData.initData(runEnsureInitialized: false); //WidgetsFlutterBinding.ensureInitialized() already run.
   runApp(const OhNoteApp());
 }
 

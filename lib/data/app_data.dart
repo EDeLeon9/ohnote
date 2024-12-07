@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:ohnote/data/filters.dart';
 import 'package:ohnote/data/home_widget_config.dart';
@@ -48,11 +49,16 @@ class AppData {
     getComparisonDateTime: (note) => note.modifDateTime,
   );
 
-  //Public using get and set
   static String? _dbPath;
   static Future<String> get dbPath async {
     _dbPath ??= p.join(await getDatabasesPath(), 'ohnote.db');
     return _dbPath!;
+  }
+
+  static String? _errorsPath;
+  static Future<String?> get errorsPath async {
+    _errorsPath ??= (await Directory(p.join((await getApplicationDocumentsDirectory()).path, 'error_logs')).create(recursive: true)).path;
+    return _errorsPath;
   }
 
   static List<Label> _labels = [];
@@ -82,24 +88,7 @@ class AppData {
       openDbId,
       await openDatabase(
         await dbPath,
-        //TODO: set to version 1.
-        version: 5,
-        onUpgrade: (db, oldVersion, newVersion) async {
-          if (oldVersion < 3) {
-            await db.execute('DELETE FROM first_access');
-            for (var firstAccess in FirstAccess.values) {
-              await db.insert('first_access', {'param': firstAccess.name});
-            }
-            await db.insert('settings', {'param': Settings.hideRemoveHomeWidgetConfigDialog.name, 'value': false.toString()});
-            await db.execute('CREATE TABLE home_widget_config('
-                'id INTEGER PRIMARY KEY, '
-                'title VARCHAR(30) NOT NULL, '
-                'theme VARCHAR(25) NOT NULL, '
-                'opacity INTEGER NOT NULL,'
-                'creation_date_time VARCHAR(25) NOT NULL)');
-            await db.execute('ALTER TABLE filters ADD COLUMN home_widget_config_id INTEGER');
-          }
-        },
+        version: 1,
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '
@@ -184,8 +173,6 @@ class AppData {
 
   static void initData({bool runEnsureInitialized = true}) async {
     HomeWidgetManager.onError = _error;
-
-    //Open db
     if (runEnsureInitialized) {
       WidgetsFlutterBinding.ensureInitialized(); //Avoid errors caused by flutter upgrade.
     }
@@ -193,6 +180,10 @@ class AppData {
       _resetDatabase = false;
       await _deleteDb();
     }
+
+    //TODO: Just for tests, remove before publishing
+    await _dbBackup();
+
     var iDb = await _openDb();
 
     //Settings
@@ -270,6 +261,8 @@ class AppData {
       where: 'parent_id IS NULL AND history_date_time IS NULL AND trash_date_time IS NULL AND archive_date_time IS NULL',
     );
     notesManager.requestUpdateDisplayList();
+
+    updateHomeWidget();
 
     validateTimeInTrash();
 
@@ -378,7 +371,7 @@ class AppData {
             _notesUserOrder.insert(0, newId);
             await _updateDbNotesUserOrder(iDb);
           } else {
-            _error('ERROR');
+            await _error('ERROR');
           }
         } else {
           query = await iDb.db.query(
@@ -404,13 +397,13 @@ class AppData {
             }
             await iDb.db.update('notes', map, where: 'id = ?', whereArgs: [parentId]);
           } else {
-            _error('ERROR');
+            await _error('ERROR');
           }
         }
       }
       var count = await _clearDraft(iDb);
       if (count <= 0) {
-        _error('ERROR');
+        await _error('ERROR');
       }
     }
   }
@@ -455,8 +448,8 @@ class AppData {
         _closeDb(iDb);
       }
     } else {
+      await _error('ERROR');
       _closeDb(iDb);
-      _error('ERROR');
     }
     return newId;
   }
@@ -504,7 +497,7 @@ class AppData {
     }
     var count = await iDb.db.update('notes', updateMap, where: 'id = ?', whereArgs: [draftId ?? note.id]);
     if (count <= 0) {
-      _error('ERROR');
+      await _error('ERROR');
     }
     await _closeDb(iDb);
   }
@@ -514,7 +507,7 @@ class AppData {
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate('UPDATE notes SET $field = $value WHERE id IN (${notes.map((e) => e.id).join(',')})');
       if (count <= 0) {
-        _error('ERROR');
+        await _error('ERROR');
       }
       await _closeDb(iDb);
     }
@@ -925,6 +918,23 @@ class AppData {
     await _closeDb(iDb);
   }
 
+  static Future<void> _dbBackup() async {
+    var externalPath = await getExternalStorageDirectory();
+    if (externalPath != null) {
+      try {
+        var dbFile = File(await dbPath);
+        if (await dbFile.exists()) {
+          var backupDir = await Directory(p.join(externalPath.path, 'db_backup')).create(recursive: true);
+          dbFile.copy(p.join(backupDir.path, 'ohnote_backup.db'));
+        }
+      } catch (e) {
+        _error('Error performing database backup. $e');
+      }
+    } else {
+      _error('External storage path couldn\'t be obtained.');
+    }
+  }
+
   static void updateDbShownFirstAccesses(List<FirstAccess> shownfirstAccesses, bool value) async {
     if (shownfirstAccesses.isNotEmpty) {
       var iDb = await _openDb();
@@ -944,7 +954,7 @@ class AppData {
       for (var setting in settings) {
         var count = await iDb.db.update('settings', {'value': settingsValues[setting]}, where: 'param = ?', whereArgs: [setting.name]);
         if (count <= 0) {
-          _error('ERROR');
+          await _error('ERROR');
         }
       }
       await _closeDb(iDb);
@@ -952,33 +962,60 @@ class AppData {
   }
 
   static void updateHomeWidget([bool updateConfigurations = false, int? maxId]) async {
-    maxId ??= homeWidgetConfigs.map((e) => e.id).max;
-    List<Future> requests = [];
-    var allList = List.of(notesManager.allList);
-    for (var config in homeWidgetConfigs) {
-      config.notesManager.allList = allList;
-      requests.add(config.notesManager.requestUpdateDisplayList());
+    maxId ??= homeWidgetConfigs.map((e) => e.id).maxOrNull;
+    if (maxId != null) {
+      List<Future> requests = [];
+      var allList = List.of(notesManager.allList);
+      for (var config in homeWidgetConfigs) {
+        config.notesManager.allList = allList;
+        requests.add(config.notesManager.requestUpdateDisplayList());
+      }
+      await Future.wait(requests);
+      var consecutiveIdsConfigs =
+          List.generate(maxId, (index) => homeWidgetConfigs.firstWhereOrNull((e) => e.id == index + 1) ?? HomeWidgetConfig(id: index + 1));
+      var serializableObjects = Map.fromEntries(consecutiveIdsConfigs.map((e) {
+        return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[]');
+      }));
+      if (updateConfigurations) {
+        serializableObjects.addAll({'_ohNoteWidgetConfigIds': homeWidgetConfigs.map((e) => e.id).toList()});
+        serializableObjects.addAll(Map.fromEntries(consecutiveIdsConfigs.map((e) {
+          return MapEntry('_ohNoteWidgetConfig_${e.id}', e.notesManager.displayList.value != null ? e : '[REMOVED]');
+        })));
+      }
+      await HomeWidgetManager.updateWidgetWithSerializable(serializableObjects);
     }
-    await Future.wait(requests);
-    var consecutiveIdsConfigs =
-        List.generate(maxId, (index) => homeWidgetConfigs.firstWhereOrNull((e) => e.id == index + 1) ?? HomeWidgetConfig(id: index + 1));
-    var serializableObjects = Map.fromEntries(consecutiveIdsConfigs.map((e) {
-      return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[]');
-    }));
-    if (updateConfigurations) {
-      serializableObjects.addAll({'_ohNoteWidgetConfigIds': homeWidgetConfigs.map((e) => e.id).toList()});
-      serializableObjects.addAll(Map.fromEntries(consecutiveIdsConfigs.map((e) {
-        return MapEntry('_ohNoteWidgetConfig_${e.id}', e.notesManager.displayList.value != null ? e : '[REMOVED]');
-      })));
-    }
-    await HomeWidgetManager.updateWidgetWithSerializable(serializableObjects);
   }
 
-  static void _error(String msg) {
+  //TODO: set valid messages for "_error('ERROR')" lines
+  static Future<void> _error(Object message) async {
+    var msg = '';
     try {
-      throw Exception(msg);
+      throw message;
     } catch (e, s) {
-      print('$msg\n$s');
+      msg = '$message${Platform.lineTerminator}$s';
+    }
+    var errPath = await errorsPath;
+    if (errPath != null) {
+      File? logFile;
+      int? index = 1;
+      var now = DateTime.now();
+      try {
+        while (index != null) {
+          logFile = File(p.join(
+              errPath, 'ohnote_error_log_${now.parseDateToStr(DTToStrFormat.DATABASE).replaceAll('-', '')}${index == 1 ? '' : '_($index)'}.log'));
+          if (await logFile.exists()) {
+            double mb = ((await logFile.length()) / 1024.0) / 1024.0;
+            if (mb > 2.0) {
+              index++;
+            } else {
+              index = null;
+            }
+          } else {
+            index = null;
+          }
+        }
+        await logFile!.writeAsString('${now.parseToStr(DTToStrFormat.LOCALE)}: $msg${Platform.lineTerminator}', mode: FileMode.writeOnlyAppend);
+      } catch (_) {}
     }
   }
 }

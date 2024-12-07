@@ -229,7 +229,8 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
   Widget _newHomeWidgetConfigButton() {
     return CustomShowCase(
       showCaseKey: _newHomeWidgetConfigSCK,
-      description: 'Tap here to create a\nhome widget configu-\nration which you can\nuse when adding a\nwidget in your home\nscreen.',
+      description:
+          'Tap here to create a\nhome widget configu-\nration which you can\nuse when adding a\nwidget in your home\nscreen. You can even\nedit it later and the\nwidget in your home\nscreen will update too.',
       child: IconButton(
         tooltip: 'New home widget configuration',
         icon: const Icon(Icons.add_card),

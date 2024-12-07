@@ -63,8 +63,14 @@ class OhNoteWidget : HomeWidgetProvider() {
         // Called when the BroadcastReceiver receives an Intent broadcast.
         if (intent.action == INTENT_OPEN_ACTION) {
             val noteId = intent.getIntExtra(EXTRA_ITEM_NOTEID, 0)
-            val activity = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=$noteId"))
-            activity.send()
+            
+            //Using an intent directly instead of getting a PendingIntent from HomeWidgetLaunchIntent.getActivity()
+            val launchIntent = Intent(context, MainActivity::class.java).apply {
+                action = "es.antonborri.home_widget.action.LAUNCH"  //action string From HomeWidgetLaunchIntent: https://github.com/ABausG/home_widget/blob/main/packages/home_widget/android/src/main/kotlin/es/antonborri/home_widget/HomeWidgetIntent.kt
+                data = Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=$noteId")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            context.startActivity(launchIntent)
         }
         super.onReceive(context, intent)
     }
@@ -91,7 +97,7 @@ internal fun updateAppWidget(
             backgroundColor = context.getColor(R.color.widget_background_dark)
             rowTextColor = context.getColor(R.color.widget_text_dark)
         } else {
-            rootLayoutId = getSystemDefaultRootLayoutId(widgetValues.configItem.opacity);
+            rootLayoutId = getSystemDefaultRootLayoutId(widgetValues.configItem.opacity)
         }
     }
 
@@ -165,7 +171,6 @@ class NoteListViewWidgetService : RemoteViewsService() {
 class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
     private var data: ArrayList<NoteItem> = arrayListOf()
     private var textColor: Int = -1
-    private val views = RemoteViews(context.packageName, R.layout.ohnote_widget_listviewitem)
         
     override fun onCreate() {
         // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
@@ -219,10 +224,8 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
     }
 
     override fun getViewAt(position: Int): RemoteViews {
-        if (textColor != -1) {
-            views.setTextColor(R.id.rowTextView, textColor)
-        }
-        views.setTextViewText(R.id.rowTextView, data[position].text)
+        println("-----------------------------------------------------------------getViewAt")
+        var views = RemoteViews(context.packageName, R.layout.ohnote_widget_listviewitem)
         var bundle = Bundle().apply { 
             putInt(EXTRA_ITEM_NOTEID, data[position].id)
         }
@@ -230,6 +233,11 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
             putExtras(bundle)
         }
         views.setOnClickFillInIntent(R.id.rowTextView, intent)
+        if (textColor != -1) {
+            views.setTextColor(R.id.rowTextView, textColor)
+        }
+        println("-----------------------------------------------------------------getViewAt: setOnClickFillInIntent")
+        views.setTextViewText(R.id.rowTextView, data[position].text)
         if (position == data.count() - 1) {
             views.setViewLayoutHeight(R.id.rowLayout, 25f, TypedValue.COMPLEX_UNIT_DIP)
         } else {

@@ -313,7 +313,7 @@ class MainScaffoldState extends State<MainScaffold> {
   }
 
   Future<void> _initialized() async {
-    while (!AppData.dataInitialized.value || _launchedFromHomeWidget == null) {
+    while (!mounted || !AppData.dataInitialized.value || _launchedFromHomeWidget == null) {
       await Future.delayed(const Duration(milliseconds: 10));
     }
   }
