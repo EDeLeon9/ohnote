@@ -60,7 +60,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: null,
+          onPressed: () => Navigator.pop(context, _filtersResult),
           child: const Text('APPLY'),
         ),
         TextButton(

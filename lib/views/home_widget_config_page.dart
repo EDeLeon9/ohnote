@@ -262,7 +262,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
                 color: Theme.of(context).colorScheme.surface.withOpacity(homeWidgetConfig.opacity / 100.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 35.0), //Height of the HeaderContainer.
+                    const SizedBox(height: 35.0), //Space for the HeaderContainer.
                     ListView.separated(
                       shrinkWrap: true, //Avoids error related of infinite height.
                       itemCount: textItems.length,

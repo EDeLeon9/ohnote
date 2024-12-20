@@ -13,7 +13,7 @@ class StyleColorPickerDialog {
           contentPadding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0.0),
           actionsPadding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 15.0),
           content: ScrollViewWithBar(
-            paddng: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Transform.translate(
               offset: const Offset(0.0, 10.0),
               child: SlidePicker(

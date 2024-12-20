@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 
 class ScrollViewWithBar extends StatefulWidget {
-  const ScrollViewWithBar({super.key, required this.child, this.paddng = EdgeInsets.zero, this.controller});
+  const ScrollViewWithBar({
+    super.key,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.scrollbarMainAxisMargin = 0.0,
+    this.scrollbarCrossAxisMargin = 0.0,
+    this.controller,
+  });
 
   final Widget child;
-  final EdgeInsets paddng;
+  final EdgeInsets padding;
+  final double scrollbarMainAxisMargin;
+  final double scrollbarCrossAxisMargin;
   final ScrollController? controller;
 
   @override
@@ -30,15 +39,20 @@ class _ScrollViewWithBarState extends State<ScrollViewWithBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      thumbVisibility: _thumbVisibility,
-      controller: widget.controller,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: widget.paddng,
-          child: widget.child,
+    return Theme(
+        data: Theme.of(context).copyWith(
+          scrollbarTheme: ScrollbarThemeData(
+            crossAxisMargin: widget.scrollbarCrossAxisMargin,
+            mainAxisMargin: widget.scrollbarMainAxisMargin,
+          ),
         ),
-      ),
-    );
+        child: Scrollbar(
+          thumbVisibility: _thumbVisibility,
+          controller: widget.controller,
+          child: SingleChildScrollView(
+            padding: widget.padding,
+            child: widget.child,
+          ),
+        ));
   }
 }

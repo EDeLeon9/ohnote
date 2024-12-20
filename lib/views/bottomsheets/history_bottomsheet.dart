@@ -90,7 +90,7 @@ class HistoryBottomSheet {
   Widget _body(ScrollController sheetScrollController) {
     return Column(
       children: [
-        const SizedBox(height: 72.0), //Height of the HeaderContainer.
+        const SizedBox(height: 72.0), //Space for the HeaderContainer.
         GuiListViewBuilder(
           expand: true,
           scrollController: sheetScrollController,

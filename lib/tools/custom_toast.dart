@@ -40,6 +40,7 @@ class _CustomToastState extends State<_CustomToast> {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 100.0),
             child: Text(
+              textAlign: TextAlign.center,
               widget.message,
               style: TextStyle(color: Theme.of(context).colorScheme.onInverseSurface),
             ),

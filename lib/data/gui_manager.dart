@@ -22,8 +22,6 @@ class GuiManager {
     filters.addListener(requestUpdateDisplayList);
   }
 
-  static final List<Stopwatch> _filterStopwatches = [];
-
   List<Note> allList = [];
   final displayList = ValueNotifierPlus<List<Note>?>(null);
   final filters = ValueNotifierPlus<Filters>(Filters());
@@ -92,36 +90,26 @@ class GuiManager {
 
   Future<void> _filterList(BoxedValue<bool> cancelFiltering) async {
     if (selectionQuantity.value != null) {
-      selectionQuantity.value = 0;
-      if (displayList.value?.any((e) => e.isChecked.value) == true) {
-        setIsCheckedToAll(false);
-      }
+      selectionQuantity.value = null;
     }
     if (filters.value.hasApplied()) {
       List<Note> filteredList = [];
       var stopwatch = Stopwatch();
-      _filterStopwatches.add(stopwatch);
       stopwatch.start();
       for (var note in allList) {
         if (cancelFiltering.value) {
           break;
         }
-        if (stopwatch.elapsedMilliseconds >= 10) {
-          //TODO: test with several home widget configs
-          stopwatch.stop();
-          stopwatch.reset();
-          do {
-            await Future.delayed(const Duration(milliseconds: 0));
-          } while (_filterStopwatches.any((e) => e.isRunning));
-          stopwatch.start();
-          displayList.value = null; //Enables wait animation.
-        }
         if (noteIsInFilter(note)) {
           filteredList.add(note);
         }
+        if (stopwatch.elapsedMilliseconds >= 10) {
+          displayList.value = null; //Enables wait animation.
+          await Future.delayed(const Duration(milliseconds: 1));
+          stopwatch.reset();
+        }
       }
       stopwatch.stop();
-      _filterStopwatches.remove(stopwatch);
       if (!cancelFiltering.value) {
         displayList.value = filteredList;
       }

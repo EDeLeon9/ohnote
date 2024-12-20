@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:ohnote/tools/error_logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:ohnote/data/filters.dart';
 import 'package:ohnote/data/home_widget_config.dart';
@@ -37,6 +37,7 @@ class AppData {
 
   //Public
   static final dataInitialized = ValueNotifier<bool>(false);
+  static bool? launchedFromHomeWidget;
   static final themeBrightness = ValueNotifier<AppThemeBrightness>(AppThemeBrightness.systemDefault);
   static bool themeUpdatedFromSettings = false;
   static final appliedWallpaper = ValueNotifier<AssetImage?>(null); //Used instead of settings value to control the update moment of the wallpaper
@@ -49,16 +50,10 @@ class AppData {
     getComparisonDateTime: (note) => note.modifDateTime,
   );
 
-  static String? _dbPath;
-  static Future<String> get dbPath async {
-    _dbPath ??= p.join(await getDatabasesPath(), 'ohnote.db');
-    return _dbPath!;
-  }
-
-  static String? _errorsPath;
-  static Future<String?> get errorsPath async {
-    _errorsPath ??= (await Directory(p.join((await getApplicationDocumentsDirectory()).path, 'error_logs')).create(recursive: true)).path;
-    return _errorsPath;
+  static String? __dbPath;
+  static Future<String> get _dbPath async {
+    __dbPath ??= p.join(await getDatabasesPath(), 'ohnote.db');
+    return __dbPath!;
   }
 
   static List<Label> _labels = [];
@@ -72,7 +67,7 @@ class AppData {
 
   //Functions
   static Future<void> _deleteDb() async {
-    var dbFile = File(await dbPath);
+    var dbFile = File(await _dbPath);
     if (await dbFile.exists()) {
       await dbFile.delete();
     }
@@ -87,7 +82,7 @@ class AppData {
     return _IndexedDatabase(
       openDbId,
       await openDatabase(
-        await dbPath,
+        await _dbPath,
         version: 1,
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
@@ -100,7 +95,7 @@ class AppData {
           await db.insert('settings', {'param': Settings.defaultNumberOfLines.name, 'value': '1'});
           await db.insert('settings', {'param': Settings.maxHistory.name, 'value': '5'});
           await db.insert('settings', {'param': Settings.useCreationDateTime.name, 'value': false.toString()});
-          await db.insert('settings', {'param': Settings.lastSortBy.name, 'value': SortByOrder.asc.name});
+          await db.insert('settings', {'param': Settings.lastSortByOrder.name, 'value': SortByOrder.asc.name});
           await db.insert('settings', {'param': Settings.hideSendToTrashDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideArchiveNotesDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideRemovePermanentlyDialog.name, 'value': false.toString()});
@@ -181,9 +176,6 @@ class AppData {
       await _deleteDb();
     }
 
-    //TODO: Just for tests, remove before publishing
-    await _dbBackup();
-
     var iDb = await _openDb();
 
     //Settings
@@ -196,7 +188,6 @@ class AppData {
     void onUseCreationDateTimeChanged() {
       notesManager.getComparisonDateTime =
           useCreationDateTime.value == true.toString() ? (note) => note.creationDateTime : (note) => note.modifDateTime;
-      notesManager.requestUpdateDisplayList();
     }
 
     useCreationDateTime.removeListener(onUseCreationDateTimeChanged);
@@ -336,6 +327,7 @@ class AppData {
   static Future<void> _recoverFromDraft(_IndexedDatabase iDb) async {
     List<Map<String, dynamic>> query = await iDb.db.query('notes',
         columns: [
+          'id',
           'text',
           'modif_date_time',
           'creation_date_time',
@@ -371,7 +363,8 @@ class AppData {
             _notesUserOrder.insert(0, newId);
             await _updateDbNotesUserOrder(iDb);
           } else {
-            await _error('ERROR');
+            //TODO: test all error logs
+            _error('Error on creating a new note from draft. Draft Id: ${draft['id']}.');
           }
         } else {
           query = await iDb.db.query(
@@ -397,13 +390,13 @@ class AppData {
             }
             await iDb.db.update('notes', map, where: 'id = ?', whereArgs: [parentId]);
           } else {
-            await _error('ERROR');
+            _error('Error on updating a note from draft. Draft Id: ${draft['id']}.');
           }
         }
       }
       var count = await _clearDraft(iDb);
       if (count <= 0) {
-        await _error('ERROR');
+        _error('Error on clearing the draft. Draft Id: ${draft['id']}.');
       }
     }
   }
@@ -448,7 +441,7 @@ class AppData {
         _closeDb(iDb);
       }
     } else {
-      await _error('ERROR');
+      _error('Error on creating a new note.');
       _closeDb(iDb);
     }
     return newId;
@@ -497,17 +490,18 @@ class AppData {
     }
     var count = await iDb.db.update('notes', updateMap, where: 'id = ?', whereArgs: [draftId ?? note.id]);
     if (count <= 0) {
-      await _error('ERROR');
+      _error('Error on updating a note. Note Id: ${draftId ?? note.id}.');
     }
     await _closeDb(iDb);
   }
 
   static void updateDbNotes(List<Note> notes, String field, String value) async {
     if (notes.isNotEmpty) {
+      var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
-      var count = await iDb.db.rawUpdate('UPDATE notes SET $field = $value WHERE id IN (${notes.map((e) => e.id).join(',')})');
+      var count = await iDb.db.rawUpdate('UPDATE notes SET $field = $value WHERE id IN ($ids)');
       if (count <= 0) {
-        await _error('ERROR');
+        _error('Error on updating a list of notes. Note Ids: $ids, field: $field, value: $value.');
       }
       await _closeDb(iDb);
     }
@@ -515,10 +509,11 @@ class AppData {
 
   static void removeDbHistory(List<Note> history) async {
     if (history.isNotEmpty) {
+      var ids = history.map((e) => e.id).join(',');
       var iDb = await _openDb();
-      var count = await iDb.db.rawDelete('DELETE FROM notes WHERE id IN (${history.map((e) => e.id).join(',')})');
+      var count = await iDb.db.rawDelete('DELETE FROM notes WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on removing the history of a note. History Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -555,10 +550,10 @@ class AppData {
     if (count > 0) {
       count = await iDb.db.delete('notes', where: 'id = ?', whereArgs: [history.id]);
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on deleting a note history. History Id: ${history.id}, note Id: ${note.id}.');
       }
     } else {
-      _error('ERROR');
+      _error('Error on restoring a note from the history. Note Id: ${note.id}, history Id: ${history.id}.');
     }
     await _closeDb(iDb);
   }
@@ -567,11 +562,12 @@ class AppData {
     if (notes.isNotEmpty) {
       removeNotesFromLists(notes, notesManager);
       updateHomeWidget();
+      var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
-      var count = await iDb.db.rawUpdate(
-          'UPDATE notes SET archive_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\' WHERE id IN (${notes.map((e) => e.id).join(',')})');
+      var count =
+          await iDb.db.rawUpdate('UPDATE notes SET archive_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\' WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on archiving a list of notes. Note Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -581,11 +577,12 @@ class AppData {
     if (notes.isNotEmpty) {
       removeNotesFromLists(notes, notesManager);
       updateHomeWidget();
+      var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
-          'UPDATE notes SET trash_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN (${notes.map((e) => e.id).join(',')})');
+          'UPDATE notes SET trash_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on sending a list of notes to trash can. Note Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -593,15 +590,15 @@ class AppData {
 
   static void removeTrash(List<Note> trashNotes, GuiManager trashManager) async {
     if (trashNotes.isNotEmpty) {
-      var idString = trashNotes.map((e) => e.id).join(',');
+      var ids = trashNotes.map((e) => e.id).join(',');
       removeNotesFromLists(trashNotes, trashManager);
       for (var note in trashNotes) {
         _notesUserOrder.remove(note.id);
       }
       var iDb = await _openDb();
-      var count = await iDb.db.rawDelete('DELETE FROM notes WHERE id IN ($idString) OR parent_id IN ($idString)');
+      var count = await iDb.db.rawDelete('DELETE FROM notes WHERE id IN ($ids) OR parent_id IN ($ids)');
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on removing a list of notes permanently from trash can. Note Ids: $ids.');
       }
       await _updateDbNotesUserOrder(iDb);
       await _closeDb(iDb);
@@ -618,11 +615,11 @@ class AppData {
       notesManager.allList = [...notesManager.allList, ...notes].sorted(notesManager.sortComparison);
       updateHomeWidget();
       notesManager.requestUpdateDisplayList();
+      var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
-      var count = await iDb.db
-          .rawUpdate('UPDATE notes SET trash_date_time = NULL, archive_date_time = NULL WHERE id IN (${notes.map((e) => e.id).join(',')})');
+      var count = await iDb.db.rawUpdate('UPDATE notes SET trash_date_time = NULL, archive_date_time = NULL WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on restoring a list of notes to the main list. Note Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -639,7 +636,7 @@ class AppData {
         ...labelsManager.allList,
       ].sorted(labelsManager.sortComparison);
     } else {
-      _error('ERROR');
+      _error('Error on creating a new label.');
     }
     _closeDb(iDb);
     labelsManager?.requestUpdateDisplayList();
@@ -653,14 +650,14 @@ class AppData {
     var iDb = await _openDb();
     var count = await iDb.db.update('labels', {'text': value}, where: 'id = ?', whereArgs: [label.id]);
     if (count <= 0) {
-      _error('ERROR');
+      _error('Error on updating the text of a label. Label Id: ${label.id}, value: $value.');
     }
     await _closeDb(iDb);
   }
 
   static void removeLabels(List<int> labelIds) async {
     if (labelIds.isNotEmpty) {
-      var idString = labelIds.join(',');
+      var labelIdsString = labelIds.join(',');
       var notesWithLabelIds = <Note>[];
       for (var labelId in labelIds) {
         for (var note in notesManager.allList.where((e) => e.labelIds.contains(labelId)).toList()) {
@@ -673,13 +670,14 @@ class AppData {
       labels.removeWhere((e) => labelIds.contains(e.id));
       updateHomeWidget();
       var iDb = await _openDb();
-      var count = await iDb.db.rawDelete('DELETE FROM labels WHERE id IN ($idString)');
-      for (var note in notesWithLabelIds) {
-        //Note: trash and archive labelIds will be removed from db when querying the notes (_queryNotes() function)
-        await iDb.db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
-      }
-      if (count <= 0) {
-        _error('ERROR');
+      var count = await iDb.db.rawDelete('DELETE FROM labels WHERE id IN ($labelIdsString)');
+      if (count > 0) {
+        for (var note in notesWithLabelIds) {
+          //Note: trash and archive labelIds will be removed from db when querying the notes (_queryNotes() function)
+          await iDb.db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
+        }
+      } else {
+        _error('Error on removing a list of labels. Label Ids: $labelIdsString.');
       }
       await _closeDb(iDb);
     }
@@ -712,7 +710,7 @@ class AppData {
     if (dbResult > 0) {
       await _updateDbFilters(iDb, homeWidgetConfig.notesManager.filters.value, false, isNew, homeWidgetConfig.id);
     } else {
-      _error('ERROR');
+      _error('Error on ${isNew ? 'creating a new' : 'updating a'} home widget config. Home widget config Id: ${homeWidgetConfig.id}.');
     }
     _closeDb(iDb);
   }
@@ -725,9 +723,11 @@ class AppData {
       var count = await iDb.db.rawDelete('DELETE FROM filters WHERE home_widget_config_id IN ($idString)');
       if (count > 0) {
         count = await iDb.db.rawDelete('DELETE FROM home_widget_config WHERE id IN ($idString)');
-      }
-      if (count <= 0) {
-        _error('ERROR');
+        if (count <= 0) {
+          _error('Error on removing a list of home widget config. Home widget config Ids: $idString.');
+        }
+      } else {
+        _error('Error on removing the filters of home widget configs. Home widget config Ids: $idString.');
       }
       _closeDb(iDb);
     }
@@ -764,7 +764,7 @@ class AppData {
   }
 
   static void sortNotes(int Function(Note a, Note b) sortByComparison, SortByOrder order) async {
-    settings[Settings.lastSortBy]!.value = order.name;
+    settings[Settings.lastSortByOrder]!.value = order.name;
     int Function(Note a, Note b) comparison = sortByComparison;
     if (order == SortByOrder.desc) {
       comparison = (a, b) => sortByComparison(b, a);
@@ -801,17 +801,18 @@ class AppData {
     notesManager.requestUpdateDisplayList();
     var iDb = await _openDb();
     await _updateDbNotesUserOrder(iDb);
-    var count = await iDb.db.update('settings', {'value': order.name}, where: 'param = ?', whereArgs: [Settings.lastSortBy.name]);
+    var count = await iDb.db.update('settings', {'value': order.name}, where: 'param = ?', whereArgs: [Settings.lastSortByOrder.name]);
     if (count <= 0) {
-      _error('ERROR');
+      _error('Error on updating the used "Sort by order". Value: ${order.name}.');
     }
     await _closeDb(iDb);
   }
 
   static Future<void> _updateDbNotesUserOrder(_IndexedDatabase iDb, [bool closeDb = false]) async {
-    var count = await iDb.db.update('notes_user_order', {'data': _notesUserOrder.join(',')});
+    var data = _notesUserOrder.join(',');
+    var count = await iDb.db.update('notes_user_order', {'data': data});
     if (count <= 0) {
-      _error('ERROR');
+      _error('Error on updating the user orders of the main list notes. Data: $data.');
     }
     if (closeDb) {
       await _closeDb(iDb);
@@ -856,7 +857,7 @@ class AppData {
       'color': color,
     });
     if (id <= 0) {
-      _error('ERROR');
+      _error('Error on adding a history to a note. Note Id: $parentId.');
     }
   }
 
@@ -878,21 +879,23 @@ class AppData {
 
     Future<void> upsert(String filterName, String value, bool notNullCondition) async {
       int dbResult;
+      var dbValue = notNullCondition ? value : null;
       if (insert) {
         dbResult = await iDb.db.insert(
           'filters',
-          {'filter': filterName, 'value': notNullCondition ? value : null, 'home_widget_config_id': homeWidgetConfigId},
+          {'filter': filterName, 'value': dbValue, 'home_widget_config_id': homeWidgetConfigId},
         );
       } else {
         dbResult = await iDb.db.update(
           'filters',
-          {'value': notNullCondition ? value : null},
+          {'value': dbValue},
           where: where,
           whereArgs: homeWidgetConfigId != null ? [filterName, homeWidgetConfigId] : [filterName],
         );
       }
       if (dbResult <= 0) {
-        _error('ERROR');
+        _error(
+            'Error on ${insert ? 'creating a new' : 'updating a'} filter. Filter name: $filterName, value: $dbValue, ${homeWidgetConfigId == null ? 'no home widget config Id' : 'home widget config Id: $homeWidgetConfigId.'}');
       }
     }
 
@@ -918,30 +921,13 @@ class AppData {
     await _closeDb(iDb);
   }
 
-  static Future<void> _dbBackup() async {
-    var externalPath = await getExternalStorageDirectory();
-    if (externalPath != null) {
-      try {
-        var dbFile = File(await dbPath);
-        if (await dbFile.exists()) {
-          var backupDir = await Directory(p.join(externalPath.path, 'db_backup')).create(recursive: true);
-          dbFile.copy(p.join(backupDir.path, 'ohnote_backup.db'));
-        }
-      } catch (e) {
-        _error('Error performing database backup. $e');
-      }
-    } else {
-      _error('External storage path couldn\'t be obtained.');
-    }
-  }
-
   static void updateDbShownFirstAccesses(List<FirstAccess> shownfirstAccesses, bool value) async {
     if (shownfirstAccesses.isNotEmpty) {
+      var paramNames = shownfirstAccesses.map((e) => '\'${e.name}\'').join(',');
       var iDb = await _openDb();
-      var count = await iDb.db
-          .rawUpdate('UPDATE first_access SET shown = ${value ? 1 : 0} WHERE param IN (${shownfirstAccesses.map((e) => '\'${e.name}\'').join(',')})');
+      var count = await iDb.db.rawUpdate('UPDATE first_access SET shown = ${value ? 1 : 0} WHERE param IN ($paramNames)');
       if (count <= 0) {
-        _error('ERROR');
+        _error('Error on updating first access values. Param names: $paramNames.');
       }
       await _closeDb(iDb);
     }
@@ -952,9 +938,10 @@ class AppData {
       var settingsValues = Map.fromEntries(settings.map((e) => MapEntry(e, AppData.settings[e]!.value)));
       var iDb = await _openDb();
       for (var setting in settings) {
-        var count = await iDb.db.update('settings', {'value': settingsValues[setting]}, where: 'param = ?', whereArgs: [setting.name]);
+        var value = settingsValues[setting];
+        var count = await iDb.db.update('settings', {'value': value}, where: 'param = ?', whereArgs: [setting.name]);
         if (count <= 0) {
-          await _error('ERROR');
+          _error('Error on updating a setting. Setting name: ${setting.name}, value: $value.');
         }
       }
       await _closeDb(iDb);
@@ -986,36 +973,42 @@ class AppData {
     }
   }
 
-  //TODO: set valid messages for "_error('ERROR')" lines
-  static Future<void> _error(Object message) async {
-    var msg = '';
+  // static Future<bool> dbBackup() async {
+  //   var externalPath = await pp.getExternalStorageDirectory();
+  //   if (externalPath != null) {
+  //     try {
+  //       var backupDir = await Directory(p.join(externalPath.path, 'db_backup')).create(recursive: true);
+  //       File(await _dbPath).copy(p.join(backupDir.path, 'ohnote_backup.db'));
+  //       return true;
+  //     } catch (e) {
+  //       _error('Error on performing backup. $e');
+  //     }
+  //   } else {
+  //     _error('External storage path couldn\'t be obtained.');
+  //   }
+  //   return false;
+  // }
+
+  static Future<bool> dbBackup() async {
     try {
-      throw message;
-    } catch (e, s) {
-      msg = '$message${Platform.lineTerminator}$s';
+      Directory destination = Directory('${Platform.pathSeparator}${p.join('storage', 'emulated', '0', 'Download')}');
+      // if (Platform.isIOS) {
+      //   destination =  await pp.getApplicationDocumentsDirectory();
+      // }
+      if ((await destination.exists()) == true) {
+        await File(await _dbPath).copy(p.join(destination.path, 'ohnote_backup.db'));
+        return true;
+      } else {
+        _error('Destination directory for backup couldn\'t be obtained or doesn\'t exist.');
+      }
+    } catch (e) {
+      _error('Error on performing backup. Try deleting the previous backup file in Download folder. Message: $e');
     }
-    var errPath = await errorsPath;
-    if (errPath != null) {
-      File? logFile;
-      int? index = 1;
-      var now = DateTime.now();
-      try {
-        while (index != null) {
-          logFile = File(p.join(
-              errPath, 'ohnote_error_log_${now.parseDateToStr(DTToStrFormat.DATABASE).replaceAll('-', '')}${index == 1 ? '' : '_($index)'}.log'));
-          if (await logFile.exists()) {
-            double mb = ((await logFile.length()) / 1024.0) / 1024.0;
-            if (mb > 2.0) {
-              index++;
-            } else {
-              index = null;
-            }
-          } else {
-            index = null;
-          }
-        }
-        await logFile!.writeAsString('${now.parseToStr(DTToStrFormat.LOCALE)}: $msg${Platform.lineTerminator}', mode: FileMode.writeOnlyAppend);
-      } catch (_) {}
-    }
+    return false;
+  }
+
+  static void _error(String msg) {
+    //TODO: Show error bar ONCE on top the whole app until close in x button or restarted (like going back to home or force closing).
+    ErrorLogger.log(msg);
   }
 }

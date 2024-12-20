@@ -72,7 +72,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
             description: 'Select the labels you want\nto attach to the note, then\npress "Done" to apply the\nlabels.',
             child: ScrollViewWithBar(
               //Padding avoids shadows to be hidden
-              paddng: const EdgeInsets.all(3.0),
+              padding: const EdgeInsets.all(3.0),
               child: Wrap(
                 spacing: 15.0,
                 runSpacing: 10.0,

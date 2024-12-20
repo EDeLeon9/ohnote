@@ -80,7 +80,6 @@ class Filters {
   bool hasApplied() => favorites || from != null || to != null || text.isNotEmpty || labelIds.isNotEmpty || colors.isNotEmpty || crossedOut;
 
   List<String> getAppliedCaptions([bool detailed = false]) {
-    //TODO: test replaceAll('\r', '')
     var textResult = text.split('\n')[0].replaceAll('\r', '');
     if (textResult.length > 400) {
       textResult = textResult.substring(0, 400);

@@ -83,7 +83,7 @@ class _NoteDetailsDialogState extends State<NoteDetailsDialog> {
           ),
         ),
         content: ScrollViewWithBar(
-          paddng: const EdgeInsets.only(left: 7.0, top: 10.0, right: 7.0),
+          padding: const EdgeInsets.only(left: 7.0, top: 10.0, right: 7.0),
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Stack(

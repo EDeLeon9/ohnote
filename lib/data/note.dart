@@ -145,7 +145,6 @@ class Note {
 
   //Used by jsonEncode in HomeWidgetManager.
   Map<String, dynamic> toJson() {
-    //TODO: test replaceAll('\r', '')
     var textResult = text.split('\n')[0].replaceAll('\r', '');
     if (textResult.length > 400) {
       textResult = textResult.substring(0, 400);

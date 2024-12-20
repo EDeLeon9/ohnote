@@ -63,7 +63,7 @@ class _MainDrawerState extends State<MainDrawer> {
           ListView(
             padding: EdgeInsets.zero,
             children: [
-              const SizedBox(height: 93.0), //Height of the HeaderContainer.
+              const SizedBox(height: 93.0), //Space of the HeaderContainer.
               ListTile(
                 title: const Text('Labels'),
                 leading: Icon(Icons.label, color: fontColor),
@@ -108,6 +108,29 @@ class _MainDrawerState extends State<MainDrawer> {
                   t.showCustomToast('Comming soon...', context);
                 },
               ),
+              //TODO: This backup option just for tests, comment this and AppData dbBackup function (and remove AndroidManifest.xml READ, WRITE and MANAGE uses-permission and requestLegacyExternalStorage).
+              c.defaultDivider,
+              ListTile(
+                title: const Text('Backup'),
+                leading: Icon(Icons.backup, color: fontColor),
+                onTap: () async {
+                  a.runFirst(
+                    () async {
+                      if (AppData.launchedFromHomeWidget == false) {
+                        String msg;
+                        if (await AppData.dbBackup()) {
+                          msg = 'Backup performed successfully.';
+                        } else {
+                          msg = 'Error on performing backup.';
+                        }
+                        if (context.mounted) {
+                          t.showCustomToast(msg, context);
+                        }
+                      }
+                    },
+                  );
+                },
+              ),
             ],
           ),
           //Header is required to be above the rest of the widgets to spread the shadow.
@@ -115,6 +138,7 @@ class _MainDrawerState extends State<MainDrawer> {
             children: [
               HeaderContainer(
                 child: ListTile(
+                  //TODO: Icons.account_circle as button for open/login account (also add option from settings), and remember to validate AppData.launchedFromHomeWidget == false for Icon action.
                   //leading: Icon(Icons.account_circle, size: 50.0, color: fontColor),
                   leading: Image(
                     height: 45.0,
@@ -150,18 +174,20 @@ class _MainDrawerState extends State<MainDrawer> {
   }
 
   void _openPage<T>(Widget page, BuildContext context, [void Function(T? value)? whenClosingPage]) {
-    Navigator.pop(context);
-    _singleAsync.runFirst(() async {
-      await Future.delayed(_drawerAnimationDuration);
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          SmoothMaterialPageRoute<T>(builder: (context) => page),
-        ).then((value) {
-          whenClosingPage?.call(value);
-        });
-      }
-    });
+    if (AppData.launchedFromHomeWidget == false) {
+      Navigator.pop(context);
+      _singleAsync.runFirst(() async {
+        await Future.delayed(_drawerAnimationDuration);
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            SmoothMaterialPageRoute<T>(builder: (context) => page),
+          ).then((value) {
+            whenClosingPage?.call(value);
+          });
+        }
+      });
+    }
   }
 
   //This starts loading the trash can notes to have it ready before opening the trash can page.

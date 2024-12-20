@@ -18,7 +18,7 @@ class ChangeWallpaperDialog {
             style: Theme.of(context).textTheme.bodyLarge!,
           ),
           content: ScrollViewWithBar(
-            paddng: const EdgeInsets.symmetric(horizontal: 7.0),
+            padding: const EdgeInsets.symmetric(horizontal: 7.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 240.0),
               child: Wrap(

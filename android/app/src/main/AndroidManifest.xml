@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ohnote">
-    <!-- For path_provider -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> <!-- For db backup -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> <!-- For db backup -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" /> <!-- For db backup -->
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:label="OhNote"
-        android:requestLegacyExternalStorage="true"> <!-- requestLegacyExternalStorage="true" for path_provider -->
+        android:requestLegacyExternalStorage="true"> <!-- For db backup -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

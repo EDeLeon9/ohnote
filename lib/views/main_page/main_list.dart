@@ -46,7 +46,7 @@ class MainList extends StatelessWidget {
           note: note,
           enableLongPress: false,
           onTap: () {
-            MainScaffold.of(context).openNote(note);
+            MainScaffold.of(context).openNote(note: note);
           },
         );
         return ReorderableDelayedDragStartListener(

@@ -61,46 +61,60 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
       clipBehavior: Clip.antiAlias,
       titlePadding: EdgeInsets.zero,
       insetPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
-      contentPadding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-      title: HeaderContainer(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 30.0, top: 18.0, bottom: 8.0),
-          child: Text(
-            '${widget.homeWidgetConfig == null ? 'New' : 'Edit'} Configuration',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Theme.of(context).colorScheme.primary),
+      contentPadding: const EdgeInsets.only(bottom: 5.0),
+      content: Stack(
+        children: [
+          ScrollViewWithBar(
+            scrollbarCrossAxisMargin: 10.0,
+            scrollbarMainAxisMargin: 55.0,
+            padding: EdgeInsets.only(top: 55.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _title(),
+                        c.defaultDivider,
+                        _theme(),
+                        c.defaultDivider,
+                        _opacity(),
+                      ],
+                    ),
+                  ),
+                  ..._filters(),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-      content: ScrollViewWithBar(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Column(
+          //Header is required to be above the rest of the widgets to spread the shadow.
+          Row(
             children: [
-              const SizedBox(height: 5.0),
-              _title(),
-              c.defaultDivider,
-              _theme(),
-              c.defaultDivider,
-              _opacity(),
-              c.defaultDivider,
-              //TODO: Filters header (sin curvatura obvio).
-              FiltersForm(
-                filtersToEdit: _homeWidgetConfigResult.notesManager.filters.value,
-                availableColors: AppData.notesManager.styleColors,
+              Expanded(
+                child: HeaderContainer(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 30.0, top: 18.0, bottom: 8.0),
+                    child: Text(
+                      '${widget.homeWidgetConfig == null ? 'New' : 'Edit'} Configuration',
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
       actions: [
         TextButton(
           onPressed: () {
             _homeWidgetConfigResult.title = _homeWidgetConfigResult.title.trim();
             if (_homeWidgetConfigResult.title.isEmpty) {
-              t.showCustomToast('Please set a title for the configuration.', context);
-            } else if (_opacityController.text.trim().isEmpty) {
-              //TODO: fix custom toast to center screen
-              t.showCustomToast('Please set a valid opacity for the configuration.', context);
+              t.showCustomToast('Please set a title for the widget.', context);
             } else {
               Navigator.pop(context, _homeWidgetConfigResult);
             }
@@ -122,7 +136,7 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
         children: [
           const Text('Widget title'),
           Padding(
-            padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+            padding: const EdgeInsets.symmetric(vertical: 5.0),
             child: LandscapeTextField(
               controller: _titleController,
               textFieldBuilder: (controller, focusNode, readOnly) {
@@ -245,5 +259,36 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
         ],
       ),
     );
+  }
+
+  List<Widget> _filters() {
+    var textTheme = Theme.of(context).textTheme.titleLarge!;
+    return [
+      Divider(height: 0.0),
+      ClipRect(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            HeaderContainer(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(26.0, 14.0, 26.0, 4.0),
+                child: Text(
+                  'Filters',
+                  style: textTheme.copyWith(color: Theme.of(context).colorScheme.primary, fontSize: textTheme.fontSize! - 1.0),
+                ),
+              ),
+            ),
+            SizedBox(height: 2.5),
+          ],
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.0),
+        child: FiltersForm(
+          filtersToEdit: _homeWidgetConfigResult.notesManager.filters.value,
+          availableColors: AppData.notesManager.styleColors,
+        ),
+      ),
+    ];
   }
 }

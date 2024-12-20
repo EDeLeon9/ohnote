@@ -23,6 +23,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Ver si no es complicado de implementar, sino puede esperar: Error handling (enviar errores periódicamente a desarrollador).
 //Verificar si hay cambios en nested_scroll_view.dart para flutter_nestedscrollview.dart y date_picker.dart del paquete flutter_holo_date_picker para HoloDatePicker
 //---------------Puede esperar:
+//Capturar errores de base de datos con try catch
 //Idioma español.
 //Opciones para hacer share de nota (por ejemplo enviar por correo o copiar al portapapeles).
 //Importar, exportar data (bd)

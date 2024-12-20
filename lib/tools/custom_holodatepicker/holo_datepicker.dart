@@ -1,21 +1,17 @@
 // ignore_for_file: unnecessary_this, unnecessary_const, use_super_parameters, no_logic_in_create_state, avoid_unnecessary_containers, avoid_function_literals_in_foreach_calls, prefer_const_constructors, prefer_single_quotes, curly_braces_in_flow_control_structures, no_leading_underscores_for_local_identifiers, prefer_conditional_assignment
 export 'package:flutter_holo_date_picker/date_picker_theme.dart';
 export 'package:ohnote/tools/custom_holodatepicker/holo_datetimepickertheme.dart';
-import 'package:ohnote/tools/custom_holodatepicker/holo_datetimepickertheme.dart';
 
+import 'package:ohnote/tools/custom_holodatepicker/holo_datetimepickertheme.dart';
 import 'dart:math';
 //import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter_holo_date_picker/date_time_formatter.dart';
-//import '../date_time_formatter.dart';
-import 'package:flutter_holo_date_picker/date_picker_theme.dart';
-//import '../date_picker_theme.dart';
-import 'package:flutter_holo_date_picker/date_picker_constants.dart';
-//import '../date_picker_constants.dart';
-import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
-//import '../i18n/date_picker_i18n.dart';
+import 'package:flutter_holo_date_picker/date_time_formatter.dart'; //import '../date_time_formatter.dart';
+import 'package:flutter_holo_date_picker/date_picker_theme.dart'; //import '../date_picker_theme.dart';
+import 'package:flutter_holo_date_picker/date_picker_constants.dart'; //import '../date_picker_constants.dart';
+import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart'; //import '../i18n/date_picker_i18n.dart';
 
 /// Solar months of 31 days.
 const List<int> _solarMonthsOf31Days = const <int>[1, 3, 5, 7, 8, 10, 12];
@@ -23,7 +19,7 @@ const List<int> _solarMonthsOf31Days = const <int>[1, 3, 5, 7, 8, 10, 12];
 /// DatePicker widget.
 //class DatePickerWidget extends StatefulWidget {
 class HoloDatePicker extends StatefulWidget {
-//DatePickerWidget({
+  //DatePickerWidget({
   HoloDatePicker({
     Key? key,
     this.firstDate,
@@ -31,8 +27,7 @@ class HoloDatePicker extends StatefulWidget {
     this.initialDate,
     this.dateFormat = DATETIME_PICKER_DATE_FORMAT,
     this.locale = DATETIME_PICKER_LOCALE_DEFAULT,
-    //this.pickerTheme = DateTimePickerTheme.Default,
-    this.pickerTheme = HoloDateTimePickerTheme.Default,
+    this.pickerTheme = HoloDateTimePickerTheme.Default, //this.pickerTheme = DateTimePickerTheme.Default,
     this.onCancel,
     this.onChange,
     this.onConfirm,
@@ -47,8 +42,7 @@ class HoloDatePicker extends StatefulWidget {
   final DateTime? firstDate, lastDate, initialDate;
   final String? dateFormat;
   final DateTimePickerLocale? locale;
-  //final DateTimePickerTheme? pickerTheme;
-  final HoloDateTimePickerTheme? pickerTheme;
+  final HoloDateTimePickerTheme? pickerTheme; //final DateTimePickerTheme? pickerTheme;
 
   final DateVoidCallback? onCancel;
   final DateValueCallback? onChange, onConfirm;
@@ -70,10 +64,12 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
   late Map<String, List<int>?> _valueRangeMap;
 
   bool _isChangeDateRange = false;
+
   // whene change year the returned month is incorrect with the shown one
   // So _lock make sure that month doesn't change from cupertino widget
   // we will handle it manually
   bool _lock = false;
+
   _DatePickerWidgetState(DateTime? minDateTime, DateTime? maxDateTime, DateTime? initialDateTime) {
     // handle current selected year、month、day
     DateTime initDateTime = initialDateTime ?? DateTime.now();
@@ -185,6 +181,19 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: pickers);
   }
 
+  Widget _dividerWidget() {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.pickerTheme!.dividerSpacing ?? MediaQuery.of(context).size.width * 0.02,
+      ),
+      child: Divider(
+        color: widget.pickerTheme!.dividerColor ?? widget.pickerTheme!.itemTextStyle.color,
+        height: widget.pickerTheme!.dividerHeight ?? DATETIME_PICKER_DIVIDER_HEIGHT,
+        thickness: widget.pickerTheme!.dividerThickness ?? DATETIME_PICKER_DIVIDER_THICKNESS,
+      ),
+    );
+  }
+
   Widget _renderDatePickerColumnComponent(
       {required FixedExtentScrollController? scrollCtrl,
       required List<int> valueRange,
@@ -207,8 +216,8 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
                   selectionOverlay: Container(),
                   backgroundColor: widget.pickerTheme!.backgroundColor,
                   scrollController: scrollCtrl,
-                  squeeze: 0.95,
-                  diameterRatio: 1.5,
+                  squeeze: widget.pickerTheme?.squeeze ?? DATETIME_PICKER_SQUEEZE,
+                  diameterRatio: widget.pickerTheme?.diameterRatio ?? DATETIME_PICKER_DIAMETER_RATIO,
                   itemExtent: widget.pickerTheme!.itemHeight,
                   onSelectedItemChanged: valueChanged,
                   looping: widget.looping,
@@ -228,45 +237,17 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
           ),
           Positioned(
             child: Container(
-                //margin: const EdgeInsets.only(top: 63),
-                margin: EdgeInsets.only(top: widget.pickerTheme!.topDividerPos ?? 52),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                    Expanded(
-                      child: Divider(
-                        color: widget.pickerTheme!.dividerColor ?? widget.pickerTheme!.itemTextStyle.color,
-                        //height: 1,
-                        height: widget.pickerTheme!.dividerHeight,
-                        //thickness: 2,
-                        thickness: widget.pickerTheme!.dividerThickness,
-                      ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.02)
-                  ],
-                )),
+              margin: EdgeInsets.only(
+                  top: widget.pickerTheme!.topDividerPos ?? ((widget.pickerTheme!.pickerHeight / 2) - (widget.pickerTheme!.itemHeight / 2))),
+              child: _dividerWidget(),
+            ),
           ),
           Positioned(
             child: Container(
-                //margin: const EdgeInsets.only(top: 99),
-                margin: EdgeInsets.only(top: widget.pickerTheme!.bottomDividerPos ?? 92),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                    Expanded(
-                      child: Divider(
-                        color: widget.pickerTheme!.dividerColor ?? widget.pickerTheme!.itemTextStyle.color,
-                        //height: 1,
-                        height: widget.pickerTheme!.dividerHeight,
-                        //thickness: 2,
-                        thickness: widget.pickerTheme!.dividerThickness,
-                      ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                  ],
-                )),
+              margin: EdgeInsets.only(
+                  top: widget.pickerTheme!.bottomDividerPos ?? ((widget.pickerTheme!.pickerHeight / 2) + (widget.pickerTheme!.itemHeight / 2))),
+              child: _dividerWidget(),
+            ),
           ),
         ],
       ),

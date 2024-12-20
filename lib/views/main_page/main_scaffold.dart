@@ -29,8 +29,7 @@ class MainScaffold extends StatefulWidget {
 }
 
 class MainScaffoldState extends State<MainScaffold> {
-  late BuildContext _scaffoldContext;
-  bool? _launchedFromHomeWidget;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final _addNewNoteSCK = ShowCaseKey(FirstAccess.addNewNoteSC);
   final noteTileSCK = ShowCaseKey(FirstAccess.noteTileSC);
   final selectionModeSCK = ShowCaseKey(FirstAccess.selectionModeSC);
@@ -44,40 +43,11 @@ class MainScaffoldState extends State<MainScaffold> {
 
   @override
   void initState() {
-    HomeWidgetManager.setClickFunction('opennote', (params) {
-      _prepareOpenFromHomeWidget().then((value) {
-        var noteId = int.tryParse(params['id'] ?? '');
-        if (mounted && noteId != null) {
-          if (noteId > 0) {
-            var note = AppData.notesManager.allList.where((e) => e.id == noteId).firstOrNull;
-            if (note != null) {
-              openNote(note);
-            }
-          } else {
-            openNote();
-          }
-        }
-      });
-    });
-    HomeWidgetManager.setClickFunction('openhomewidgetconfigs', (params) {
-      _prepareOpenFromHomeWidget().then((value) {
-        if (mounted) {
-          Navigator.push(context, SmoothMaterialPageRoute(builder: (context) => const HomeWidgetConfigPage()));
-        }
-      });
-    });
-    //Forces to run the click function because setClickFunction was just called.
-    HomeWidgetManager.getFunctionIfLaunchedFromHomeWidget().then((onTapFunction) {
-      if (onTapFunction != null) {
-        _launchedFromHomeWidget = true;
-        onTapFunction();
-      } else {
-        _launchedFromHomeWidget = false;
-      }
-    });
+    _setHomeWidgetClickFunctions();
+    _runIfLaunchedFromHomeWidget(); //Forces to run the click function because _setHomeWidgetClickFunction was just called.
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await _initialized();
-      if (_launchedFromHomeWidget == false) {
+      if (AppData.launchedFromHomeWidget == false) {
         Future.delayed(Duration(milliseconds: 750 - CustomShowCase.delay.inMilliseconds), _startShowCase);
       }
     });
@@ -105,6 +75,7 @@ class MainScaffoldState extends State<MainScaffold> {
                 }
               }
               return Scaffold(
+                key: _scaffoldKey,
                 drawer: dataInitialized
                     ? MainDrawer(
                         onSettingsClosed: () {
@@ -136,26 +107,21 @@ class MainScaffoldState extends State<MainScaffold> {
                 floatingActionButton: _fab(stylePanelHeight: stylePanelHeight),
                 body: SafeArea(
                   top: false,
-                  child: Builder(
-                    builder: (context) {
-                      _scaffoldContext = context;
-                      return Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          AnimatedPadding(
-                            duration: c.animationDuration,
-                            padding: EdgeInsets.only(bottom: stylePanelHeight - bottomIndent),
-                            child: custom.BouncingNestedScrollView(
-                              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                                return [_header(nestedScrollViewContext: context)];
-                              },
-                              body: _body(bottomIndent: bottomIndent),
-                            ),
-                          ),
-                          _stylePanel(stylePanelHeight: stylePanelHeight),
-                        ],
-                      );
-                    },
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      AnimatedPadding(
+                        duration: c.animationDuration,
+                        padding: EdgeInsets.only(bottom: stylePanelHeight - bottomIndent),
+                        child: custom.BouncingNestedScrollView(
+                          headerSliverBuilder: (context, innerBoxIsScrolled) {
+                            return [_header(nestedScrollViewContext: context)];
+                          },
+                          body: _body(bottomIndent: bottomIndent),
+                        ),
+                      ),
+                      _stylePanel(stylePanelHeight: stylePanelHeight),
+                    ],
                   ),
                 ),
               );
@@ -168,8 +134,8 @@ class MainScaffoldState extends State<MainScaffold> {
 
   void _onPopInvoked(bool didPop) {
     if (!didPop && !CustomShowCase.next(context)) {
-      if (Scaffold.of(_scaffoldContext).isDrawerOpen) {
-        Scaffold.of(_scaffoldContext).closeDrawer();
+      if (_scaffoldKey.currentState?.isDrawerOpen == true) {
+        _scaffoldKey.currentState!.closeDrawer();
       } else {
         if (AppData.notesManager.selectionQuantity.value == null && !AppData.notesManager.showSearchText.value) {
           SystemNavigator.pop();
@@ -268,8 +234,9 @@ class MainScaffoldState extends State<MainScaffold> {
         : const SizedBox.shrink();
   }
 
-  void openNote([Note? note]) {
-    if (mounted) {
+  void openNote({Note? note, bool skipLaunchedFromHomeWidgetValidation = false}) {
+    if (mounted && AppData.dataInitialized.value && (AppData.launchedFromHomeWidget == false || skipLaunchedFromHomeWidgetValidation)) {
+      _scaffoldKey.currentState?.closeDrawer();
       AppData.notesManager.selectionQuantity.value = null;
       AppData.notesManager.showSearchText.value = false;
       Navigator.push(
@@ -300,20 +267,60 @@ class MainScaffoldState extends State<MainScaffold> {
     }
   }
 
-  Future<void> _prepareOpenFromHomeWidget() async {
-    await _initialized();
-    if (mounted) {
-      Navigator.popUntil(
-        context,
-        (route) {
-          return ModalRoute.isCurrentOf(context) == true;
-        },
-      );
+  void _setHomeWidgetClickFunctions() {
+    Future<void> prepareOpenFromHomeWidget() async {
+      AppData.launchedFromHomeWidget = true;
+      AppData.notesManager.selectionQuantity.value = null;
+      AppData.notesManager.showSearchText.value = false;
+      await _initialized();
+      if (mounted) {
+        Navigator.popUntil(
+          context,
+          (route) {
+            return ModalRoute.isCurrentOf(context) == true;
+          },
+        );
+      }
+    }
+
+    HomeWidgetManager.setClickFunction('opennote', (params) async {
+      await prepareOpenFromHomeWidget();
+      var noteId = int.tryParse(params['id'] ?? '');
+      if (mounted && noteId != null) {
+        if (noteId > 0) {
+          var note = AppData.notesManager.allList.where((e) => e.id == noteId).firstOrNull;
+          if (note != null) {
+            openNote(note: note, skipLaunchedFromHomeWidgetValidation: true);
+          }
+        } else {
+          openNote(skipLaunchedFromHomeWidgetValidation: true);
+        }
+      }
+      AppData.launchedFromHomeWidget = false;
+    });
+    HomeWidgetManager.setClickFunction('openhomewidgetconfigs', (params) async {
+      await prepareOpenFromHomeWidget();
+      if (mounted) {
+        Navigator.push(context, SmoothMaterialPageRoute(builder: (context) => const HomeWidgetConfigPage()));
+      }
+      AppData.launchedFromHomeWidget = false;
+    });
+  }
+
+  void _runIfLaunchedFromHomeWidget() async {
+    AppData.launchedFromHomeWidget = null;
+    AppData.notesManager.selectionQuantity.value = null;
+    AppData.notesManager.showSearchText.value = false;
+    var onTapFunction = await HomeWidgetManager.getFunctionIfLaunchedFromHomeWidget();
+    if (onTapFunction != null) {
+      onTapFunction();
+    } else {
+      AppData.launchedFromHomeWidget = false;
     }
   }
 
   Future<void> _initialized() async {
-    while (!mounted || !AppData.dataInitialized.value || _launchedFromHomeWidget == null) {
+    while (!mounted || !AppData.dataInitialized.value || AppData.launchedFromHomeWidget == null) {
       await Future.delayed(const Duration(milliseconds: 10));
     }
   }

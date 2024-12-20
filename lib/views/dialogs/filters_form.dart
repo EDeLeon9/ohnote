@@ -311,8 +311,8 @@ class _FiltersFormState extends State<FiltersForm> {
 
   HoloDateTimePickerTheme _getDateTimePickerTheme() {
     return HoloDateTimePickerTheme(
-      topDividerPos: 5.0,
-      bottomDividerPos: 29.0,
+      // topDividerPos: 5.0,
+      // bottomDividerPos: 29.0,
       itemHeight: 22.0,
       pickerHeight: 50.0,
       backgroundColor: Colors.transparent,

@@ -22,14 +22,14 @@ class SortByDialog extends StatefulWidget {
 }
 
 class _SortByDialogState extends State<SortByDialog> {
-  late SortByOrder? _order = AppData.settings[Settings.lastSortBy]!.value == SortByOrder.asc.name ? SortByOrder.asc : SortByOrder.desc;
+  late SortByOrder? _order = AppData.settings[Settings.lastSortByOrder]!.value == SortByOrder.asc.name ? SortByOrder.asc : SortByOrder.desc;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       clipBehavior: Clip.antiAlias,
       titlePadding: EdgeInsets.zero,
-      contentPadding: const EdgeInsets.fromLTRB(0, 0.0, 0, 0.0),
+      contentPadding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
       insetPadding: EdgeInsets.zero,
       title: HeaderContainer(
         child: Padding(
@@ -48,6 +48,11 @@ class _SortByDialogState extends State<SortByDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
+              child: Text('Sorts once the notes by the selected option.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            ),
+            Divider(height: 0.0),
             Row(
               children: [
                 Expanded(

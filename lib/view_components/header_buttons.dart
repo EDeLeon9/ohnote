@@ -65,7 +65,11 @@ class HeaderButton {
         color: color,
         shadows: shadows,
         isVisible: isVisible != false,
-        onPressed: onPressed,
+        onPressed: () {
+          if (AppData.launchedFromHomeWidget == false) {
+            onPressed();
+          }
+        },
       );
       if (showCaseKey != null) {
         button = CustomShowCase(
