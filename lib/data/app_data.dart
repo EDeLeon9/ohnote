@@ -17,6 +17,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 import 'package:ohnote/tools/datetime_to_str_converter.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart' as pp;
 
 class _IndexedDatabase {
   final int openDbId;
@@ -973,36 +974,19 @@ class AppData {
     }
   }
 
-  // static Future<bool> dbBackup() async {
-  //   var externalPath = await pp.getExternalStorageDirectory();
-  //   if (externalPath != null) {
-  //     try {
-  //       var backupDir = await Directory(p.join(externalPath.path, 'db_backup')).create(recursive: true);
-  //       File(await _dbPath).copy(p.join(backupDir.path, 'ohnote_backup.db'));
-  //       return true;
-  //     } catch (e) {
-  //       _error('Error on performing backup. $e');
-  //     }
-  //   } else {
-  //     _error('External storage path couldn\'t be obtained.');
-  //   }
-  //   return false;
-  // }
-
   static Future<bool> dbBackup() async {
-    try {
-      Directory destination = Directory('${Platform.pathSeparator}${p.join('storage', 'emulated', '0', 'Download')}');
-      // if (Platform.isIOS) {
-      //   destination =  await pp.getApplicationDocumentsDirectory();
-      // }
-      if ((await destination.exists()) == true) {
-        await File(await _dbPath).copy(p.join(destination.path, 'ohnote_backup.db'));
+    var externalPath = await pp.getExternalStorageDirectory();
+    if (externalPath != null) {
+      try {
+        var backupDir = await Directory(p.join(externalPath.path, 'db_backup')).create(recursive: true);
+        //Backup path: /storage/emulated/0/Android/data/com.example.ohnote/files/db_backup/ohnote_backup.db
+        File(await _dbPath).copy(p.join(backupDir.path, 'ohnote_backup.db'));
         return true;
-      } else {
-        _error('Destination directory for backup couldn\'t be obtained or doesn\'t exist.');
+      } catch (e) {
+        _error('Error on performing backup. $e');
       }
-    } catch (e) {
-      _error('Error on performing backup. Try deleting the previous backup file in Download folder. Message: $e');
+    } else {
+      _error('External storage path couldn\'t be obtained.');
     }
     return false;
   }

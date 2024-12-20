@@ -108,7 +108,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   t.showCustomToast('Comming soon...', context);
                 },
               ),
-              //TODO: This backup option just for tests, comment this and AppData dbBackup function (and remove AndroidManifest.xml READ, WRITE and MANAGE uses-permission and requestLegacyExternalStorage).
+              //TODO: This backup option just for tests, comment this and AppData dbBackup function (no permission added in AndroidManifest.xml).
               c.defaultDivider,
               ListTile(
                 title: const Text('Backup'),
