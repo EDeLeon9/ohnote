@@ -40,18 +40,15 @@ class HomeWidgetManager {
     return await HomeWidget.getWidgetData<T>(valueName, defaultValue: defaultValue);
   }
 
-  //Note: Always update all the used values because _singleAsync will run the last requested function.
   static Future<void> updateWidget(Map<String, String> values) async {
     for (var value in values.entries) {
-      var saved = await HomeWidget.saveWidgetData(value.key, value.value);
-      if (saved != true) {
-        onError?.call('Home widget data not saved: key: ${value.key}, value: ${value.value}');
+      if ((await HomeWidget.saveWidgetData(value.key, value.value)) != true) {
+        onError?.call('Error on saving home widget data. Value name: ${value.key}, value: ${value.value}.');
       }
     }
     _singleAsync.runLast(300, () async {
-      var saved = await HomeWidget.updateWidget(name: _androidWidgetName, androidName: _androidWidgetName, iOSName: _iOSWidgetName);
-      if (saved != true) {
-        onError?.call('Home widget not updated.');
+      if ((await HomeWidget.updateWidget(name: _androidWidgetName, androidName: _androidWidgetName, iOSName: _iOSWidgetName)) != true) {
+        onError?.call('Error on updating home widget.');
       }
     });
   }

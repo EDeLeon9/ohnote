@@ -108,29 +108,6 @@ class _MainDrawerState extends State<MainDrawer> {
                   t.showCustomToast('Comming soon...', context);
                 },
               ),
-              //TODO: This backup option just for tests, comment this and AppData dbBackup function (no permission added in AndroidManifest.xml).
-              c.defaultDivider,
-              ListTile(
-                title: const Text('Backup'),
-                leading: Icon(Icons.backup, color: fontColor),
-                onTap: () async {
-                  a.runFirst(
-                    () async {
-                      if (AppData.launchedFromHomeWidget == false) {
-                        String msg;
-                        if (await AppData.dbBackup()) {
-                          msg = 'Backup performed successfully.';
-                        } else {
-                          msg = 'Error on performing backup.';
-                        }
-                        if (context.mounted) {
-                          t.showCustomToast(msg, context);
-                        }
-                      }
-                    },
-                  );
-                },
-              ),
             ],
           ),
           //Header is required to be above the rest of the widgets to spread the shadow.

@@ -50,7 +50,7 @@ class _SortByDialogState extends State<SortByDialog> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
-              child: Text('Sorts once the notes by the selected option.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              child: Text('Sorts notes by the selected option once.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
             ),
             Divider(height: 0.0),
             Row(

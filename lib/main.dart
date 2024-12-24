@@ -10,7 +10,7 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Deslizar a la izquierda o derecha para cambiar de nota cuando se está en modo edición
+//Deslizar a la izquierda o derecha para cambiar de nota cuando se está en modo edición.
 //Mejorar ícono con transparencia (se ve una rayita arriba del lápiz al abrir la app).
 //Hacer el preview para mostrar cuando se va a agregar Homescreen widget, actualmente muestra el widget vacío (creo que tiene que usarse el android:previewImage en vez de android:previewLayout en ohnote_widget_info.xml).
 //cambiar com.example.ohnote a com.<empresa>.ohnote, esto seguro requiere hacer backup antes de desinstalar e instalar

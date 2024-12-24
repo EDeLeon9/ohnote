@@ -17,7 +17,6 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 import 'package:ohnote/tools/datetime_to_str_converter.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart' as pp;
 
 class _IndexedDatabase {
   final int openDbId;
@@ -51,6 +50,7 @@ class AppData {
     getComparisonDateTime: (note) => note.modifDateTime,
   );
 
+  // /data/user/0/com.example.ohnote/databases/ohnote.db
   static String? __dbPath;
   static Future<String> get _dbPath async {
     __dbPath ??= p.join(await getDatabasesPath(), 'ohnote.db');
@@ -168,7 +168,9 @@ class AppData {
   }
 
   static void initData({bool runEnsureInitialized = true}) async {
-    HomeWidgetManager.onError = _error;
+    ErrorLogger.onLogStarted = _onErrorLogStarted;
+
+    HomeWidgetManager.onError = ErrorLogger.log;
     if (runEnsureInitialized) {
       WidgetsFlutterBinding.ensureInitialized(); //Avoid errors caused by flutter upgrade.
     }
@@ -364,8 +366,7 @@ class AppData {
             _notesUserOrder.insert(0, newId);
             await _updateDbNotesUserOrder(iDb);
           } else {
-            //TODO: test all error logs
-            _error('Error on creating a new note from draft. Draft Id: ${draft['id']}.');
+            ErrorLogger.log('Error on creating a new note from draft. Draft Id: ${draft['id']}.');
           }
         } else {
           query = await iDb.db.query(
@@ -391,13 +392,13 @@ class AppData {
             }
             await iDb.db.update('notes', map, where: 'id = ?', whereArgs: [parentId]);
           } else {
-            _error('Error on updating a note from draft. Draft Id: ${draft['id']}.');
+            ErrorLogger.log('Error on updating a note from draft. Draft Id: ${draft['id']}.');
           }
         }
       }
       var count = await _clearDraft(iDb);
       if (count <= 0) {
-        _error('Error on clearing the draft. Draft Id: ${draft['id']}.');
+        ErrorLogger.log('Error on clearing the draft. Draft Id: ${draft['id']}.');
       }
     }
   }
@@ -442,7 +443,7 @@ class AppData {
         _closeDb(iDb);
       }
     } else {
-      _error('Error on creating a new note.');
+      ErrorLogger.log('Error on creating a new note.');
       _closeDb(iDb);
     }
     return newId;
@@ -491,7 +492,7 @@ class AppData {
     }
     var count = await iDb.db.update('notes', updateMap, where: 'id = ?', whereArgs: [draftId ?? note.id]);
     if (count <= 0) {
-      _error('Error on updating a note. Note Id: ${draftId ?? note.id}.');
+      ErrorLogger.log('Error on updating a note. Note Id: ${draftId ?? note.id}.');
     }
     await _closeDb(iDb);
   }
@@ -502,7 +503,7 @@ class AppData {
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate('UPDATE notes SET $field = $value WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('Error on updating a list of notes. Note Ids: $ids, field: $field, value: $value.');
+        ErrorLogger.log('Error on updating a list of notes. Note Ids: $ids, field: $field, value: $value.');
       }
       await _closeDb(iDb);
     }
@@ -514,7 +515,7 @@ class AppData {
       var iDb = await _openDb();
       var count = await iDb.db.rawDelete('DELETE FROM notes WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('Error on removing the history of a note. History Ids: $ids.');
+        ErrorLogger.log('Error on removing the history of a note. History Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -551,10 +552,10 @@ class AppData {
     if (count > 0) {
       count = await iDb.db.delete('notes', where: 'id = ?', whereArgs: [history.id]);
       if (count <= 0) {
-        _error('Error on deleting a note history. History Id: ${history.id}, note Id: ${note.id}.');
+        ErrorLogger.log('Error on deleting a note history. History Id: ${history.id}, note Id: ${note.id}.');
       }
     } else {
-      _error('Error on restoring a note from the history. Note Id: ${note.id}, history Id: ${history.id}.');
+      ErrorLogger.log('Error on restoring a note from the history. Note Id: ${note.id}, history Id: ${history.id}.');
     }
     await _closeDb(iDb);
   }
@@ -568,7 +569,7 @@ class AppData {
       var count =
           await iDb.db.rawUpdate('UPDATE notes SET archive_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\' WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('Error on archiving a list of notes. Note Ids: $ids.');
+        ErrorLogger.log('Error on archiving a list of notes. Note Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -583,7 +584,7 @@ class AppData {
       var count = await iDb.db.rawUpdate(
           'UPDATE notes SET trash_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('Error on sending a list of notes to trash can. Note Ids: $ids.');
+        ErrorLogger.log('Error on sending a list of notes to trash can. Note Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -599,7 +600,7 @@ class AppData {
       var iDb = await _openDb();
       var count = await iDb.db.rawDelete('DELETE FROM notes WHERE id IN ($ids) OR parent_id IN ($ids)');
       if (count <= 0) {
-        _error('Error on removing a list of notes permanently from trash can. Note Ids: $ids.');
+        ErrorLogger.log('Error on removing a list of notes permanently from trash can. Note Ids: $ids.');
       }
       await _updateDbNotesUserOrder(iDb);
       await _closeDb(iDb);
@@ -620,7 +621,7 @@ class AppData {
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate('UPDATE notes SET trash_date_time = NULL, archive_date_time = NULL WHERE id IN ($ids)');
       if (count <= 0) {
-        _error('Error on restoring a list of notes to the main list. Note Ids: $ids.');
+        ErrorLogger.log('Error on restoring a list of notes to the main list. Note Ids: $ids.');
       }
       await _closeDb(iDb);
     }
@@ -637,7 +638,7 @@ class AppData {
         ...labelsManager.allList,
       ].sorted(labelsManager.sortComparison);
     } else {
-      _error('Error on creating a new label.');
+      ErrorLogger.log('Error on creating a new label.');
     }
     _closeDb(iDb);
     labelsManager?.requestUpdateDisplayList();
@@ -651,7 +652,7 @@ class AppData {
     var iDb = await _openDb();
     var count = await iDb.db.update('labels', {'text': value}, where: 'id = ?', whereArgs: [label.id]);
     if (count <= 0) {
-      _error('Error on updating the text of a label. Label Id: ${label.id}, value: $value.');
+      ErrorLogger.log('Error on updating the text of a label. Label Id: ${label.id}, value: $value.');
     }
     await _closeDb(iDb);
   }
@@ -678,7 +679,7 @@ class AppData {
           await iDb.db.update('notes', {'label_ids': note.labelIdsString()}, where: 'id = ?', whereArgs: [note.id]);
         }
       } else {
-        _error('Error on removing a list of labels. Label Ids: $labelIdsString.');
+        ErrorLogger.log('Error on removing a list of labels. Label Ids: $labelIdsString.');
       }
       await _closeDb(iDb);
     }
@@ -711,7 +712,7 @@ class AppData {
     if (dbResult > 0) {
       await _updateDbFilters(iDb, homeWidgetConfig.notesManager.filters.value, false, isNew, homeWidgetConfig.id);
     } else {
-      _error('Error on ${isNew ? 'creating a new' : 'updating a'} home widget config. Home widget config Id: ${homeWidgetConfig.id}.');
+      ErrorLogger.log('Error on ${isNew ? 'creating a new' : 'updating a'} home widget config. Home widget config Id: ${homeWidgetConfig.id}.');
     }
     _closeDb(iDb);
   }
@@ -725,10 +726,10 @@ class AppData {
       if (count > 0) {
         count = await iDb.db.rawDelete('DELETE FROM home_widget_config WHERE id IN ($idString)');
         if (count <= 0) {
-          _error('Error on removing a list of home widget config. Home widget config Ids: $idString.');
+          ErrorLogger.log('Error on removing a list of home widget config. Home widget config Ids: $idString.');
         }
       } else {
-        _error('Error on removing the filters of home widget configs. Home widget config Ids: $idString.');
+        ErrorLogger.log('Error on removing the filters of home widget configs. Home widget config Ids: $idString.');
       }
       _closeDb(iDb);
     }
@@ -804,7 +805,7 @@ class AppData {
     await _updateDbNotesUserOrder(iDb);
     var count = await iDb.db.update('settings', {'value': order.name}, where: 'param = ?', whereArgs: [Settings.lastSortByOrder.name]);
     if (count <= 0) {
-      _error('Error on updating the used "Sort by order". Value: ${order.name}.');
+      ErrorLogger.log('Error on updating the used "Sort by order". Value: ${order.name}.');
     }
     await _closeDb(iDb);
   }
@@ -813,7 +814,7 @@ class AppData {
     var data = _notesUserOrder.join(',');
     var count = await iDb.db.update('notes_user_order', {'data': data});
     if (count <= 0) {
-      _error('Error on updating the user orders of the main list notes. Data: $data.');
+      ErrorLogger.log('Error on updating the user orders of the main list notes. Data: $data.');
     }
     if (closeDb) {
       await _closeDb(iDb);
@@ -858,7 +859,7 @@ class AppData {
       'color': color,
     });
     if (id <= 0) {
-      _error('Error on adding a history to a note. Note Id: $parentId.');
+      ErrorLogger.log('Error on adding a history to a note. Note Id: $parentId.');
     }
   }
 
@@ -895,8 +896,8 @@ class AppData {
         );
       }
       if (dbResult <= 0) {
-        _error(
-            'Error on ${insert ? 'creating a new' : 'updating a'} filter. Filter name: $filterName, value: $dbValue, ${homeWidgetConfigId == null ? 'no home widget config Id' : 'home widget config Id: $homeWidgetConfigId.'}');
+        ErrorLogger.log(
+            'Error on ${insert ? 'creating a new' : 'updating a'} filter. Filter name: $filterName, value: $dbValue, home widget config Id: ${homeWidgetConfigId == null ? 'null' : '$homeWidgetConfigId'}.');
       }
     }
 
@@ -928,7 +929,7 @@ class AppData {
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate('UPDATE first_access SET shown = ${value ? 1 : 0} WHERE param IN ($paramNames)');
       if (count <= 0) {
-        _error('Error on updating first access values. Param names: $paramNames.');
+        ErrorLogger.log('Error on updating first access values. Param names: $paramNames.');
       }
       await _closeDb(iDb);
     }
@@ -942,7 +943,7 @@ class AppData {
         var value = settingsValues[setting];
         var count = await iDb.db.update('settings', {'value': value}, where: 'param = ?', whereArgs: [setting.name]);
         if (count <= 0) {
-          _error('Error on updating a setting. Setting name: ${setting.name}, value: $value.');
+          ErrorLogger.log('Error on updating a setting. Setting name: ${setting.name}, value: $value.');
         }
       }
       await _closeDb(iDb);
@@ -974,25 +975,7 @@ class AppData {
     }
   }
 
-  static Future<bool> dbBackup() async {
-    var externalPath = await pp.getExternalStorageDirectory();
-    if (externalPath != null) {
-      try {
-        var backupDir = await Directory(p.join(externalPath.path, 'db_backup')).create(recursive: true);
-        //Backup path: /storage/emulated/0/Android/data/com.example.ohnote/files/db_backup/ohnote_backup.db
-        File(await _dbPath).copy(p.join(backupDir.path, 'ohnote_backup.db'));
-        return true;
-      } catch (e) {
-        _error('Error on performing backup. $e');
-      }
-    } else {
-      _error('External storage path couldn\'t be obtained.');
-    }
-    return false;
-  }
-
-  static void _error(String msg) {
+  static void _onErrorLogStarted() {
     //TODO: Show error bar ONCE on top the whole app until close in x button or restarted (like going back to home or force closing).
-    ErrorLogger.log(msg);
   }
 }
