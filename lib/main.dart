@@ -10,8 +10,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Opción para borrar directamente y no enviar a Trash can (colocar en Trash can page y Settings).
-//Mejorar ícono con transparencia (se ve una rayita arriba del lápiz al abrir la app).
 //Hacer el preview para mostrar cuando se va a agregar Homescreen widget, actualmente muestra el widget vacío (creo que tiene que usarse el android:previewImage en vez de android:previewLayout en ohnote_widget_info.xml).
 //cambiar com.example.ohnote a com.<empresa>.ohnote, esto seguro requiere hacer backup antes de desinstalar e instalar
 //Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.
@@ -27,6 +25,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Idioma español.
 //Opciones para hacer share de nota (por ejemplo enviar por correo o copiar al portapapeles).
 //Importar, exportar data (bd)
+//Arreglar íconos para iOS generados con "dart run flutter_launcher_icons"
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); //Required by HomeWidgetManager and AppData.
