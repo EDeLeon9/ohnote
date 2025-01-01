@@ -23,4 +23,8 @@ class SingleAsync {
     _cancelableOperation = CancelableOperation.fromFuture(Future.delayed(Duration(milliseconds: msDelay)));
     _cancelableOperation!.value.whenComplete(() => function());
   }
+
+  void cancelRunLast() {
+    _cancelableOperation?.cancel();
+  }
 }

@@ -85,8 +85,8 @@ class CustomShowCase<T> extends StatelessWidget {
       tooltipBackgroundColor: theme.brightness == Brightness.dark ? theme.colorScheme.primary : theme.colorScheme.onPrimary,
       movingAnimationDuration: const Duration(milliseconds: 400),
       disposeOnTap: false, //Required when using onTargetClick.
-      //Tapping on the target don't close the Showcase so it's used ShowCaseWidget.completed(), but it doesn't animate
-      //close, so ShowCaseWidget.completed() is being used in these three scenarios to make uniform animations.
+      //Tapping on the target doesn't close the Showcase so it's being used ShowCaseWidget.completed() but it doesn't animate the
+      //closing, and to disable the remaining closing animations it's being used ShowCaseWidget.completed() the other two scenarios too.
       onToolTipClick: () {
         ShowCaseWidget.of(context).completed(showCaseKey);
       },
@@ -137,7 +137,7 @@ class CustomShowCaseWidgetState<T> extends State<CustomShowCaseWidget<T>> {
         }
         for (var onFinishRequest in onFinishRequests) {
           _onFinishRequests.remove(onFinishRequest);
-          onFinishRequest.request(); //Must be called after setting shownKeyValues to true and finished to true.
+          onFinishRequest.request(); //Must be called after setting _shownMap items to true.
         }
         widget.onFinish?.call(shownKeyValues);
       },

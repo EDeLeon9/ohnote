@@ -342,20 +342,20 @@ class AppData {
           'parent_id',
         ],
         where: 'parent_id IS NOT NULL AND history_date_time IS NULL',
-        orderBy: 'modif_date_time DESC'); //It should be only one draft in db, but just in case we're getting the last one.
+        orderBy: 'modif_date_time DESC'); //It should be only one draft in db, other drafts should already be saved and will be deleted.
     var draft = query.firstOrNull;
     if (draft != null) {
       String draftText = draft['text'];
-      if (draftText.trim().isNotEmpty) {
-        int parentId = draft['parent_id'];
-        Map<String, dynamic> map = {
-          'text': draftText,
-          'modif_date_time': draft['modif_date_time'],
-          'color': draft['color'],
-          'favorite': draft['favorite'],
-          'label_ids': draft['label_ids']
-        };
-        if (parentId == 0) {
+      int parentId = draft['parent_id'];
+      Map<String, dynamic> map = {
+        'text': draftText,
+        'modif_date_time': draft['modif_date_time'],
+        'color': draft['color'],
+        'favorite': draft['favorite'],
+        'label_ids': draft['label_ids']
+      };
+      if (parentId == 0) {
+        if (draftText.trim().isNotEmpty) {
           map.addAll({
             'creation_date_time': draft['creation_date_time'],
             'is_crossed_out': draft['is_crossed_out'],
@@ -368,32 +368,43 @@ class AppData {
           } else {
             ErrorLogger.log('Error on creating a new note from draft. Draft Id: ${draft['id']}.');
           }
-        } else {
-          query = await iDb.db.query(
-            'notes',
-            columns: ['text', 'modif_date_time', 'creation_date_time', 'is_crossed_out', 'number_of_lines', 'color'],
-            where: 'id = ?',
-            whereArgs: [parentId],
-          );
-          var parent = query.firstOrNull;
-          if (parent != null) {
-            if (draftText != parent['text'] || draft['color'] != parent['color']) {
-              await _addHistory(
-                iDb,
-                parentId,
-                draft['creation_date_time'],
-                parent['text'],
-                parent['modif_date_time'],
-                parent['creation_date_time'],
-                parent['is_crossed_out'],
-                parent['number_of_lines'],
-                parent['color'],
+        }
+      } else {
+        query = await iDb.db.query(
+          'notes',
+          columns: ['text', 'modif_date_time', 'creation_date_time', 'is_crossed_out', 'number_of_lines', 'color'],
+          where: 'id = ?',
+          whereArgs: [parentId],
+        );
+        var parent = query.firstOrNull;
+        if (parent != null) {
+          if (DateTime.parse(draft['modif_date_time']).isAfter(DateTime.parse(parent['modif_date_time']))) {
+            if (draftText.trim().isNotEmpty) {
+              if (draftText != parent['text'] || draft['color'] != parent['color']) {
+                await _addHistory(
+                  iDb,
+                  parentId,
+                  draft['creation_date_time'],
+                  parent['text'],
+                  parent['modif_date_time'],
+                  parent['creation_date_time'],
+                  parent['is_crossed_out'],
+                  parent['number_of_lines'],
+                  parent['color'],
+                );
+              }
+              await iDb.db.update('notes', map, where: 'id = ?', whereArgs: [parentId]);
+            } else {
+              await iDb.db.update(
+                'notes',
+                {'trash_date_time': parent['creation_date_time'], 'archive_date_time': null},
+                where: 'id = ?',
+                whereArgs: [parentId],
               );
             }
-            await iDb.db.update('notes', map, where: 'id = ?', whereArgs: [parentId]);
-          } else {
-            ErrorLogger.log('Error on updating a note from draft. Draft Id: ${draft['id']}.');
           }
+        } else {
+          ErrorLogger.log('Error on updating a note from draft. Draft Id: ${draft['id']}, parent Id: ${[parentId]}.');
         }
       }
       var count = await _clearDraft(iDb);
@@ -449,32 +460,24 @@ class AppData {
     return newId;
   }
 
-  static Future<void> updateNoteFromEdit(Note note, Note oldNote, [int? draftId]) async {
+  static Future<void> updateDbNoteFromEdit(Note note, Note? unmodifiedNote, [int? draftId]) async {
     _IndexedDatabase iDb;
     var now = DateTime.now();
-    var modified = note.text != oldNote.text || note.color.value != oldNote.color.value;
-    var modifiedWithoutHistory = modified || note.favorite.value != oldNote.favorite.value || note.labelIds.join(',') != oldNote.labelIds.join(',');
-    if ((modified || modifiedWithoutHistory) && draftId == null) {
-      note.modifDateTime = now;
-      if (!notesManager.noteIsInFilter(note)) {
-        notesManager.displayList.value!.remove(note);
-      }
-      updateHomeWidget();
-    }
-    if (modified && draftId == null) {
+    if (draftId == null && unmodifiedNote != null && (note.text != unmodifiedNote.text || note.color.value != unmodifiedNote.color.value)) {
       var noteCopy = note.clone(); //Cloning note to save asynchronously to history with the current values.
       iDb = await _openDb();
       await _addHistory(
         iDb,
         noteCopy.id,
         now.parseToStr(DTToStrFormat.DATABASE),
-        oldNote.text,
+        unmodifiedNote.text,
         noteCopy.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
         noteCopy.creationDateTime.parseToStr(DTToStrFormat.DATABASE),
         noteCopy.isCrossedOut.value ? 1 : 0,
         noteCopy.numberOfLines.value,
-        oldNote.color.value?.value,
+        unmodifiedNote.color.value?.value,
       );
+      await _clearDraft(iDb);
     } else {
       iDb = await _openDb();
     }
@@ -485,9 +488,7 @@ class AppData {
       'favorite': note.favorite.value ? 1 : 0,
       'label_ids': note.labelIdsString(),
     };
-    if (draftId == null) {
-      await _clearDraft(iDb);
-    } else {
+    if (draftId != null) {
       updateMap.addAll({'creation_date_time': now.parseToStr(DTToStrFormat.DATABASE)});
     }
     var count = await iDb.db.update('notes', updateMap, where: 'id = ?', whereArgs: [draftId ?? note.id]);

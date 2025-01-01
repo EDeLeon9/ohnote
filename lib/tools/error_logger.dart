@@ -22,17 +22,17 @@ class ErrorLogger {
   static void log(String message) async {
     var stackTrace = StackTrace.current.toString();
     onLogStarted?.call();
-    if (_previousStackTrace != stackTrace) {
-      _previousStackTrace = stackTrace;
-      stackTrace =
-          '${Platform.lineTerminator}${stackTrace.trim().split('\n').skip(1).map((e) => e.replaceAll('\r', '')).map((e) => '    ${(e.startsWith('#') ? e.substring(e.indexOf(' ')) : e).trim()}').join(Platform.lineTerminator)}';
-    } else {
-      stackTrace = '';
-    }
-    var now = DateTime.now();
     try {
       var errPath = await _errorsPath;
       if (errPath != null && errPath.isNotEmpty) {
+        if (_previousStackTrace != stackTrace) {
+          _previousStackTrace = stackTrace;
+          stackTrace =
+              '${Platform.lineTerminator}${stackTrace.trim().split('\n').skip(1).map((e) => e.replaceAll('\r', '')).map((e) => '    ${(e.startsWith('#') ? e.substring(e.indexOf(' ')) : e).trim()}').join(Platform.lineTerminator)}';
+        } else {
+          stackTrace = '';
+        }
+        var now = DateTime.now();
         var destination = (await Directory(p.join(errPath, now.year.toString())).create(recursive: true)).path;
         var logFile = File(p.join(destination, 'error_${now.parseDateToStr(DTToStrFormat.DATABASE).replaceAll('-', '')}.log'));
         _pendingMessages.add('${now.parseToStr(DTToStrFormat.LOCALE)}: $message$stackTrace${Platform.lineTerminator}');

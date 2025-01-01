@@ -234,30 +234,43 @@ class MainScaffoldState extends State<MainScaffold> {
         : const SizedBox.shrink();
   }
 
-  void openNote({Note? note, bool skipLaunchedFromHomeWidgetValidation = false}) {
-    if (mounted && AppData.dataInitialized.value && (AppData.launchedFromHomeWidget == false || skipLaunchedFromHomeWidgetValidation)) {
+  void openNote({Note? note, int? homeWidgetConfigId}) {
+    if (mounted && AppData.dataInitialized.value && (AppData.launchedFromHomeWidget == false || (homeWidgetConfigId ?? 0) > 0)) {
       _scaffoldKey.currentState?.closeDrawer();
       AppData.notesManager.selectionQuantity.value = null;
       AppData.notesManager.showSearchText.value = false;
-      Navigator.push(
-        context,
-        note == null
-            ? SmoothMaterialPageRoute(
-                builder: (context) {
-                  var colorStr = AppData.settings[Settings.defaultColor]!.value;
-                  return NoteEditPage(
-                    note: Note(
-                      id: 0,
-                      text: '',
-                      guiManager: AppData.notesManager,
-                      numberOfLines: int.parse(AppData.settings[Settings.defaultNumberOfLines]!.value),
-                      color: colorStr != null.toString() ? Color(int.parse(colorStr)) : null,
-                    ),
-                  );
-                },
-              )
-            : CupertinoPageRoute(builder: (context) => NoteEditPage(note: note)),
-      ).whenComplete(() {
+      Route page;
+      if (note == null) {
+        page = SmoothMaterialPageRoute(
+          builder: (context) {
+            var colorStr = AppData.settings[Settings.defaultColor]!.value;
+            return NoteEditPage(
+              notes: [
+                Note(
+                  id: 0,
+                  text: '',
+                  guiManager: AppData.notesManager,
+                  numberOfLines: int.parse(AppData.settings[Settings.defaultNumberOfLines]!.value),
+                  color: colorStr != null.toString() ? Color(int.parse(colorStr)) : null,
+                )
+              ],
+              selectedNoteId: 0,
+            );
+          },
+        );
+      } else {
+        var notes = [note];
+        if (homeWidgetConfigId == null) {
+          notes = List.of(AppData.notesManager.displayList.value!);
+        } else {
+          var homeWidgetConfig = AppData.homeWidgetConfigs.firstWhereOrNull((e) => e.id == homeWidgetConfigId);
+          if (homeWidgetConfig?.notesManager.displayList.value?.contains(note) == true) {
+            notes = List.of(homeWidgetConfig!.notesManager.displayList.value!);
+          }
+        }
+        page = CupertinoPageRoute(builder: (context) => NoteEditPage(notes: notes, selectedNoteId: note.id));
+      }
+      Navigator.push(context, page).whenComplete(() {
         if (AppData.notesManager.displayList.value?.isNotEmpty == true) {
           Future.delayed(const Duration(milliseconds: 100), () {
             _startShowCase();
@@ -286,14 +299,15 @@ class MainScaffoldState extends State<MainScaffold> {
     HomeWidgetManager.setClickFunction('opennote', (params) async {
       await prepareOpenFromHomeWidget();
       var noteId = int.tryParse(params['id'] ?? '');
+      var homeWidgetConfigId = int.tryParse(params['configid'] ?? '');
       if (mounted && noteId != null) {
         if (noteId > 0) {
-          var note = AppData.notesManager.allList.where((e) => e.id == noteId).firstOrNull;
+          var note = AppData.notesManager.allList.firstWhereOrNull((e) => e.id == noteId);
           if (note != null) {
-            openNote(note: note, skipLaunchedFromHomeWidgetValidation: true);
+            openNote(note: note, homeWidgetConfigId: homeWidgetConfigId);
           }
         } else {
-          openNote(skipLaunchedFromHomeWidgetValidation: true);
+          openNote(homeWidgetConfigId: homeWidgetConfigId);
         }
       }
       AppData.launchedFromHomeWidget = false;

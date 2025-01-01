@@ -26,6 +26,7 @@ internal const val APP_SCHEME_NAME = "ohnotewidget"
 internal const val OPEN_NOTE = "opennote"
 internal const val EXTRA_NOTELIST = "com.example.ohnote.EXTRA_NOTELIST"
 internal const val EXTRA_ITEM_NOTEID = "com.example.ohnote.EXTRA_ITEM_NOTEID"
+internal const val EXTRA_ITEM_CONFIGID = "com.example.ohnote.EXTRA_ITEM_CONFIGID"
 internal const val EXTRA_ITEM_TEXTCOLOR = "com.example.ohnote.EXTRA_ITEM_TEXTCOLOR"
 internal const val INTENT_OPEN_ACTION = "com.example.ohnote.INTENT_OPEN_ACTION"
 
@@ -63,11 +64,12 @@ class OhNoteWidget : HomeWidgetProvider() {
         // Called when the BroadcastReceiver receives an Intent broadcast.
         if (intent.action == INTENT_OPEN_ACTION) {
             val noteId = intent.getIntExtra(EXTRA_ITEM_NOTEID, 0)
+            val configId = intent.getIntExtra(EXTRA_ITEM_CONFIGID, -1)
             
             //Using an intent directly instead of getting a PendingIntent from HomeWidgetLaunchIntent.getActivity()
             val launchIntent = Intent(context, MainActivity::class.java).apply {
                 action = "es.antonborri.home_widget.action.LAUNCH"  //action string From HomeWidgetLaunchIntent: https://github.com/ABausG/home_widget/blob/main/packages/home_widget/android/src/main/kotlin/es/antonborri/home_widget/HomeWidgetIntent.kt
-                data = Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=$noteId")
+                data = Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=$noteId&configid=$configId")
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             context.startActivity(launchIntent)
@@ -105,6 +107,7 @@ internal fun updateAppWidget(
         // Add the widget ID to the intent extras.
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         putExtra(EXTRA_NOTELIST, widgetValues.noteListString)
+        putExtra(EXTRA_ITEM_CONFIGID, widgetValues.configId)
         putExtra(EXTRA_ITEM_TEXTCOLOR, rowTextColor)
         data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
     }
@@ -143,7 +146,7 @@ internal fun updateAppWidget(
         val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
         setOnClickPendingIntent(R.id.widgetRoot, pendingIntent)
 
-        val buttonPendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=0"))
+        val buttonPendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=0&configid=${widgetValues.configId}"))
         setOnClickPendingIntent(R.id.addNoteButton, buttonPendingIntent)
 
         // This section makes it possible for items to have individualized. It does this by setting up a pending intent template.
@@ -171,6 +174,7 @@ class NoteListViewWidgetService : RemoteViewsService() {
 class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
     private var data: ArrayList<NoteItem> = arrayListOf()
     private var textColor: Int = -1
+    private var configId: Int = -1
         
     override fun onCreate() {
         // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
@@ -191,6 +195,7 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
         // in its current state while work is being done here, so you don't need to worry about
         // locking up the widget.
         textColor = intent.getIntExtra(EXTRA_ITEM_TEXTCOLOR, -1)
+        configId = intent.getIntExtra(EXTRA_ITEM_CONFIGID, -1)
         val list: ArrayList<NoteItem> = arrayListOf()
         val noteListString = intent.getStringExtra(EXTRA_NOTELIST)
         val jsonArray = JSONTokener(noteListString).nextValue() as JSONArray
@@ -224,10 +229,10 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
     }
 
     override fun getViewAt(position: Int): RemoteViews {
-        println("-----------------------------------------------------------------getViewAt")
         var views = RemoteViews(context.packageName, R.layout.ohnote_widget_listviewitem)
         var bundle = Bundle().apply { 
             putInt(EXTRA_ITEM_NOTEID, data[position].id)
+            putInt(EXTRA_ITEM_CONFIGID, configId)
         }
         val intent = Intent().apply {
             putExtras(bundle)
@@ -236,7 +241,6 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
         if (textColor != -1) {
             views.setTextColor(R.id.rowTextView, textColor)
         }
-        println("-----------------------------------------------------------------getViewAt: setOnClickFillInIntent")
         views.setTextViewText(R.id.rowTextView, data[position].text)
         if (position == data.count() - 1) {
             views.setViewLayoutHeight(R.id.rowLayout, 25f, TypedValue.COMPLEX_UNIT_DIP)
