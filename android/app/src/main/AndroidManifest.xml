@@ -56,8 +56,5 @@
         <service 
             android:name=".NoteListViewWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
-        <!-- <service 
-            android:name=".ConfigurationsListViewWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" /> -->
     </application>
 </manifest>

@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/Theme.Android.AppWidgetContainer"
@@ -19,6 +20,7 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:id="@+id/titleTextView"
                 android:maxLines="1"
                 android:layout_marginTop="1dp"
                 android:gravity="center_vertical"
@@ -30,6 +32,7 @@
                 android:textStyle="bold"/>
                 
             <Button
+                android:id="@+id/addNoteButton"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:minHeight="5dp"
@@ -42,156 +45,151 @@
                 android:textColor="@color/widget_button_text"
                 android:background="@drawable/app_widget_button_add" />
         </RelativeLayout>
-            
-        <FrameLayout
+        
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
             
-            <LinearLayout
+            <TextView
+                android:text="Send meeting invitation via email"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                
-                <TextView
-                    android:text="Send meeting invitation via email"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
-                
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="Requests from Leonard..."
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
-                
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+            <TextView
+                android:text="Requests from Leonard..."
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="My songs: Safe and Sound, Instant Crush, We Are Young, Animals"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
-                
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+            <TextView
+                android:text="My songs: Safe and Sound, Instant Crush, We Are Young, Animals"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="Advantages of project: reliability, efficiency, long-term"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
-                
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+            <TextView
+                android:text="Advantages of project: reliability, efficiency, long-term"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="Class calendar: Calculus 11:00 - 13:00, French 13:00 - 15:00"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
+            <TextView
+                android:text="Class calendar: Calculus 11:00 - 13:00, French 13:00 - 15:00"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="Mots français : audace, humanité, normes, contrôler, émettre, émaner"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
+            <TextView
+                android:text="Mots français : audace, humanité, normes, contrôler, émettre, émaner"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="Client Services: Ascent IT Innovate Solutions, Ascent Retained Search"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
+            <TextView
+                android:text="Client Services: Ascent IT Innovate Solutions, Ascent Retained Search"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/widget_divider" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/widget_divider" />
 
-                <TextView
-                    android:text="Cooking recipe..."
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:gravity="top"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:maxLines="1"
-                    android:textSize="14sp"
-                    android:textColor="@color/widget_text"
-                    android:background="?android:attr/selectableItemBackground" />
+            <TextView
+                android:text="Cooking recipe..."
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:gravity="top"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:maxLines="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_text"
+                android:background="?android:attr/selectableItemBackground" />
 
-            </LinearLayout>
-        </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
