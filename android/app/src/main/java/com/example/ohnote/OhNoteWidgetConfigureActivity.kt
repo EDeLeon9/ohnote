@@ -1,4 +1,4 @@
-package com.example.ohnote
+package com.trendsapps.ohnote
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
@@ -19,7 +19,7 @@ import org.json.JSONTokener
 import org.json.JSONArray
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
-import com.example.ohnote.databinding.OhnoteWidgetConfigureBinding //layout/ohnote_widget_configure.xml
+import com.trendsapps.ohnote.databinding.OhnoteWidgetConfigureBinding //layout/ohnote_widget_configure.xml
 
 internal const val OPEN_HOMEWIDGETCONFIGS = "openhomewidgetconfigs"
 internal const val PREF_CONFIG_IDS = "_ohNoteWidgetConfigIds"

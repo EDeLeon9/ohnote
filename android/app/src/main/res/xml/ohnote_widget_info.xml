@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configure="com.example.ohnote.OhNoteWidgetConfigureActivity"
+    android:configure="com.trendsapps.ohnote.OhNoteWidgetConfigureActivity"
     android:description="@string/List_of_notes"
     android:initialKeyguardLayout="@layout/ohnote_widget_root"
     android:initialLayout="@layout/ohnote_widget_root"

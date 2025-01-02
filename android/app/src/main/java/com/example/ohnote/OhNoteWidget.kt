@@ -1,4 +1,4 @@
-package com.example.ohnote // Your package name
+package com.trendsapps.ohnote // Your package name
 
 import android.view.View
 import android.appwidget.AppWidgetManager
@@ -24,11 +24,11 @@ import es.antonborri.home_widget.HomeWidgetProvider
 
 internal const val APP_SCHEME_NAME = "ohnotewidget"
 internal const val OPEN_NOTE = "opennote"
-internal const val EXTRA_NOTELIST = "com.example.ohnote.EXTRA_NOTELIST"
-internal const val EXTRA_ITEM_NOTEID = "com.example.ohnote.EXTRA_ITEM_NOTEID"
-internal const val EXTRA_ITEM_CONFIGID = "com.example.ohnote.EXTRA_ITEM_CONFIGID"
-internal const val EXTRA_ITEM_TEXTCOLOR = "com.example.ohnote.EXTRA_ITEM_TEXTCOLOR"
-internal const val INTENT_OPEN_ACTION = "com.example.ohnote.INTENT_OPEN_ACTION"
+internal const val EXTRA_NOTELIST = "com.trendsapps.ohnote.EXTRA_NOTELIST"
+internal const val EXTRA_ITEM_NOTEID = "com.trendsapps.ohnote.EXTRA_ITEM_NOTEID"
+internal const val EXTRA_ITEM_CONFIGID = "com.trendsapps.ohnote.EXTRA_ITEM_CONFIGID"
+internal const val EXTRA_ITEM_TEXTCOLOR = "com.trendsapps.ohnote.EXTRA_ITEM_TEXTCOLOR"
+internal const val INTENT_OPEN_ACTION = "com.trendsapps.ohnote.INTENT_OPEN_ACTION"
 
 /*
  * Implementation of App Widget functionality.

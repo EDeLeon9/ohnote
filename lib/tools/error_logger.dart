@@ -12,7 +12,7 @@ class ErrorLogger {
   static bool _isWriting = false;
   static final List<String> _pendingMessages = [];
 
-  // /data/user/0/com.example.ohnote/app_flutter/error_logs
+  // /data/user/0/com.trendsapps.ohnote/app_flutter/error_logs
   static String? __errorsPath;
   static Future<String?> get _errorsPath async {
     __errorsPath ??= p.join((await pp.getApplicationDocumentsDirectory()).path, 'error_logs');

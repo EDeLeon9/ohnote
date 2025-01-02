@@ -50,7 +50,7 @@ class AppData {
     getComparisonDateTime: (note) => note.modifDateTime,
   );
 
-  // /data/user/0/com.example.ohnote/databases/ohnote.db
+  // /data/user/0/com.trendsapps.ohnote/databases/ohnote.db
   static String? __dbPath;
   static Future<String> get _dbPath async {
     __dbPath ??= p.join(await getDatabasesPath(), 'ohnote.db');

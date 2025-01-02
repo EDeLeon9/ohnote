@@ -10,7 +10,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//cambiar com.example.ohnote a com.<empresa>.ohnote, esto seguro requiere hacer backup antes de desinstalar e instalar.
 //Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.
 //Probar en emuladores de android con v21 y v31 (por valores de app widget)
 //Anuncios.

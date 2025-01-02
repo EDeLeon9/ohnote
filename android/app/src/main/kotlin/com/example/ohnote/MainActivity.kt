@@ -1,4 +1,4 @@
-package com.example.ohnote
+package com.trendsapps.ohnote
 
 import io.flutter.embedding.android.FlutterActivity
 
