@@ -161,17 +161,17 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                   HeaderButton(HeaderButtonDetails.back),
                   HeaderButton(HeaderButtonDetails.navMenu)
                     ..showCaseKey = MainScaffold.of(context).navMenuSCK
-                    ..showCaseDescription = 'This is the menu button,\nwhere settings, trash can,\nand other stuff are.',
+                    ..showCaseDescription = 'This is the menu\nbutton, where the\nsettings, trash can\nand other stuff are.',
                   HeaderButton(HeaderButtonDetails.selectionMode)
                     ..showCaseKey = MainScaffold.of(context).selectionModeSCK
                     ..showCaseDescription =
-                        'If you want to do any\naction with your notes\nenter in selection mode\ntapping here to select\nthe notes.',
+                        'If you want to perform\nany action with your\nnotes, enter selection\nmode by tapping here\nto select the notes.',
                   HeaderButton(HeaderButtonDetails.searchText)
                     ..showCaseKey = MainScaffold.of(context).searchSCK
-                    ..showCaseDescription = 'Tap here to search\nnotes that match\nwith the typed text.',
+                    ..showCaseDescription = 'Tap here to search\nfor notes that match\nthe typed text.',
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = MainScaffold.of(context).moreSCK
-                    ..showCaseDescription = 'Tap here to view more\nactions you can do\nwith your notes.',
+                    ..showCaseDescription = 'Tap here to see\nmore actions you\ncan take with your\nnotes.',
                   HeaderButton(HeaderButtonDetails.filters),
                   HeaderButton(HeaderButtonDetails.sortBy),
                   HeaderButton(HeaderButtonDetails.style),

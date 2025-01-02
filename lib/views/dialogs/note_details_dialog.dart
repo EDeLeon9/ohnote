@@ -90,7 +90,7 @@ class _NoteDetailsDialogState extends State<NoteDetailsDialog> {
               children: [
                 CustomShowCase(
                   showCaseKey: _detailsDialogSCK,
-                  description: 'You can select and copy\nthe details and even the\ndate if you need to.',
+                  description: 'You can select and\ncopy the details and\neven the date if you\nneed to.',
                   child: const SizedBox(
                     width: double.infinity,
                     child: Text(' '),

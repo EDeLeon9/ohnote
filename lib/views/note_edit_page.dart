@@ -145,7 +145,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
                     index == _configBarSCPageIndex
                         ? CustomShowCase(
                             showCaseKey: _configBarSCK,
-                            description: 'You can tap this zone to\nset color to your note.',
+                            description: 'You can tap on this\nzone to set a color\nto your note.',
                             child: _configBar(editor),
                           )
                         : _configBar(editor),
@@ -171,7 +171,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
   Widget _backButton() {
     return CustomShowCase(
       showCaseKey: _backSCK,
-      description: 'Tap back to save changes\nafter editing your note.',
+      description: 'Tap back to save\nchanges after editing\nyour note.',
       child: SizedBox(
         height: 56.0,
         width: 56.0,
@@ -189,7 +189,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
   Widget _favoriteButton() {
     return CustomShowCase(
       showCaseKey: _favoriteSCK,
-      description: 'You can set your note\nas favorite. This can\nhelp you when using\nfilters in the main list.',
+      description: 'You can set your note\nas a favorite. This can\nhelp you when using\nfilters in the main list.',
       child: ValueListenableBuilder(
         valueListenable: _currentEditor.note.favorite,
         builder: (context, favorite, child) {
@@ -263,7 +263,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
       context: context,
       button: HeaderButton(HeaderButtonDetails.more)
         ..showCaseKey = _moreSCK
-        ..showCaseDescription = 'Tap here to see more\noptions like viewing the\nhistory of your note or\n sending it to trash can.',
+        ..showCaseDescription = 'Tap here for more\noptions, such as\nviewing your note\'s\nhistory or sending it\nto the trash can.',
       moreButtons: [
         HeaderButton(HeaderButtonDetails.history),
         HeaderButton(HeaderButtonDetails.sendToTrash),

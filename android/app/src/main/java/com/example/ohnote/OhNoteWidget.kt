@@ -1,4 +1,4 @@
-package com.trendsapps.ohnote // Your package name
+package com.trendsapps.ohnote
 
 import android.view.View
 import android.appwidget.AppWidgetManager
@@ -12,6 +12,7 @@ import android.widget.RemoteViewsService
 import android.net.Uri
 import android.app.PendingIntent
 import android.os.Bundle
+import android.os.Build
 import android.util.TypedValue
 import android.graphics.Color
 import kotlin.math.roundToInt
@@ -92,12 +93,12 @@ internal fun updateAppWidget(
     if (widgetValues.configItem != null) {
         if (widgetValues.configItem.theme == "Light theme") {
             rootLayoutId = R.layout.ohnote_widget_root_light
-            backgroundColor = context.getColor(R.color.widget_background_light)
-            rowTextColor = context.getColor(R.color.widget_text_light)
+            backgroundColor = safeGetColor(context, R.color.widget_background_light)
+            rowTextColor = safeGetColor(context, R.color.widget_text_light)
         } else if (widgetValues.configItem.theme == "Dark theme") {
             rootLayoutId = R.layout.ohnote_widget_root_dark
-            backgroundColor = context.getColor(R.color.widget_background_dark)
-            rowTextColor = context.getColor(R.color.widget_text_dark)
+            backgroundColor = safeGetColor(context, R.color.widget_background_dark)
+            rowTextColor = safeGetColor(context, R.color.widget_text_dark)
         } else {
             rootLayoutId = getSystemDefaultRootLayoutId(widgetValues.configItem.opacity)
         }
@@ -152,11 +153,17 @@ internal fun updateAppWidget(
         // This section makes it possible for items to have individualized. It does this by setting up a pending intent template.
         // Individuals items of a collection can't set up their own pending intents. Instead, the collection as a whole sets up a pending
         // intent template, and the individual items set a fillInIntent to create unique behavior on an item-by-item basis.
+        var pendingIntentFlags: Int
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT
+        }
         val pendingIntentTemplate = Intent(context, OhNoteWidget::class.java).run {
             action = INTENT_OPEN_ACTION
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
-            PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+            PendingIntent.getBroadcast(context, 0, this, pendingIntentFlags)
         }
         setPendingIntentTemplate(R.id.noteListView, pendingIntentTemplate)
     }
@@ -242,10 +249,12 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
             views.setTextColor(R.id.rowTextView, textColor)
         }
         views.setTextViewText(R.id.rowTextView, data[position].text)
-        if (position == data.count() - 1) {
-            views.setViewLayoutHeight(R.id.rowLayout, 25f, TypedValue.COMPLEX_UNIT_DIP)
-        } else {
-            views.setViewLayoutHeight(R.id.rowLayout, 20f, TypedValue.COMPLEX_UNIT_DIP)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (position == data.count() - 1) {
+                views.setViewLayoutHeight(R.id.rowLayout, 25f, TypedValue.COMPLEX_UNIT_DIP)
+            } else {
+                views.setViewLayoutHeight(R.id.rowLayout, 20f, TypedValue.COMPLEX_UNIT_DIP)
+            }
         }
         return views
     }

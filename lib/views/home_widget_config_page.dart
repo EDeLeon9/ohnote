@@ -92,7 +92,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
               button: HeaderButton(HeaderButtonDetails.more)
                 ..showCaseKey = _homeWidgetConfigMoreSCK
                 ..showCaseDescription =
-                    'To remove a home\nwidget configuration\ntap in the option of\nthis menu. you have\nto select first the\nconfiguration you\nwant to remove.',
+                    'To remove a home\nwidget configuration\ntap on the option in\nthis menu. You must\nfirst select the confi-\nguration you want to\nremove.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.removeHomeWidgetConfig),
               ],
@@ -230,7 +230,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
     return CustomShowCase(
       showCaseKey: _newHomeWidgetConfigSCK,
       description:
-          'Tap here to create a\nhome widget configu-\nration which you can\nuse when adding a\nwidget in your home\nscreen. You can even\nedit it later and the\nwidget in your home\nscreen will update too.',
+          'Tap here to create a\nhome widget configu-\nration that you can use\nto add a widget to your\nhome screen. You can\neven edit it later and\nyour home screen\nwidget will be updated\nas well.',
       child: IconButton(
         tooltip: 'New home widget configuration',
         icon: const Icon(Icons.add_card),
@@ -309,14 +309,18 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
                           elevation: 0.0,
                           minimumSize: Size.zero,
                           visualDensity: const VisualDensity(horizontal: -4.0, vertical: -4.0),
-                          padding: const EdgeInsets.symmetric(horizontal: 7.0),
+                          padding: const EdgeInsets.all(0.0),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           shadowColor: Colors.transparent,
                         ),
                         onPressed: () {},
-                        child: const Text('+', style: TextStyle(fontSize: 16.0)),
+                        child: SizedBox(
+                          height: 23.0,
+                          width: 23.0,
+                          child: const Icon(Icons.add, size: 17.0),
+                        ),
                       ),
                     ],
                   ),

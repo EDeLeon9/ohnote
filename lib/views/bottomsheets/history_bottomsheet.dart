@@ -43,7 +43,7 @@ class HistoryBottomSheet {
         AppData.restoreHistory(historyToRestore, selectedOption.endsWith('style'));
         AppData.removeNotesFromLists([historyToRestore], historyManager);
         if (context.mounted) {
-          t.showCustomToast('Note restored', context);
+          t.showCustomToast('Note restored.', context);
         }
         return true;
       }
@@ -113,7 +113,7 @@ class HistoryBottomSheet {
             return index == 0
                 ? CustomShowCase(
                     showCaseKey: _historyTileSCK,
-                    description: 'Tap a note history to view\nthe details. You can also\nlong-press to select it and\nperform actions.',
+                    description: 'Tap a note history to\nview the details. You\ncan also long-press to\nselect it and perform\nactions.',
                     child: noteTile,
                   )
                 : noteTile;

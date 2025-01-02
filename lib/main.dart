@@ -10,20 +10,21 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Revisar redacción de showcases con google Translate y verificar largo de los textos y tamaño de las boquitas.
-//Probar en emuladores de android con v21 y v31 (por valores de app widget)
+//Probar en emuladores de android con v21 y v31 (por valores de app widget).
+//About page (investigar que se debe o que se recomienda poner ahí).
 //Anuncios.
 //Solicitar Rate us.
-//Autenticación google para guardar base de datos (como sería en iPhone? tambien google?).
-//About page (investigar que se debe o que se recomienda poner ahí).
-//Ver si no es complicado de implementar, sino puede esperar: Error handling (enviar errores periódicamente a desarrollador).
-//Verificar si hay cambios en nested_scroll_view.dart para flutter_nestedscrollview.dart y date_picker.dart del paquete flutter_holo_date_picker para HoloDatePicker
 //---------------Puede esperar:
-//Capturar errores de base de datos con try catch
+//Autenticación google para guardar base de datos (como sería en iPhone? tambien google?).
+//Capturar errores de base de datos con try catch y enviar errores periódicamente a desarrollador.
 //Idioma español.
 //Opciones para hacer share de nota (por ejemplo enviar por correo o copiar al portapapeles).
-//Importar, exportar data (bd)
+//Importar, exportar notas
 //Arreglar íconos para iOS generados con "dart run flutter_launcher_icons"
+
+//Notes:
+//Android Widget base created with Android Studio (right click in android/app -> New -> Widget -> App Widget)
+//App icons created with flutter_launcher_icons package, and then with Android Studio (right click in android/app/res -> New -> Image Asset)
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); //Required by HomeWidgetManager and AppData.

@@ -55,8 +55,8 @@ class MainList extends StatelessWidget {
           child: index == 0
               ? CustomShowCase(
                   showCaseKey: MainScaffold.of(context).noteTileSCK,
-                  description: 'Tap a note to edit it. You can\nalso long-press to select it\nand perform actions, '
-                      'or long-\npress to drag and drop and\nreorder notes.',
+                  description:
+                      'Tap a note to edit it.\nYou can also long-\npress to select it and\nperform actions, or\nlong-press to drag\nand drop and reorder\nnotes.',
                   child: noteTile,
                 )
               : noteTile,

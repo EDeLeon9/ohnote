@@ -350,7 +350,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Settings.hideDetachLabelDialog,
             ]);
             if (context.mounted) {
-              t.showCustomToast('Checks were reset', context);
+              t.showCustomToast('Checks were reset.', context);
             }
           }
         });

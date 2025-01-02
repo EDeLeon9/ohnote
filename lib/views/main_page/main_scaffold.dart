@@ -193,7 +193,7 @@ class MainScaffoldState extends State<MainScaffold> {
           EdgeInsets.only(bottom: stylePanelHeight - (AppData.notesManager.stylePanelOpened.value && AppData.dataInitialized.value ? 45.0 : 0.0)),
       child: CustomShowCase(
         showCaseKey: _addNewNoteSCK,
-        description: 'Tap here to add a new note.',
+        description: 'Tap here to add a\nnew note.',
         child: FloatingActionButton(
           tooltip: 'New note',
           onPressed: openNote,

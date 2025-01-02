@@ -1,0 +1,10 @@
+<!-- Created with Android Studio (right click in android/app/res/drawable -> New -> Vector Asset) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:height="17dp" 
+    android:width="17dp"
+    android:tint="@color/widget_button_text">
+    <path android:fillColor="@android:color/white" 
+          android:pathData="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+</vector>

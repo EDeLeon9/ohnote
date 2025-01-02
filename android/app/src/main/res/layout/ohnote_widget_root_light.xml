@@ -36,13 +36,11 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:minHeight="5dp"
-                android:paddingLeft="1dp"
-                android:paddingBottom="1dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="1dp"
                 android:layout_alignParentRight="true"
-                android:text="+"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/widget_button_text_light"
+                android:drawableLeft="@drawable/app_widget_add_icon_light"
+                android:drawablePadding="0dp"
                 android:background="@drawable/app_widget_button_add_light" />
         </RelativeLayout>
             

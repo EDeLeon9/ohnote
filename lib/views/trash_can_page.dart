@@ -69,7 +69,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
               button: HeaderButton(HeaderButtonDetails.more)
                 ..showCaseKey = _trashMoreSCK
                 ..showCaseDescription =
-                    'Here you can filter\nnotes in trash can,\nrestore them or remove\nthem permanently. Tap\nhere to view the options.',
+                    'Here you can filter\nthe trash can notes,\nrestore them or remove\nthem permanently. Tap\nhere to see the options.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.filters),
                 HeaderButton(HeaderButtonDetails.restore),

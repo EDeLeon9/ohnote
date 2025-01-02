@@ -61,7 +61,7 @@ void showCustomToast(String message, BuildContext context, [int msDuration = 400
   _CustomToast.fToast!.showToast(
       fadeDuration: _CustomToast.fadeDuration, //Shows a bit quicker.
       toastDuration: Duration(milliseconds: msDuration),
-      positionedToastBuilder: (context, child) {
+      positionedToastBuilder: (context, child, gravity) {
         return Positioned(
           left: 0.0,
           right: 0.0,

@@ -69,7 +69,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
           width: MediaQuery.of(context).size.width,
           child: CustomShowCase(
             showCaseKey: _labelDialogSelectSCK,
-            description: 'Select the labels you want\nto attach to the note, then\npress "Done" to apply the\nlabels.',
+            description: 'Select the labels you\nwant to attach to the\nnote, then press "Done"\nto apply the labels.',
             child: ScrollViewWithBar(
               //Padding avoids shadows to be hidden
               padding: const EdgeInsets.all(3.0),
@@ -107,7 +107,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
                 height: 75,
                 child: CustomShowCase(
                   showCaseKey: _labelDialogNewSCK,
-                  description: 'You can create a new\nlabel by typing a new\nlabel name, then press\n"+" button to add the\nlabel.',
+                  description: 'You can create a new\nlabel by typing a new\nlabel name and then\ntapping the "+" button\nto add the label.',
                   child: Row(
                     children: [
                       Expanded(

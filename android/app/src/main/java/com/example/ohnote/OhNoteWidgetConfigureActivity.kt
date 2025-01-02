@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.Intent
 import android.os.Bundle
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import android.widget.TextView
 import android.widget.ListView
 import android.widget.EditText
 import android.net.Uri
+import android.graphics.Color
 import org.json.JSONObject
 import org.json.JSONTokener
 import org.json.JSONArray
@@ -183,6 +185,16 @@ internal fun deleteConfigId(context: Context, appWidgetId: Int, prefs: SharedPre
     prefsEdit.apply()
 }
 
+internal fun safeGetColor(context: Context, layoutId: Int): Int {
+    var getColor: (Int) -> Int
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        getColor = context::getColor
+    } else {
+        getColor = context.resources::getColor
+    }
+    return getColor(layoutId)
+}
+
 class ConfigurationItem(
     val id: Int, 
     val title: String, 
@@ -205,9 +217,10 @@ class ConfigurationsListViewAdapter(context: Context, items: ArrayList<Configura
         view.findViewById<TextView>(R.id.row_title_textview).text = configItem.title
         view.findViewById<TextView>(R.id.row_desc_textview).text = "${configItem.theme}, ${configItem.opacity}% opacity${getFiltersString(configItem.filters)}"
         if (position == selectedPosition) {
-            view.setBackgroundColor(context.getColor(R.color.widget_selected_item))
-        } else {
-            view.setBackgroundColor(context.getColor(R.color.transparent))
+            view.setBackgroundColor(safeGetColor(context, R.color.widget_selected_item))
+        } 
+        else {
+            view.setBackgroundColor(Color.TRANSPARENT)
         }
         return view
     }

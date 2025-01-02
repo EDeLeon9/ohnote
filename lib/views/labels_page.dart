@@ -79,7 +79,7 @@ class _LabelsPageState extends State<LabelsPage> {
               context: context,
               button: HeaderButton(HeaderButtonDetails.more)
                 ..showCaseKey = _labelMoreSCK
-                ..showCaseDescription = 'To search or remove\na label tap here and\nselect the option.',
+                ..showCaseDescription = 'To search for or\nremove a label tap\nhere and select the\noption.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.searchLabel),
                 HeaderButton(HeaderButtonDetails.removeLabel),
@@ -196,7 +196,7 @@ class _LabelsPageState extends State<LabelsPage> {
   Widget _newLabelButton() {
     return CustomShowCase(
       showCaseKey: _newLabelSCK,
-      description: 'To add a new label\nyou can tap here\nthen type a title\nfor the label.',
+      description: 'To add a new label\nyou can tap here\nand then type a title\nfor the label.',
       child: Transform.rotate(
         angle: (90.0 * math.pi) / 180.0,
         child: IconButton(
