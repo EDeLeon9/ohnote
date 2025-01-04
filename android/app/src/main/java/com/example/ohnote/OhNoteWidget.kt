@@ -28,7 +28,7 @@ internal const val OPEN_NOTE = "opennote"
 internal const val EXTRA_NOTELIST = "com.trendsapps.ohnote.EXTRA_NOTELIST"
 internal const val EXTRA_ITEM_NOTEID = "com.trendsapps.ohnote.EXTRA_ITEM_NOTEID"
 internal const val EXTRA_ITEM_CONFIGID = "com.trendsapps.ohnote.EXTRA_ITEM_CONFIGID"
-internal const val EXTRA_ITEM_TEXTCOLOR = "com.trendsapps.ohnote.EXTRA_ITEM_TEXTCOLOR"
+internal const val EXTRA_ITEM_LAYOUTID = "com.trendsapps.ohnote.EXTRA_ITEM_LAYOUTID"
 internal const val INTENT_OPEN_ACTION = "com.trendsapps.ohnote.INTENT_OPEN_ACTION"
 
 /*
@@ -89,16 +89,19 @@ internal fun updateAppWidget(
 
     var rootLayoutId = R.layout.ohnote_widget_root
     var backgroundColor = -1
-    var rowTextColor = -1
+    var rowLayoutId = R.layout.ohnote_widget_listviewitem
+    var contentTextColor = -1
     if (widgetValues.configItem != null) {
         if (widgetValues.configItem.theme == "Light theme") {
             rootLayoutId = R.layout.ohnote_widget_root_light
             backgroundColor = safeGetColor(context, R.color.widget_background_light)
-            rowTextColor = safeGetColor(context, R.color.widget_text_light)
+            rowLayoutId = R.layout.ohnote_widget_listviewitem_light
+            contentTextColor = safeGetColor(context, R.color.widget_text_light)
         } else if (widgetValues.configItem.theme == "Dark theme") {
             rootLayoutId = R.layout.ohnote_widget_root_dark
             backgroundColor = safeGetColor(context, R.color.widget_background_dark)
-            rowTextColor = safeGetColor(context, R.color.widget_text_dark)
+            rowLayoutId = R.layout.ohnote_widget_listviewitem_dark
+            contentTextColor = safeGetColor(context, R.color.widget_text_dark)
         } else {
             rootLayoutId = getSystemDefaultRootLayoutId(widgetValues.configItem.opacity)
         }
@@ -109,7 +112,7 @@ internal fun updateAppWidget(
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         putExtra(EXTRA_NOTELIST, widgetValues.noteListString)
         putExtra(EXTRA_ITEM_CONFIGID, widgetValues.configId)
-        putExtra(EXTRA_ITEM_TEXTCOLOR, rowTextColor)
+        putExtra(EXTRA_ITEM_LAYOUTID, rowLayoutId)
         data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
     }
 
@@ -125,8 +128,8 @@ internal fun updateAppWidget(
                 setInt(R.id.widgetRoot, "setBackgroundColor", 
                     Color.argb(alpha.roundToInt(), Color.red(backgroundColor), Color.green(backgroundColor), Color.blue(backgroundColor)))
             }
-            if (rowTextColor != -1) {
-                setTextColor(R.id.emptyTextView, rowTextColor)
+            if (contentTextColor != -1) {
+                setTextColor(R.id.emptyTextView, contentTextColor)
             }
         }
 
@@ -180,7 +183,7 @@ class NoteListViewWidgetService : RemoteViewsService() {
 
 class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
     private var data: ArrayList<NoteItem> = arrayListOf()
-    private var textColor: Int = -1
+    private var layoutId: Int = R.layout.ohnote_widget_listviewitem
     private var configId: Int = -1
         
     override fun onCreate() {
@@ -201,7 +204,7 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
         // from the network, etc., it is ok to do it here, synchronously. The widget will remain
         // in its current state while work is being done here, so you don't need to worry about
         // locking up the widget.
-        textColor = intent.getIntExtra(EXTRA_ITEM_TEXTCOLOR, -1)
+        layoutId = intent.getIntExtra(EXTRA_ITEM_LAYOUTID, R.layout.ohnote_widget_listviewitem)
         configId = intent.getIntExtra(EXTRA_ITEM_CONFIGID, -1)
         val list: ArrayList<NoteItem> = arrayListOf()
         val noteListString = intent.getStringExtra(EXTRA_NOTELIST)
@@ -236,7 +239,7 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
     }
 
     override fun getViewAt(position: Int): RemoteViews {
-        var views = RemoteViews(context.packageName, R.layout.ohnote_widget_listviewitem)
+        var views = RemoteViews(context.packageName, layoutId)
         var bundle = Bundle().apply { 
             putInt(EXTRA_ITEM_NOTEID, data[position].id)
             putInt(EXTRA_ITEM_CONFIGID, configId)
@@ -245,9 +248,6 @@ class NoteListViewAdapter(val context: Context, val intent: Intent) : RemoteView
             putExtras(bundle)
         }
         views.setOnClickFillInIntent(R.id.rowTextView, intent)
-        if (textColor != -1) {
-            views.setTextColor(R.id.rowTextView, textColor)
-        }
         views.setTextViewText(R.id.rowTextView, data[position].text)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (position == data.count() - 1) {

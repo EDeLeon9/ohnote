@@ -20,6 +20,7 @@
     <color name="widget_button_text_light">#FCF8F4</color>
     <color name="widget_button_light">#006782</color>
     <color name="widget_pressed_button_light">#58919F</color>
+    <color name="widget_selected_item_light">#46006782</color>
 
     <!-- Dark -->
     <color name="widget_background_dark">#191F21</color>
@@ -28,6 +29,7 @@
     <color name="widget_button_text_dark">#010F13</color>
     <color name="widget_button_dark">#D0F2FF</color>
     <color name="widget_pressed_button_dark">#C4DCE5</color>
+    <color name="widget_selected_item_dark">#50D0F2FF</color>
 
     <!-- System default -->
     <color name="widget_background_95">#F2F7EDE3</color>

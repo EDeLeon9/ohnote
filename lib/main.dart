@@ -10,7 +10,8 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Probar en emuladores de android con v21 y v31 (por valores de app widget).
+//Crear ohnote_widget_listviewitem_light.xml y ohnote_widget_listviewitem_dark.xml para cambiar android:background="?android:attr/selectableItemBackground"
+//Probar en emuladores de android con desde v21.
 //About page (investigar que se debe o que se recomienda poner ahí).
 //Anuncios.
 //Solicitar Rate us.
@@ -22,8 +23,8 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Importar, exportar notas
 //Arreglar íconos para iOS generados con "dart run flutter_launcher_icons"
 
-//Notes:
-//Android Widget base created with Android Studio (right click in android/app -> New -> Widget -> App Widget)
+//Reminder:
+//Android Widget base files created with Android Studio (right click in android/app -> New -> Widget -> App Widget)
 //App icons created with flutter_launcher_icons package, and then with Android Studio (right click in android/app/res -> New -> Image Asset)
 
 void main() {
