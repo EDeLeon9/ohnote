@@ -10,7 +10,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Crear ohnote_widget_listviewitem_light.xml y ohnote_widget_listviewitem_dark.xml para cambiar android:background="?android:attr/selectableItemBackground"
 //Probar en emuladores de android con desde v21.
 //About page (investigar que se debe o que se recomienda poner ahí).
 //Anuncios.

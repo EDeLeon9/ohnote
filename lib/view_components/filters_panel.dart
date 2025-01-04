@@ -82,7 +82,7 @@ class _FiltersPanelState extends State<FiltersPanel> {
                               blurRadius: 3.5,
                               spreadRadius: 1.0,
                               offset: const Offset(0.0, -2.0),
-                              color: Theme.of(context).colorScheme.shadow.withOpacity(0.5),
+                              color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.5),
                             ),
                           ],
                           color: Theme.of(context).colorScheme.tertiaryContainer,

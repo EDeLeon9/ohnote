@@ -48,7 +48,7 @@ class AppTheme {
           foregroundColor: colorScheme.onPrimary,
         ),
       ),
-      splashColor: colorScheme.primary.withOpacity(0.2),
+      splashColor: colorScheme.primary.withValues(alpha: 0.2),
     );
   }
 

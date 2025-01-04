@@ -35,7 +35,7 @@ class _CustomToastState extends State<_CustomToast> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25.0),
-            color: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.9),
+            color: Theme.of(context).colorScheme.inverseSurface.withValues(alpha: 0.9),
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 100.0),

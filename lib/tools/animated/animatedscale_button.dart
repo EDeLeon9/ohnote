@@ -35,7 +35,7 @@ class AnimatedScaleButton extends StatelessWidget {
         tooltip: tooltip,
         //Just horizontal -0.2 is required, but using symmetric densities avoid bluring icons.
         visualDensity: const VisualDensity(horizontal: -0.2, vertical: -0.2),
-        highlightColor: buttonColor.withOpacity(0.1),
+        highlightColor: buttonColor.withValues(alpha: 0.1),
         icon: Icon(
           icon,
           color: isEnabled ? buttonColor : Theme.of(context).colorScheme.outline,

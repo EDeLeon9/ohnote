@@ -34,8 +34,8 @@ class ErrorLogger {
         }
         var now = DateTime.now();
         var destination = (await Directory(p.join(errPath, now.year.toString())).create(recursive: true)).path;
-        var logFile = File(p.join(destination, 'error_${now.parseDateToStr(DTToStrFormat.DATABASE).replaceAll('-', '')}.log'));
-        _pendingMessages.add('${now.parseToStr(DTToStrFormat.LOCALE)}: $message$stackTrace${Platform.lineTerminator}');
+        var logFile = File(p.join(destination, 'error_${now.dateToStr(DTToStrFormat.DATABASE).replaceAll('-', '')}.log'));
+        _pendingMessages.add('${now.toStr(DTToStrFormat.LOCALE)}: $message$stackTrace${Platform.lineTerminator}');
         while (_isWriting) {
           await Future.delayed(const Duration(milliseconds: 10));
         }

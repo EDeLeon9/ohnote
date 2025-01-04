@@ -92,7 +92,7 @@ class Note {
   String? get localeFormatArchiveDateTime => archiveDateTime != null ? _getLocaleFormatDateTime(archiveDateTime!) : null;
 
   String _getLocaleFormatDateTime(DateTime dateTime) {
-    var result = dateTime.parseToStr(DTToStrFormat.LOCALE);
+    var result = dateTime.toStr(DTToStrFormat.LOCALE);
     var amPm = result.substring(result.length - 2);
     return '${result.substring(0, result.length - 6)} $amPm';
   }

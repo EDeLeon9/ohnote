@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:collection/collection.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/tools/animated/animated_growth.dart';
+import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/linear_fade_out_mask.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
 import 'package:ohnote/views/dialogs/style_colorpicker_dialog.dart';
@@ -137,7 +138,7 @@ class _StylePanelColorsState extends State<StylePanelColors> {
         diameter: _colorButtonDiameter,
         margin: const EdgeInsets.all(6.0),
         onTap: changeColor,
-        isSelectedIcon: color.value == AppData.notesManager.styleSelectedColor.value?.value,
+        isSelectedIcon: color.toInt() == AppData.notesManager.styleSelectedColor.value?.toInt(),
       ),
     );
   }
@@ -161,7 +162,7 @@ class _StylePanelColorsState extends State<StylePanelColors> {
       setState(() {});
     } else if (_dialogPickerColor != null) {
       _saveColor(_dialogPickerColor);
-      if (!AppData.notesManager.styleColors.any((e) => e.value == _dialogPickerColor!.value)) {
+      if (!AppData.notesManager.styleColors.any((e) => e.toInt() == _dialogPickerColor!.toInt())) {
         setState(() {
           _animateColorButton = true;
           AppData.notesManager.styleColors.add(_dialogPickerColor!);
@@ -184,7 +185,7 @@ class _StylePanelColorsState extends State<StylePanelColors> {
         note.color.value = color;
       }
       AppData.notesManager.styleSelectedColor.value = color;
-      AppData.updateDbNotes(selectednotes, 'color', '${color?.value}');
+      AppData.updateDbNotes(selectednotes, 'color', '${color?.toInt()}');
     } else {
       t.showCustomToast('No notes selected.', context);
     }

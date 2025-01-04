@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
@@ -8,6 +7,7 @@ import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/data/sort_by.dart';
 import 'package:ohnote/tools/animated/animatedscale_button.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
+import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/tools/tappable_popupmenubutton.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
@@ -268,7 +268,7 @@ class HeaderButtons extends StatefulWidget {
             comparison = (Note a, Note b) => guiManager.getComparisonDateTime(a).compareTo(guiManager.getComparisonDateTime(b));
             break;
           case SortBy.color:
-            comparison = (Note a, Note b) => (b.color.value ?? Colors.transparent).value.compareTo((a.color.value ?? Colors.transparent).value);
+            comparison = (Note a, Note b) => (b.color.value ?? Colors.transparent).toInt().compareTo((a.color.value ?? Colors.transparent).toInt());
             break;
           case SortBy.label:
             comparison = (Note a, Note b) {
@@ -484,7 +484,7 @@ class _HeaderButtonsState extends State<HeaderButtons> {
                                     buttonsMap[HeaderButtonDetails.archive],
                                     buttonsMap[HeaderButtonDetails.sendToTrash],
                                     buttonsMap[HeaderButtonDetails.discardHistory],
-                                  ].whereNotNull().toList(),
+                                  ].where((e) => e != null).map((e) => e!).toList(),
                                   onSelected: (selected) {
                                     if (selected == HeaderButtonDetails.filters) {
                                       HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager, updateDb: widget.updateDbFilters);

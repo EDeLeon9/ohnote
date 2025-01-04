@@ -44,7 +44,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
         .map((e) => Note(
               id: e.id,
               text: e.title,
-              color: Colors.black.withOpacity(e.opacity / 100.0),
+              color: Colors.black.withValues(alpha: e.opacity / 100.0),
               creationDateTime: e.creationDateTime,
               guiManager: _homeWidgetConfigManager,
             ))
@@ -187,7 +187,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
           hwcNote = _homeWidgetConfigManager.allList.where((e) => e.id == homeWidgetConfig!.id).first;
           hwcNote.text = value.title;
         }
-        hwcNote.color.value = Colors.black.withOpacity(value.opacity / 100.0);
+        hwcNote.color.value = Colors.black.withValues(alpha: value.opacity / 100.0);
         homeWidgetConfig!.copyFrom(value);
         _homeWidgetConfigManager.requestUpdateDisplayList();
         AppData.updateDbHomeWidgetConfig(homeWidgetConfig!, isNew);
@@ -259,7 +259,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
             children: [
               Container(
                 constraints: const BoxConstraints(minHeight: 200.0),
-                color: Theme.of(context).colorScheme.surface.withOpacity(homeWidgetConfig.opacity / 100.0),
+                color: Theme.of(context).colorScheme.surface.withValues(alpha: homeWidgetConfig.opacity / 100.0),
                 child: Column(
                   children: [
                     const SizedBox(height: 35.0), //Space for the HeaderContainer.
@@ -279,7 +279,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
                           ),
                         );
                       },
-                      separatorBuilder: (context, index) => Divider(height: 0.0, color: Colors.grey.withOpacity(0.35)),
+                      separatorBuilder: (context, index) => Divider(height: 0.0, color: Colors.grey.withValues(alpha: 0.35)),
                     ),
                     const SizedBox(height: 1.0),
                   ],

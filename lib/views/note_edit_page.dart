@@ -63,6 +63,10 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
 
     _isNewNote = _currentEditor.note.id == 0;
 
+    if (!_isNewNote) {
+      _heroTag = 'noteHero_${_currentEditor.note.id}';
+    }
+
     _showCaseKeys = [_configBarSCK, _backSCK, _favoriteSCK, _labelNoteSCK, _moreSCK];
     if (_currentEditor.note.labelIds.isNotEmpty) {
       _showCaseKeys.add(_removeLabelSCK);
@@ -343,7 +347,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
               wordSpacing: 1.5,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
             ),
           ),
           onChanged: (value) {

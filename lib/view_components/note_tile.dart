@@ -34,8 +34,15 @@ class _NoteTileState extends State<NoteTile> {
   final GlobalKey _noteTileKey = GlobalKey();
 
   @override
+  void didUpdateWidget(covariant NoteTile oldWidget) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NoteTile.setNoteTileYPosition(_noteTileKey, widget.note);
+    });
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    NoteTile.setNoteTileYPosition(_noteTileKey, widget.note);
     //Material allows to set color to ListTile without removing the splash effect.
     return Material(
       key: _noteTileKey,

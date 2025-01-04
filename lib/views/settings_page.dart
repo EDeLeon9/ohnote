@@ -4,6 +4,7 @@ import 'package:ohnote/data/app_theme.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animated_growth.dart';
+import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/tools/option_tiles.dart';
 import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
@@ -134,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
               context: context,
               pickerColor: _defaultColor,
               onColorChanged: (value) {
-                AppData.settings[Settings.defaultColor]!.value = value != Colors.transparent ? value.value.toString() : null.toString();
+                AppData.settings[Settings.defaultColor]!.value = value != Colors.transparent ? value.toInt().toString() : null.toString();
               },
             ).whenComplete(() {
               AppData.updateDbSettings([Settings.defaultColor]);

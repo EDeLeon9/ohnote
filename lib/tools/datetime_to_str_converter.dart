@@ -6,7 +6,7 @@ enum DTToStrFormat {
 }
 
 extension DateTimeToStr on DateTime {
-  String parseToStr(DTToStrFormat format) {
+  String toStr(DTToStrFormat format) {
     if (format == DTToStrFormat.DATABASE) {
       return DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(this);
     } else {
@@ -14,7 +14,7 @@ extension DateTimeToStr on DateTime {
     }
   }
 
-  String parseDateToStr(DTToStrFormat format) {
+  String dateToStr(DTToStrFormat format) {
     if (format == DTToStrFormat.DATABASE) {
       return DateFormat('yyyy-MM-dd').format(this);
     } else {
@@ -22,7 +22,7 @@ extension DateTimeToStr on DateTime {
     }
   }
 
-  String parseTimeToStr(DTToStrFormat format) {
+  String timeToStr(DTToStrFormat format) {
     if (format == DTToStrFormat.DATABASE) {
       return DateFormat('HH:mm:ss.SSS').format(this);
     } else {

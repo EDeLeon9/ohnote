@@ -116,10 +116,10 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                                               end: Alignment.topCenter,
                                               stops: const [0.075, 0.15, 0.25, 0.3, 0.35],
                                               colors: [
-                                                shadowColor.withOpacity(0.8),
-                                                shadowColor.withOpacity(0.6),
-                                                shadowColor.withOpacity(0.15),
-                                                shadowColor.withOpacity(0.05),
+                                                shadowColor.withValues(alpha: 0.8),
+                                                shadowColor.withValues(alpha: 0.6),
+                                                shadowColor.withValues(alpha: 0.15),
+                                                shadowColor.withValues(alpha: 0.05),
                                                 Colors.transparent,
                                               ],
                                             ),
@@ -195,7 +195,7 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
   List<Shadow> _shadows(ThemeData theme, double appBarPercent) {
     return [
       Shadow(
-        color: theme.colorScheme.shadow.withOpacity(appBarPercent >= 0.5 ? appBarPercent - 0.5 : 0),
+        color: theme.colorScheme.shadow.withValues(alpha: appBarPercent >= 0.5 ? appBarPercent - 0.5 : 0),
         blurRadius: 6.0,
         offset: const Offset(-1.0, 1.0),
       ),

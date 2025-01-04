@@ -123,7 +123,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
                               decoration: InputDecoration(
                                 border: const OutlineInputBorder(),
                                 hintText: 'New label',
-                                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35)),
+                                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35)),
                               ),
                             );
                           },

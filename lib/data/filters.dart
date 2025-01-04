@@ -88,8 +88,8 @@ class Filters {
         ? _addAppliedToList(
             'Filtered by favorites',
             'Filtered by date:'
-                '${from != null ? ' from ${from!.parseDateToStr(DTToStrFormat.LOCALE)}' : ''}'
-                '${to != null ? ' to ${to!.parseDateToStr(DTToStrFormat.LOCALE)}' : ''}',
+                '${from != null ? ' from ${from!.dateToStr(DTToStrFormat.LOCALE)}' : ''}'
+                '${to != null ? ' to ${to!.dateToStr(DTToStrFormat.LOCALE)}' : ''}',
             'Filtered by text: $textResult',
             'Filtered by labels: ${[
               ...labelIds.where((e) => e > 0).map((id) {

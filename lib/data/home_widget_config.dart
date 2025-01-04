@@ -42,7 +42,7 @@ class HomeWidgetConfig {
         'title': title,
         'theme': theme.caption,
         'opacity': opacity,
-        'creation_datetime': creationDateTime!.parseToStr(DTToStrFormat.DATABASE),
+        'creation_datetime': creationDateTime!.toStr(DTToStrFormat.DATABASE),
         'filters': notesManager.filters.value.getAppliedCaptions(),
       };
 }

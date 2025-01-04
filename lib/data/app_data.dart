@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
+import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/error_logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:ohnote/data/filters.dart';
@@ -427,11 +428,11 @@ class AppData {
     }
     var newId = await iDb.db.insert('notes', {
       'text': note.text,
-      'modif_date_time': now.parseToStr(DTToStrFormat.DATABASE),
-      'creation_date_time': now.parseToStr(DTToStrFormat.DATABASE),
+      'modif_date_time': now.toStr(DTToStrFormat.DATABASE),
+      'creation_date_time': now.toStr(DTToStrFormat.DATABASE),
       'is_crossed_out': note.isCrossedOut.value ? 1 : 0,
       'number_of_lines': note.numberOfLines.value,
-      'color': note.color.value?.value,
+      'color': note.color.value?.toInt(),
       'favorite': note.favorite.value ? 1 : 0,
       'label_ids': note.labelIdsString(),
       'parent_id': isDraft ? note.id : null,
@@ -469,13 +470,13 @@ class AppData {
       await _addHistory(
         iDb,
         noteCopy.id,
-        now.parseToStr(DTToStrFormat.DATABASE),
+        now.toStr(DTToStrFormat.DATABASE),
         unmodifiedNote.text,
-        noteCopy.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
-        noteCopy.creationDateTime.parseToStr(DTToStrFormat.DATABASE),
+        noteCopy.modifDateTime.toStr(DTToStrFormat.DATABASE),
+        noteCopy.creationDateTime.toStr(DTToStrFormat.DATABASE),
         noteCopy.isCrossedOut.value ? 1 : 0,
         noteCopy.numberOfLines.value,
-        unmodifiedNote.color.value?.value,
+        unmodifiedNote.color.value?.toInt(),
       );
       await _clearDraft(iDb);
     } else {
@@ -483,13 +484,13 @@ class AppData {
     }
     Map<String, dynamic> updateMap = {
       'text': note.text,
-      'modif_date_time': now.parseToStr(DTToStrFormat.DATABASE),
-      'color': note.color.value?.value,
+      'modif_date_time': now.toStr(DTToStrFormat.DATABASE),
+      'color': note.color.value?.toInt(),
       'favorite': note.favorite.value ? 1 : 0,
       'label_ids': note.labelIdsString(),
     };
     if (draftId != null) {
-      updateMap.addAll({'creation_date_time': now.parseToStr(DTToStrFormat.DATABASE)});
+      updateMap.addAll({'creation_date_time': now.toStr(DTToStrFormat.DATABASE)});
     }
     var count = await iDb.db.update('notes', updateMap, where: 'id = ?', whereArgs: [draftId ?? note.id]);
     if (count <= 0) {
@@ -538,12 +539,12 @@ class AppData {
       'notes',
       {
         'text': history.text,
-        'modif_date_time': history.modifDateTime.parseToStr(DTToStrFormat.DATABASE),
+        'modif_date_time': history.modifDateTime.toStr(DTToStrFormat.DATABASE),
         ...(withStyle
             ? {
                 'is_crossed_out': history.isCrossedOut.value ? 1 : 0,
                 'number_of_lines': history.numberOfLines.value,
-                'color': history.color.value?.value,
+                'color': history.color.value?.toInt(),
               }
             : {}),
       },
@@ -568,7 +569,7 @@ class AppData {
       var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
       var count =
-          await iDb.db.rawUpdate('UPDATE notes SET archive_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\' WHERE id IN ($ids)');
+          await iDb.db.rawUpdate('UPDATE notes SET archive_date_time = \'${DateTime.now().toStr(DTToStrFormat.DATABASE)}\' WHERE id IN ($ids)');
       if (count <= 0) {
         ErrorLogger.log('Error on archiving a list of notes. Note Ids: $ids.');
       }
@@ -583,7 +584,7 @@ class AppData {
       var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
-          'UPDATE notes SET trash_date_time = \'${DateTime.now().parseToStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN ($ids)');
+          'UPDATE notes SET trash_date_time = \'${DateTime.now().toStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN ($ids)');
       if (count <= 0) {
         ErrorLogger.log('Error on sending a list of notes to trash can. Note Ids: $ids.');
       }
@@ -696,7 +697,7 @@ class AppData {
         'title': homeWidgetConfig.title,
         'theme': homeWidgetConfig.theme.caption,
         'opacity': homeWidgetConfig.opacity,
-        'creation_date_time': now.parseToStr(DTToStrFormat.DATABASE),
+        'creation_date_time': now.toStr(DTToStrFormat.DATABASE),
       });
     } else {
       dbResult = await iDb.db.update(
@@ -912,7 +913,7 @@ class AppData {
         filtersCopy.from != null || filtersCopy.to != null,
       );
       await upsert(Filters.BY_LABEL, filtersCopy.labelIds.join(','), filtersCopy.labelIds.isNotEmpty);
-      await upsert(Filters.BY_COLOR, filtersCopy.colors.map((e) => e.value).join(','), filtersCopy.colors.isNotEmpty);
+      await upsert(Filters.BY_COLOR, filtersCopy.colors.map((e) => e.toInt()).join(','), filtersCopy.colors.isNotEmpty);
       await upsert(Filters.CROSSED_OUT, true.toString(), filtersCopy.crossedOut);
     }
   }

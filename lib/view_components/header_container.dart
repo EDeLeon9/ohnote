@@ -15,7 +15,7 @@ class HeaderContainer extends StatelessWidget {
             blurRadius: 2.0,
             spreadRadius: 2.0,
             offset: const Offset(0.0, -1.5),
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.5),
           ),
         ],
       ),

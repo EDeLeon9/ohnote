@@ -23,7 +23,7 @@ class LabelContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipShadowPath(
       shadow: Shadow(
-        color: Theme.of(context).colorScheme.shadow.withOpacity(0.7),
+        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.7),
         offset: const Offset(1.5, 2.5),
         blurRadius: 1.5,
       ),
@@ -32,7 +32,7 @@ class LabelContainer extends StatelessWidget {
         shadowColor: Colors.black,
         color: color ?? Theme.of(context).colorScheme.primary,
         child: InkWell(
-          splashColor: Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.onPrimary, 0.5)?.withOpacity(0.35),
+          splashColor: Color.lerp(Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.onPrimary, 0.5)?.withValues(alpha: 0.35),
           onTap: onTap,
           onLongPress: onLongPress,
           child: ConstrainedBox(
