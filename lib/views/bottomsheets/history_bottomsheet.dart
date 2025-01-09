@@ -78,8 +78,9 @@ class HistoryBottomSheet {
         title: 'History',
         guiManager: historyManager,
         padding: const EdgeInsets.only(top: 25.0),
-        largeMainButtons: false,
         buttons: [
+          HeaderButton(HeaderButtonDetails.back),
+          HeaderButton(HeaderButtonDetails.selectionMode),
           HeaderButton(HeaderButtonDetails.more),
           HeaderButton(HeaderButtonDetails.discardHistory),
         ],

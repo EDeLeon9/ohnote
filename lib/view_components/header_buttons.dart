@@ -66,7 +66,7 @@ class HeaderButton {
         shadows: shadows,
         isVisible: isVisible != false,
         onPressed: () {
-          if (AppData.launchedFromHomeWidget == false) {
+          if (AppData.launchingFromHomeWidget == false) {
             onPressed();
           }
         },
@@ -93,7 +93,6 @@ class HeaderButtons extends StatefulWidget {
     required this.guiManager,
     required this.buttons,
     this.padding,
-    this.largeMainButtons = true,
     this.updateDbFilters = false,
   });
 
@@ -103,7 +102,6 @@ class HeaderButtons extends StatefulWidget {
   final GuiManager guiManager;
   final List<HeaderButton> buttons;
   final EdgeInsets? padding;
-  final bool largeMainButtons;
   final bool updateDbFilters;
 
   @override
@@ -115,17 +113,13 @@ class HeaderButtons extends StatefulWidget {
     required HeaderButton? button,
   }) {
     return button != null
-        ? SizedBox(
-            height: largeMainButtons ? 56.0 : null,
-            width: largeMainButtons ? 56.0 : null,
-            child: button.build(
-              color: color,
-              shadows: shadows,
-              isVisible: isVisible,
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            ),
+        ? button.build(
+            color: color,
+            shadows: shadows,
+            isVisible: isVisible,
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
           )
         : const SizedBox.shrink();
   }
@@ -136,18 +130,14 @@ class HeaderButtons extends StatefulWidget {
     List<Shadow>? shadows,
   }) {
     return button != null
-        ? SizedBox(
-            height: largeMainButtons ? 56.0 : null,
-            width: largeMainButtons ? 56.0 : null,
-            child: button.build(
-              color: color,
-              shadows: shadows,
-              isVisible: isVisible,
-              onPressed: () {
-                guiManager.selectionQuantity.value = null;
-                guiManager.showSearchText.value = false;
-              },
-            ),
+        ? button.build(
+            color: color,
+            shadows: shadows,
+            isVisible: isVisible,
+            onPressed: () {
+              guiManager.selectionQuantity.value = null;
+              guiManager.showSearchText.value = false;
+            },
           )
         : const SizedBox.shrink();
   }
@@ -439,7 +429,7 @@ class _HeaderButtonsState extends State<HeaderButtons> {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          SizedBox(width: widget.largeMainButtons ? 0.0 : 1.4),
+                          SizedBox(width: 1.4),
                           Stack(
                             children: [
                               widget._navMenuButton(
@@ -454,57 +444,54 @@ class _HeaderButtonsState extends State<HeaderButtons> {
                             ],
                           ),
                           const Spacer(),
-                          Padding(
-                            padding: widget.largeMainButtons ? const EdgeInsets.only(bottom: 4.0) : EdgeInsets.zero,
-                            child: Row(
-                              children: [
-                                HeaderButtons.selectionModeButton(
-                                  context: context,
-                                  color: widget.color,
-                                  shadows: widget.shadows,
-                                  guiManager: widget.guiManager,
-                                  button: buttonsMap[HeaderButtonDetails.selectionMode],
-                                ),
-                                HeaderButtons.searchTextButton(
-                                  color: widget.color,
-                                  shadows: widget.shadows,
-                                  guiManager: widget.guiManager,
-                                  button: buttonsMap[HeaderButtonDetails.searchText],
-                                ),
-                                HeaderButtons.moreButton(
-                                  context: context,
-                                  color: widget.color,
-                                  shadows: widget.shadows,
-                                  button: buttonsMap[HeaderButtonDetails.more],
-                                  moreButtons: [
-                                    buttonsMap[HeaderButtonDetails.filters],
-                                    buttonsMap[HeaderButtonDetails.sortBy],
-                                    buttonsMap[HeaderButtonDetails.style],
-                                    buttonsMap[HeaderButtonDetails.favorite],
-                                    buttonsMap[HeaderButtonDetails.archive],
-                                    buttonsMap[HeaderButtonDetails.sendToTrash],
-                                    buttonsMap[HeaderButtonDetails.discardHistory],
-                                  ].where((e) => e != null).map((e) => e!).toList(),
-                                  onSelected: (selected) {
-                                    if (selected == HeaderButtonDetails.filters) {
-                                      HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager, updateDb: widget.updateDbFilters);
-                                    } else if (selected == HeaderButtonDetails.sortBy) {
-                                      widget._sortByPressed(context: context, guiManager: widget.guiManager);
-                                    } else if (selected == HeaderButtonDetails.style) {
-                                      widget._stylePressed(guiManager: widget.guiManager);
-                                    } else if (selected == HeaderButtonDetails.favorite) {
-                                      widget._favoritePressed(context: context);
-                                    } else if (selected == HeaderButtonDetails.archive) {
-                                      widget._archivePressed(context: context);
-                                    } else if (selected == HeaderButtonDetails.sendToTrash) {
-                                      widget._sendToTrashPressed(context: context);
-                                    } else if (selected == HeaderButtonDetails.discardHistory) {
-                                      widget._discardHistoryPressed(context: context);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
+                          Row(
+                            children: [
+                              HeaderButtons.selectionModeButton(
+                                context: context,
+                                color: widget.color,
+                                shadows: widget.shadows,
+                                guiManager: widget.guiManager,
+                                button: buttonsMap[HeaderButtonDetails.selectionMode],
+                              ),
+                              HeaderButtons.searchTextButton(
+                                color: widget.color,
+                                shadows: widget.shadows,
+                                guiManager: widget.guiManager,
+                                button: buttonsMap[HeaderButtonDetails.searchText],
+                              ),
+                              HeaderButtons.moreButton(
+                                context: context,
+                                color: widget.color,
+                                shadows: widget.shadows,
+                                button: buttonsMap[HeaderButtonDetails.more],
+                                moreButtons: [
+                                  buttonsMap[HeaderButtonDetails.filters],
+                                  buttonsMap[HeaderButtonDetails.sortBy],
+                                  buttonsMap[HeaderButtonDetails.style],
+                                  buttonsMap[HeaderButtonDetails.favorite],
+                                  buttonsMap[HeaderButtonDetails.archive],
+                                  buttonsMap[HeaderButtonDetails.sendToTrash],
+                                  buttonsMap[HeaderButtonDetails.discardHistory],
+                                ].where((e) => e != null).map((e) => e!).toList(),
+                                onSelected: (selected) {
+                                  if (selected == HeaderButtonDetails.filters) {
+                                    HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager, updateDb: widget.updateDbFilters);
+                                  } else if (selected == HeaderButtonDetails.sortBy) {
+                                    widget._sortByPressed(context: context, guiManager: widget.guiManager);
+                                  } else if (selected == HeaderButtonDetails.style) {
+                                    widget._stylePressed(guiManager: widget.guiManager);
+                                  } else if (selected == HeaderButtonDetails.favorite) {
+                                    widget._favoritePressed(context: context);
+                                  } else if (selected == HeaderButtonDetails.archive) {
+                                    widget._archivePressed(context: context);
+                                  } else if (selected == HeaderButtonDetails.sendToTrash) {
+                                    widget._sendToTrashPressed(context: context);
+                                  } else if (selected == HeaderButtonDetails.discardHistory) {
+                                    widget._discardHistoryPressed(context: context);
+                                  }
+                                },
+                              ),
+                            ],
                           ),
                           const SizedBox(width: 1.4),
                         ],

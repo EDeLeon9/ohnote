@@ -29,7 +29,6 @@ class HomeWidgetConfigPage extends StatefulWidget {
 }
 
 class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
-  final _appTheme = AppTheme();
   late final _backgroundAlignmentLerp = Random().nextDouble();
   final _newHomeWidgetConfigSCK = ShowCaseKey(FirstAccess.newHomeWidgetConfigSC);
   final _homeWidgetConfigMoreSCK = ShowCaseKey(FirstAccess.homeWidgetConfigMoreSC);
@@ -252,7 +251,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
         ? Brightness.light
         : (homeWidgetConfig.theme == AppThemeBrightness.dark ? Brightness.dark : Theme.of(context).brightness);
     return Theme(
-      data: brightness == Brightness.dark ? _appTheme.darkTheme : _appTheme.lightTheme,
+      data: brightness == Brightness.dark ? AppTheme.current.darkTheme : AppTheme.current.lightTheme,
       child: Builder(
         builder: (context) {
           return Stack(
@@ -319,7 +318,11 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
                         child: SizedBox(
                           height: 23.0,
                           width: 23.0,
-                          child: const Icon(Icons.add, size: 17.0),
+                          child: Icon(
+                            Icons.add,
+                            size: 17.0,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                     ],

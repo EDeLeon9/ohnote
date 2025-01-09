@@ -5,6 +5,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="OhNote">
+        <!-- TODO: try to enable Impeller again removing this meta-data tag -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

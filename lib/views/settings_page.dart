@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/app_theme.dart';
@@ -7,6 +8,7 @@ import 'package:ohnote/tools/animated/animated_growth.dart';
 import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
 import 'package:ohnote/tools/option_tiles.dart';
+import 'package:ohnote/views/about_page.dart';
 import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
 import 'package:ohnote/views/dialogs/style_colorpicker_dialog.dart';
@@ -61,6 +63,8 @@ class _SettingsPageState extends State<SettingsPage> {
             _resetDontShowAgain(context),
             c.defaultDivider,
             _restartStartupHelp(context),
+            c.defaultDivider,
+            _about(),
           ],
         ),
       ),
@@ -317,6 +321,15 @@ class _SettingsPageState extends State<SettingsPage> {
             }
           }
         });
+      },
+    );
+  }
+
+  Widget _about() {
+    return ListTile(
+      title: Text('About', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+      onTap: () {
+        Navigator.push(context, CupertinoPageRoute(builder: (context) => AboutPage()));
       },
     );
   }

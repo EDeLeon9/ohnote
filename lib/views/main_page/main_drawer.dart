@@ -11,7 +11,6 @@ import 'package:ohnote/views/settings_page.dart';
 import 'package:ohnote/views/trash_can_page.dart';
 import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/single_async.dart' as a;
-import 'package:ohnote/tools/custom_toast.dart' as t;
 
 class MainDrawer extends StatefulWidget {
   const MainDrawer({super.key, required this.onSettingsClosed});
@@ -68,28 +67,28 @@ class _MainDrawerState extends State<MainDrawer> {
                 title: const Text('Labels'),
                 leading: Icon(Icons.label, color: fontColor),
                 onTap: () {
-                  _openPage(const LabelsPage(), context);
+                  _openPage(const LabelsPage());
                 },
               ),
               ListTile(
                 title: const Text('Archive'),
                 leading: Icon(Icons.archive, color: fontColor),
                 onTap: () {
-                  _openPage(ArchivePage(archiveManager: archiveManager), context);
+                  _openPage(ArchivePage(archiveManager: archiveManager));
                 },
               ),
               ListTile(
                 title: const Text('Trash Can'),
                 leading: Icon(Icons.delete, color: fontColor),
                 onTap: () {
-                  _openPage(TrashCanPage(trashManager: trashManager), context);
+                  _openPage(TrashCanPage(trashManager: trashManager));
                 },
               ),
               ListTile(
                 title: const Text('Home Widget'),
                 leading: Icon(Icons.add_to_home_screen, color: fontColor),
                 onTap: () {
-                  _openPage(const HomeWidgetConfigPage(), context);
+                  _openPage(const HomeWidgetConfigPage());
                 },
               ),
               c.defaultDivider,
@@ -97,15 +96,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 title: const Text('Settings'),
                 leading: Icon(Icons.settings, color: fontColor),
                 onTap: () {
-                  _openPage<Map<Settings, String>>(const SettingsPage(), context, (value) => widget.onSettingsClosed());
-                },
-              ),
-              c.defaultDivider,
-              ListTile(
-                title: const Text('About'),
-                leading: Icon(Icons.info, color: fontColor),
-                onTap: () {
-                  t.showCustomToast('Comming soon...', context);
+                  _openPage<Map<Settings, String>>(const SettingsPage(), (value) => widget.onSettingsClosed());
                 },
               ),
             ],
@@ -150,12 +141,12 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
-  void _openPage<T>(Widget page, BuildContext context, [void Function(T? value)? whenClosingPage]) {
-    if (AppData.launchedFromHomeWidget == false) {
+  void _openPage<T>(Widget page, [void Function(T? value)? whenClosingPage]) {
+    if (AppData.launchingFromHomeWidget == false) {
       Navigator.pop(context);
       _singleAsync.runFirst(() async {
         await Future.delayed(_drawerAnimationDuration);
-        if (context.mounted) {
+        if (mounted) {
           Navigator.push(
             context,
             SmoothMaterialPageRoute<T>(builder: (context) => page),

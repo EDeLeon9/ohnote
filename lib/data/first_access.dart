@@ -4,6 +4,7 @@ enum FirstAccess {
   editBackSC,
   editFavoriteSC,
   editLabelNoteSC,
+  editSwipeNoteSC,
   editMoreSC,
   editRemoveLabelSC,
   addNewNoteSC,

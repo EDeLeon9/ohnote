@@ -10,8 +10,7 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//Probar en emuladores de android con desde v21.
-//About page (investigar que se debe o que se recomienda poner ahí).
+//About page.
 //Anuncios.
 //Solicitar Rate us.
 //---------------Puede esperar:
@@ -21,6 +20,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Opciones para hacer share de nota (por ejemplo enviar por correo o copiar al portapapeles).
 //Importar, exportar notas
 //Arreglar íconos para iOS generados con "dart run flutter_launcher_icons"
+//Revisar los "TODO" en Search
 
 //Reminder:
 //Android Widget base files created with Android Studio (right click in android/app -> New -> Widget -> App Widget)
@@ -44,14 +44,13 @@ class OhNoteApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var appTheme = AppTheme();
     return ValueListenableBuilder(
       valueListenable: AppData.settings[Settings.theme]!,
       builder: (context, theme, child) {
         return MaterialApp(
           title: 'OhNote',
-          theme: appTheme.lightTheme,
-          darkTheme: appTheme.darkTheme,
+          theme: AppTheme.current.lightTheme,
+          darkTheme: AppTheme.current.darkTheme,
           themeMode: theme == AppThemeBrightness.light.caption
               ? ThemeMode.light
               : (theme == AppThemeBrightness.dark.caption ? ThemeMode.dark : ThemeMode.system),

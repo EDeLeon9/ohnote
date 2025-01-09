@@ -14,14 +14,15 @@ class _OnFinishRequest<T> {
   final List<T> shownKeyValues;
 }
 
-class CustomShowCase<T> extends StatelessWidget {
-  const CustomShowCase({super.key, required this.showCaseKey, required this.description, required this.child});
-
-  static Duration delay = const Duration(milliseconds: 300);
+class CustomShowCase<T> extends StatefulWidget {
+  const CustomShowCase({super.key, required this.showCaseKey, required this.description, required this.child, this.overlay});
 
   final ShowCaseKey<T> showCaseKey;
   final String description;
   final Widget child;
+  final Widget? overlay;
+
+  static Duration delay = const Duration(milliseconds: 300);
 
   static bool startShowCase<T>({
     required BuildContext context,
@@ -74,12 +75,19 @@ class CustomShowCase<T> extends StatelessWidget {
   }
 
   @override
+  State<CustomShowCase> createState() => _CustomShowCaseState();
+}
+
+class _CustomShowCaseState extends State<CustomShowCase> {
+  bool _showOverlay = false;
+
+  @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     return Showcase(
       tooltipBorderRadius: BorderRadius.circular(5.0),
-      key: showCaseKey,
-      description: description,
+      key: widget.showCaseKey,
+      description: widget.description,
       targetPadding: const EdgeInsets.all(4.0),
       textColor: theme.brightness == Brightness.dark ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
       tooltipBackgroundColor: theme.brightness == Brightness.dark ? theme.colorScheme.primary : theme.colorScheme.onPrimary,
@@ -88,15 +96,23 @@ class CustomShowCase<T> extends StatelessWidget {
       //Tapping on the target doesn't close the Showcase so it's being used ShowCaseWidget.completed() but it doesn't animate the
       //closing, and to disable the remaining closing animations it's being used ShowCaseWidget.completed() the other two scenarios too.
       onToolTipClick: () {
-        ShowCaseWidget.of(context).completed(showCaseKey);
+        ShowCaseWidget.of(context).completed(widget.showCaseKey);
       },
       onTargetClick: () {
-        ShowCaseWidget.of(context).completed(showCaseKey);
+        ShowCaseWidget.of(context).completed(widget.showCaseKey);
       },
       onBarrierClick: () {
-        ShowCaseWidget.of(context).completed(showCaseKey);
+        ShowCaseWidget.of(context).completed(widget.showCaseKey);
       },
-      child: child,
+      child: widget.overlay != null && _showOverlay
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                widget.child,
+                widget.overlay!,
+              ],
+            )
+          : widget.child,
     );
   }
 }
@@ -126,6 +142,22 @@ class CustomShowCaseWidgetState<T> extends State<CustomShowCaseWidget<T>> {
   @override
   Widget build(BuildContext context) {
     return ShowCaseWidget(
+      onComplete: (index, globalKey) {
+        var customShowCaseState = globalKey.currentContext?.findAncestorStateOfType<_CustomShowCaseState>();
+        if (customShowCaseState?.widget.overlay != null) {
+          customShowCaseState!.setState(() {
+            customShowCaseState._showOverlay = false;
+          });
+        }
+      },
+      onStart: (index, globalKey) {
+        var customShowCaseState = globalKey.currentContext?.findAncestorStateOfType<_CustomShowCaseState>();
+        if (customShowCaseState?.widget.overlay != null) {
+          customShowCaseState!.setState(() {
+            customShowCaseState._showOverlay = true;
+          });
+        }
+      },
       onFinish: () {
         List<T> shownKeyValues = [];
         var onFinishRequests = List.of(_onFinishRequests);

@@ -38,7 +38,7 @@ class AppData {
 
   //Public
   static final dataInitialized = ValueNotifier<bool>(false);
-  static bool? launchedFromHomeWidget;
+  static bool? launchingFromHomeWidget;
   static final themeBrightness = ValueNotifier<AppThemeBrightness>(AppThemeBrightness.systemDefault);
   static bool themeUpdatedFromSettings = false;
   static final appliedWallpaper = ValueNotifier<AssetImage?>(null); //Used instead of settings value to control the update moment of the wallpaper
@@ -85,7 +85,15 @@ class AppData {
       openDbId,
       await openDatabase(
         await _dbPath,
-        version: 1,
+        version: 2, //TODO: change to 1
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            await db.rawDelete('DELETE FROM first_access');
+            for (var firstAccess in FirstAccess.values) {
+              await db.insert('first_access', {'param': firstAccess.name});
+            }
+          }
+        },
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('
               'id INTEGER PRIMARY KEY AUTOINCREMENT, '

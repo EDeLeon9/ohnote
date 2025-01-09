@@ -17,6 +17,10 @@ enum AppThemeBrightness {
 }
 
 class AppTheme {
+  AppTheme._();
+
+  static final current = AppTheme._();
+
   late final ThemeData lightTheme = _createThemeData(false);
   late final ThemeData darkTheme = _createThemeData(true);
 
@@ -51,6 +55,8 @@ class AppTheme {
       splashColor: colorScheme.primary.withValues(alpha: 0.2),
     );
   }
+
+  final appIconColor = Color(0xFF132A38);
 
   final _lightColorScheme = const ColorScheme(
     brightness: Brightness.light,

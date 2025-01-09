@@ -7,6 +7,7 @@ import 'package:ohnote/data/note_editor.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animatedscale_button.dart';
+import 'package:ohnote/tools/animated/explicit_animation_builder.dart';
 import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
@@ -29,7 +30,7 @@ class NoteEditPage extends StatefulWidget {
   State<NoteEditPage> createState() => _NoteEditPageState();
 }
 
-class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver {
+class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late final bool _isNewNote;
   late NoteEditor _currentEditor;
   late final List<NoteEditor?> _editors;
@@ -40,14 +41,15 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
     sortComparison: (a, b) => b.historyDateTime!.compareTo(a.historyDateTime!),
     getComparisonDateTime: (note) => note.modifDateTime,
   );
-  bool _showCaseFinished = false;
   late final int _configBarSCPageIndex;
   int _removeLabelSCPageIndex = -1;
+  bool _showCaseFinished = false;
   late final List<ShowCaseKey<FirstAccess>> _showCaseKeys;
   final _configBarSCK = ShowCaseKey(FirstAccess.editConfigBarSC);
   final _backSCK = ShowCaseKey(FirstAccess.editBackSC);
   final _favoriteSCK = ShowCaseKey(FirstAccess.editFavoriteSC);
   final _labelNoteSCK = ShowCaseKey(FirstAccess.editLabelNoteSC);
+  final _swipeSCK = ShowCaseKey(FirstAccess.editSwipeNoteSC);
   final _moreSCK = ShowCaseKey(FirstAccess.editMoreSC);
   final _removeLabelSCK = ShowCaseKey(FirstAccess.editRemoveLabelSC);
 
@@ -68,6 +70,9 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
     }
 
     _showCaseKeys = [_configBarSCK, _backSCK, _favoriteSCK, _labelNoteSCK, _moreSCK];
+    if (widget.notes.length > 1) {
+      _showCaseKeys.add(_swipeSCK);
+    }
     if (_currentEditor.note.labelIds.isNotEmpty) {
       _showCaseKeys.add(_removeLabelSCK);
       _removeLabelSCPageIndex = selectedNoteIndex;
@@ -82,7 +87,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
       onFinish: () {
         setState(() {
           _showCaseFinished = true;
-        }); //Updates the widgets who uses _showCaseFinished value.
+        });
       },
     )) {
       _showCaseFinished = true;
@@ -145,24 +150,61 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
               return SafeArea(
                 key: Key('edt_$index'),
                 child: Column(
-                  children: [
-                    index == _configBarSCPageIndex
-                        ? CustomShowCase(
+                  children: index == _configBarSCPageIndex && !_showCaseFinished
+                      ? [
+                          CustomShowCase(
                             showCaseKey: _configBarSCK,
                             description: 'You can tap on this\nzone to set a color\nto your note.',
                             child: _configBar(editor),
-                          )
-                        : _configBar(editor),
-                    const Divider(height: 0.0),
-                    _textField(editor),
-                    index == _removeLabelSCPageIndex
-                        ? CustomShowCase(
+                          ),
+                          const Divider(height: 0.0),
+                          Expanded(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                _textField(editor),
+                                Positioned.fill(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 70.0),
+                                    child: CustomShowCase(
+                                      showCaseKey: _swipeSCK,
+                                      description: 'Swipe left or right\nto scroll through\nyour notes.',
+                                      overlay: Opacity(
+                                        opacity: 0.3,
+                                        child: ExplicitAnimationBuilder(
+                                          begin: 1.0,
+                                          end: 0.9,
+                                          durationMs: 500,
+                                          builder: (context, animation) {
+                                            return ScaleTransition(
+                                              scale: animation,
+                                              child: Icon(
+                                                Icons.swipe,
+                                                size: MediaQuery.of(context).size.width - 130.0,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      child: SizedBox.expand(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          CustomShowCase(
                             showCaseKey: _removeLabelSCK,
                             description: 'You can long-press\na label to detach it\nfrom your note.',
                             child: _labels(editor),
-                          )
-                        : _labels(editor),
-                  ],
+                          ),
+                        ]
+                      : [
+                          _configBar(editor),
+                          const Divider(height: 0.0),
+                          Expanded(child: _textField(editor)),
+                          _labels(editor),
+                        ],
                 ),
               );
             },
@@ -173,12 +215,11 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
   }
 
   Widget _backButton() {
-    return CustomShowCase(
-      showCaseKey: _backSCK,
-      description: 'Tap back to save\nchanges after editing\nyour note.',
-      child: SizedBox(
-        height: 56.0,
-        width: 56.0,
+    //Center shrinks the button to look like a default leading back button in Flutter new version.
+    return Center(
+      child: CustomShowCase(
+        showCaseKey: _backSCK,
+        description: 'Tap back to save\nchanges after editing\nyour note.',
         child: IconButton(
           tooltip: HeaderButtonDetails.back.caption,
           icon: Icon(HeaderButtonDetails.back.icon),
@@ -248,10 +289,16 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
                   setState(() {
                     _removeLabelSCPageIndex = _editors.indexOf(_currentEditor);
                   });
+                  _showCaseFinished = false;
                   CustomShowCase.startShowCase(
                     context: context,
                     showCaseKeys: [_removeLabelSCK],
                     usePostFrameCallback: false,
+                    onFinish: () {
+                      setState(() {
+                        _showCaseFinished = true;
+                      });
+                    },
                   );
                 }
               }
@@ -363,11 +410,9 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
         child: result,
       );
     }
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 0.0),
-        child: result,
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 0.0),
+      child: result,
     );
   }
 

@@ -47,7 +47,7 @@ class MainScaffoldState extends State<MainScaffold> {
     _runIfLaunchedFromHomeWidget(); //Forces to run the click function because _setHomeWidgetClickFunction was just called.
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await _initialized();
-      if (AppData.launchedFromHomeWidget == false) {
+      if (AppData.launchingFromHomeWidget == false) {
         Future.delayed(Duration(milliseconds: 750 - CustomShowCase.delay.inMilliseconds), _startShowCase);
       }
     });
@@ -235,7 +235,7 @@ class MainScaffoldState extends State<MainScaffold> {
   }
 
   void openNote({Note? note, int? homeWidgetConfigId}) {
-    if (mounted && AppData.dataInitialized.value && (AppData.launchedFromHomeWidget == false || (homeWidgetConfigId ?? 0) > 0)) {
+    if (mounted && AppData.dataInitialized.value && (AppData.launchingFromHomeWidget == false || (homeWidgetConfigId ?? 0) > 0)) {
       _scaffoldKey.currentState?.closeDrawer();
       AppData.notesManager.selectionQuantity.value = null;
       AppData.notesManager.showSearchText.value = false;
@@ -282,7 +282,7 @@ class MainScaffoldState extends State<MainScaffold> {
 
   void _setHomeWidgetClickFunctions() {
     Future<void> prepareOpenFromHomeWidget() async {
-      AppData.launchedFromHomeWidget = true;
+      AppData.launchingFromHomeWidget = true;
       AppData.notesManager.selectionQuantity.value = null;
       AppData.notesManager.showSearchText.value = false;
       await _initialized();
@@ -310,31 +310,31 @@ class MainScaffoldState extends State<MainScaffold> {
           openNote(homeWidgetConfigId: homeWidgetConfigId);
         }
       }
-      AppData.launchedFromHomeWidget = false;
+      AppData.launchingFromHomeWidget = false;
     });
     HomeWidgetManager.setClickFunction('openhomewidgetconfigs', (params) async {
       await prepareOpenFromHomeWidget();
       if (mounted) {
         Navigator.push(context, SmoothMaterialPageRoute(builder: (context) => const HomeWidgetConfigPage()));
       }
-      AppData.launchedFromHomeWidget = false;
+      AppData.launchingFromHomeWidget = false;
     });
   }
 
   void _runIfLaunchedFromHomeWidget() async {
-    AppData.launchedFromHomeWidget = null;
+    AppData.launchingFromHomeWidget = null;
     AppData.notesManager.selectionQuantity.value = null;
     AppData.notesManager.showSearchText.value = false;
     var onTapFunction = await HomeWidgetManager.getFunctionIfLaunchedFromHomeWidget();
     if (onTapFunction != null) {
       onTapFunction();
     } else {
-      AppData.launchedFromHomeWidget = false;
+      AppData.launchingFromHomeWidget = false;
     }
   }
 
   Future<void> _initialized() async {
-    while (!mounted || !AppData.dataInitialized.value || AppData.launchedFromHomeWidget == null) {
+    while (!mounted || !AppData.dataInitialized.value || AppData.launchingFromHomeWidget == null) {
       await Future.delayed(const Duration(milliseconds: 10));
     }
   }
