@@ -20,17 +20,17 @@ import 'package:ohnote/constants.dart' as c;
 import 'package:ohnote/tools/custom_toast.dart' as t;
 import 'package:ohnote/tools/single_async.dart' as a;
 
-class NoteEditPage extends StatefulWidget {
-  const NoteEditPage({super.key, required this.notes, required this.selectedNoteId});
+class EditNotePage extends StatefulWidget {
+  const EditNotePage({super.key, required this.notes, required this.selectedNoteId});
 
   final int selectedNoteId;
   final List<Note> notes;
 
   @override
-  State<NoteEditPage> createState() => _NoteEditPageState();
+  State<EditNotePage> createState() => _EditNotePageState();
 }
 
-class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late final bool _isNewNote;
   late NoteEditor _currentEditor;
   late final List<NoteEditor?> _editors;
@@ -48,7 +48,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
   final _configBarSCK = ShowCaseKey(FirstAccess.editConfigBarSC);
   final _backSCK = ShowCaseKey(FirstAccess.editBackSC);
   final _favoriteSCK = ShowCaseKey(FirstAccess.editFavoriteSC);
-  final _labelNoteSCK = ShowCaseKey(FirstAccess.editLabelNoteSC);
+  final _sendToTrashSCK = ShowCaseKey(FirstAccess.editSendToTrashSC);
   final _swipeSCK = ShowCaseKey(FirstAccess.editSwipeNoteSC);
   final _moreSCK = ShowCaseKey(FirstAccess.editMoreSC);
   final _removeLabelSCK = ShowCaseKey(FirstAccess.editRemoveLabelSC);
@@ -69,7 +69,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
       _heroTag = 'noteHero_${_currentEditor.note.id}';
     }
 
-    _showCaseKeys = [_configBarSCK, _backSCK, _favoriteSCK, _labelNoteSCK, _moreSCK];
+    _showCaseKeys = [_configBarSCK, _backSCK, _favoriteSCK, _sendToTrashSCK, _moreSCK];
     if (widget.notes.length > 1) {
       _showCaseKeys.add(_swipeSCK);
     }
@@ -129,7 +129,7 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
             leading: _backButton(),
             actions: [
               _favoriteButton(),
-              _labelNoteButton(),
+              _sendToTrashButton(),
               _moreButton(),
             ],
           ),
@@ -267,43 +267,52 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
     );
   }
 
-  Widget _labelNoteButton() {
+  Widget _sendToTrashButton() {
     return CustomShowCase(
-      showCaseKey: _labelNoteSCK,
-      description: 'You can add labels to\nyour note by tapping\nhere. You can also\nfilter by label in the\nmain list.',
+      showCaseKey: _sendToTrashSCK,
+      description: 'To send the note\nto trash can tap\nthis button.',
       child: IconButton(
-        tooltip: 'Label note',
-        icon: const Icon(Icons.label),
+        tooltip: HeaderButtonDetails.sendToTrash.caption,
+        icon: Icon(HeaderButtonDetails.sendToTrash.icon),
         onPressed: () {
-          NoteLabelsDialog.show(
-            context: context,
-            selectedLabelsId: _currentEditor.note.labelIds,
-          ).then((value) {
-            if (value != null) {
-              setState(() {
-                _currentEditor.note.labelIds = value;
-              });
-              _saveDraft(_currentEditor);
-              if (_currentEditor.note.labelIds.isNotEmpty && mounted) {
-                if (_removeLabelSCPageIndex == -1) {
-                  setState(() {
-                    _removeLabelSCPageIndex = _editors.indexOf(_currentEditor);
-                  });
-                  _showCaseFinished = false;
-                  CustomShowCase.startShowCase(
-                    context: context,
-                    showCaseKeys: [_removeLabelSCK],
-                    usePostFrameCallback: false,
-                    onFinish: () {
-                      setState(() {
-                        _showCaseFinished = true;
-                      });
-                    },
-                  );
+          if (_isNewNote && _currentEditor.note.text.trim().isEmpty) {
+            Navigator.pop(context);
+          } else {
+            a.runFirst(() async {
+              var sendToTrash = await ConfirmationDialog.show(
+                context: context,
+                caption: 'Do you want to send the note to trash?',
+                confirmOption: 'Send to trash',
+                confirmOptionIcon: Icons.delete,
+                dontShowAgainChecked: AppData.settings[Settings.hideSendToTrashDialog]!.value == true.toString(),
+                setDontShowAgain: () {
+                  AppData.settings[Settings.hideSendToTrashDialog]!.value = true.toString();
+                  AppData.updateDbSettings([Settings.hideSendToTrashDialog]);
+                },
+              );
+              if (sendToTrash) {
+                setState(() {
+                  _closing = true;
+                });
+                if (_isNewNote) {
+                  sendToTrash = await AppData.newNoteFromEdit(_currentEditor.note) > 0;
+                } else {
+                  if (_currentEditor.note.text.trim().isEmpty) {
+                    _currentEditor.note.text = _currentEditor.unmodifiedNote.text;
+                  }
+                  _saveNote(_currentEditor);
+                }
+                if (mounted) {
+                  if (sendToTrash) {
+                    _sendEmptyToTrash(editorForcedToTrash: _currentEditor);
+                    AppData.notesManager.displayList.notifyListeners();
+                    t.showCustomToast('Note sent to trash.', context);
+                  }
+                  Navigator.pop(context);
                 }
               }
-            }
-          });
+            });
+          }
         },
       ),
     );
@@ -314,16 +323,16 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
       context: context,
       button: HeaderButton(HeaderButtonDetails.more)
         ..showCaseKey = _moreSCK
-        ..showCaseDescription = 'Tap here for more\noptions, such as\nviewing your note\'s\nhistory or sending it\nto the trash can.',
+        ..showCaseDescription = 'Tap here for more\noptions, such as\nviewing your note\'s\nhistory or adding\nlabels to your note.',
       moreButtons: [
+        HeaderButton(HeaderButtonDetails.labelNote),
         HeaderButton(HeaderButtonDetails.history),
-        HeaderButton(HeaderButtonDetails.sendToTrash),
       ],
       onSelected: (selected) {
-        if (selected == HeaderButtonDetails.history) {
+        if (selected == HeaderButtonDetails.labelNote) {
+          _labelNotePressed();
+        } else if (selected == HeaderButtonDetails.history) {
           _historyPressed();
-        } else if (selected == HeaderButtonDetails.sendToTrash) {
-          _sendToTrashPressed();
         }
       },
     );
@@ -500,6 +509,53 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
     }
   }
 
+  void _historyPressed() {
+    HistoryBottomSheet.show(
+      context: context,
+      historyManager: historyManager,
+    ).then((value) {
+      historyManager.selectionQuantity.value = null;
+      if (value == true) {
+        _currentEditor.unmodifiedNote = _currentEditor.note.clone();
+        setState(() {
+          _currentEditor.textController.text = _currentEditor.note.text;
+        });
+      }
+    });
+  }
+
+  void _labelNotePressed() {
+    NoteLabelsDialog.show(
+      context: context,
+      selectedLabelsId: _currentEditor.note.labelIds,
+    ).then((value) {
+      if (value != null) {
+        setState(() {
+          _currentEditor.note.labelIds = value;
+        });
+        _saveDraft(_currentEditor);
+        if (_currentEditor.note.labelIds.isNotEmpty && mounted) {
+          if (_removeLabelSCPageIndex == -1) {
+            setState(() {
+              _removeLabelSCPageIndex = _editors.indexOf(_currentEditor);
+            });
+            _showCaseFinished = false;
+            CustomShowCase.startShowCase(
+              context: context,
+              showCaseKeys: [_removeLabelSCK],
+              usePostFrameCallback: false,
+              onFinish: () {
+                setState(() {
+                  _showCaseFinished = true;
+                });
+              },
+            );
+          }
+        }
+      }
+    });
+  }
+
   void _saveNote(NoteEditor editor) async {
     if (editor.note.text.trim().isNotEmpty) {
       editor.draftSaver.cancelRunLast();
@@ -537,47 +593,6 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
     });
   }
 
-  void _sendToTrashPressed() {
-    if (_isNewNote && _currentEditor.note.text.trim().isEmpty) {
-      Navigator.pop(context);
-    } else {
-      a.runFirst(() async {
-        var sendToTrash = await ConfirmationDialog.show(
-          context: context,
-          caption: 'Do you want to send the note to trash?',
-          confirmOption: 'Send to trash',
-          confirmOptionIcon: Icons.delete,
-          dontShowAgainChecked: AppData.settings[Settings.hideSendToTrashDialog]!.value == true.toString(),
-          setDontShowAgain: () {
-            AppData.settings[Settings.hideSendToTrashDialog]!.value = true.toString();
-            AppData.updateDbSettings([Settings.hideSendToTrashDialog]);
-          },
-        );
-        if (sendToTrash) {
-          setState(() {
-            _closing = true;
-          });
-          if (_isNewNote) {
-            sendToTrash = await AppData.newNoteFromEdit(_currentEditor.note) > 0;
-          } else {
-            if (_currentEditor.note.text.trim().isEmpty) {
-              _currentEditor.note.text = _currentEditor.unmodifiedNote.text;
-            }
-            _saveNote(_currentEditor);
-          }
-          if (mounted) {
-            if (sendToTrash) {
-              _sendEmptyToTrash(editorForcedToTrash: _currentEditor);
-              AppData.notesManager.displayList.notifyListeners();
-              t.showCustomToast('Note sent to trash.', context);
-            }
-            Navigator.pop(context);
-          }
-        }
-      });
-    }
-  }
-
   void _sendEmptyToTrash({NoteEditor? editorForcedToTrash}) {
     var editorsToDelete = _editors.where((e) => e != null && e.note.text.trim().isEmpty).toList();
     for (var editor in editorsToDelete) {
@@ -591,21 +606,6 @@ class _NoteEditPageState extends State<NoteEditPage> with WidgetsBindingObserver
     if (editorsToDelete.isNotEmpty) {
       AppData.sendNotesToTrash(editorsToDelete.map((e) => e!.note).toList());
     }
-  }
-
-  void _historyPressed() {
-    HistoryBottomSheet.show(
-      context: context,
-      historyManager: historyManager,
-    ).then((value) {
-      historyManager.selectionQuantity.value = null;
-      if (value == true) {
-        _currentEditor.unmodifiedNote = _currentEditor.note.clone();
-        setState(() {
-          _currentEditor.textController.text = _currentEditor.note.text;
-        });
-      }
-    });
   }
 
   NoteEditor _getEditor(int index) {

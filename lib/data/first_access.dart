@@ -3,7 +3,7 @@ enum FirstAccess {
   editConfigBarSC,
   editBackSC,
   editFavoriteSC,
-  editLabelNoteSC,
+  editSendToTrashSC,
   editSwipeNoteSC,
   editMoreSC,
   editRemoveLabelSC,

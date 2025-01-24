@@ -85,14 +85,14 @@ class AppData {
       openDbId,
       await openDatabase(
         await _dbPath,
-        version: 2, //TODO: change to 1
+        version: 1,
         onUpgrade: (db, oldVersion, newVersion) async {
-          if (oldVersion < 2) {
-            await db.rawDelete('DELETE FROM first_access');
-            for (var firstAccess in FirstAccess.values) {
-              await db.insert('first_access', {'param': firstAccess.name});
-            }
-          }
+          // if (oldVersion < 2) {
+          //   await db.rawDelete('DELETE FROM first_access');
+          //   for (var firstAccess in FirstAccess.values) {
+          //     await db.insert('first_access', {'param': firstAccess.name});
+          //   }
+          // }
         },
         onCreate: (db, version) async {
           await db.execute('CREATE TABLE settings('

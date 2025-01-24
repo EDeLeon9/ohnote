@@ -13,7 +13,7 @@ import 'package:ohnote/view_components/filters_panel.dart';
 import 'package:ohnote/views/bottomsheets/style_panel.dart';
 import 'package:ohnote/views/home_widget_config_page.dart';
 import 'package:ohnote/views/main_page/main_drawer.dart';
-import 'package:ohnote/views/note_edit_page.dart';
+import 'package:ohnote/views/edit_note_page.dart';
 import 'package:ohnote/views/main_page/main_appbar.dart';
 import 'package:ohnote/views/main_page/main_list.dart';
 import 'package:ohnote/constants.dart' as c;
@@ -244,7 +244,7 @@ class MainScaffoldState extends State<MainScaffold> {
         page = SmoothMaterialPageRoute(
           builder: (context) {
             var colorStr = AppData.settings[Settings.defaultColor]!.value;
-            return NoteEditPage(
+            return EditNotePage(
               notes: [
                 Note(
                   id: 0,
@@ -268,7 +268,7 @@ class MainScaffoldState extends State<MainScaffold> {
             notes = List.of(homeWidgetConfig!.notesManager.displayList.value!);
           }
         }
-        page = CupertinoPageRoute(builder: (context) => NoteEditPage(notes: notes, selectedNoteId: note.id));
+        page = CupertinoPageRoute(builder: (context) => EditNotePage(notes: notes, selectedNoteId: note.id));
       }
       Navigator.push(context, page).whenComplete(() {
         if (AppData.notesManager.displayList.value?.isNotEmpty == true) {

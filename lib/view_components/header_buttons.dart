@@ -35,6 +35,7 @@ enum HeaderButtonDetails {
   discardHistory('Discard', Icons.delete_forever),
   restore('Restore', Icons.restore_page),
   removePermanently('Remove permanently', Icons.delete_forever),
+  labelNote('Label note', Icons.label),
   searchLabel('Search label', Icons.search),
   removeLabel('Remove label', Icons.delete_forever),
   removeHomeWidgetConfig('Remove home widget\nconfiguration', Icons.delete_forever);

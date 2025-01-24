@@ -71,17 +71,17 @@ class _MainDrawerState extends State<MainDrawer> {
                 },
               ),
               ListTile(
-                title: const Text('Archive'),
-                leading: Icon(Icons.archive, color: fontColor),
-                onTap: () {
-                  _openPage(ArchivePage(archiveManager: archiveManager));
-                },
-              ),
-              ListTile(
                 title: const Text('Trash Can'),
                 leading: Icon(Icons.delete, color: fontColor),
                 onTap: () {
                   _openPage(TrashCanPage(trashManager: trashManager));
+                },
+              ),
+              ListTile(
+                title: const Text('Archive'),
+                leading: Icon(Icons.archive, color: fontColor),
+                onTap: () {
+                  _openPage(ArchivePage(archiveManager: archiveManager));
                 },
               ),
               ListTile(

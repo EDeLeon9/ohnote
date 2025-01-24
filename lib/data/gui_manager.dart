@@ -96,7 +96,7 @@ class GuiManager {
       List<Note> filteredList = [];
       var stopwatch = Stopwatch();
       stopwatch.start();
-      //Notes can be empty when editing and slided in the NoteEditPage PageView.
+      //Notes can be empty when editing and slided in the EditNotePage PageView.
       for (var note in allList.where((e) => e.text.trim().isNotEmpty).toList()) {
         if (cancelFiltering.value) {
           break;
@@ -115,7 +115,7 @@ class GuiManager {
         displayList.value = filteredList;
       }
     } else {
-      //Notes can be empty when editing and slided in the NoteEditPage PageView.
+      //Notes can be empty when editing and slided in the EditNotePage PageView.
       displayList.value = List.of(allList.where((e) => e.text.trim().isNotEmpty).toList());
     }
   }
