@@ -9,9 +9,6 @@ import 'package:ohnote/tools/custom_showcase.dart';
 import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
-//Main branch test 2
-//Branch test 4
-
 //TODO: OhNote Bugs y Pendientes
 //Anuncios.
 //Solicitar Rate us.
