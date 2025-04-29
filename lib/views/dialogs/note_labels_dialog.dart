@@ -53,7 +53,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && !CustomShowCase.next(context)) {
-          Navigator.pop(context, result);
+          Navigator.pop(context, _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList());
         }
       },
       child: AlertDialog(
@@ -186,13 +186,8 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
                   ),
                   const SizedBox(width: 5.0),
                   TextButton(
-                    onPressed: () => Navigator.maybePop(context, _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList()),
-                    child: const Text('APPLY'),
-                  ),
-                  const SizedBox(width: 5.0),
-                  TextButton(
                     onPressed: () => Navigator.maybePop(context),
-                    child: const Text('CANCEL'),
+                    child: const Text('DONE'),
                   ),
                 ],
               ),

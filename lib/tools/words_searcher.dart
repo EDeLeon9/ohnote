@@ -33,7 +33,7 @@ class WordsSearcher {
   }
 
   bool searchIn(String source, [bool caseSensitive = false]) =>
-      source.replaceAll(RegExp('[\n\r]'), ' ').contains(RegExp(pattern, caseSensitive: caseSensitive));
+      source.replaceAll(RegExp('[\r\n]'), ' ').contains(RegExp(pattern, caseSensitive: caseSensitive));
 
   static bool search(String wordsToSearch, String source) => WordsSearcher(wordsToSearch).searchIn(source);
 }

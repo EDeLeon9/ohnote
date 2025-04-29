@@ -90,11 +90,11 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.trendsapps" "\0"
-            VALUE "FileDescription", "OhNote" "\0"
+            VALUE "FileDescription", "ohnote" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "ohnote" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.trendsapps. All rights reserved." "\0"
-            VALUE "OriginalFilename", "OhNote.exe" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.trendsapps. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ohnote.exe" "\0"
             VALUE "ProductName", "ohnote" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
