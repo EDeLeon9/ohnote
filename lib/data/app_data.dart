@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
+import 'package:ohnote/firebase_options.dart';
 import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/error_logger.dart';
 import 'package:sqflite/sqflite.dart';
@@ -95,10 +98,12 @@ class AppData {
           // }
         },
         onCreate: (db, version) async {
-          await db.execute('CREATE TABLE settings('
-              'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'param VARCHAR(25) NOT NULL, '
-              'value VARCHAR(25) NOT NULL)');
+          await db.execute(
+            'CREATE TABLE settings('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'param VARCHAR(25) NOT NULL, '
+            'value VARCHAR(25) NOT NULL)',
+          );
           await db.insert('settings', {'param': Settings.theme.name, 'value': AppThemeBrightness.systemDefault.caption});
           await db.insert('settings', {'param': Settings.wallpaper.name, 'value': c.defaultWallpaper});
           await db.insert('settings', {'param': Settings.defaultColor.name, 'value': null.toString()});
@@ -112,50 +117,60 @@ class AppData {
           await db.insert('settings', {'param': Settings.hideRemoveLabelDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideDetachLabelDialog.name, 'value': false.toString()});
           await db.insert('settings', {'param': Settings.hideRemoveHomeWidgetConfigDialog.name, 'value': false.toString()});
-          await db.execute('CREATE TABLE first_access('
-              'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'param VARCHAR(25) NOT NULL, '
-              'shown INTEGER NOT NULL DEFAULT 0)');
+          await db.execute(
+            'CREATE TABLE first_access('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'param VARCHAR(25) NOT NULL, '
+            'shown INTEGER NOT NULL DEFAULT 0)',
+          );
           for (var firstAccess in FirstAccess.values) {
             await db.insert('first_access', {'param': firstAccess.name});
           }
-          await db.execute('CREATE TABLE home_widget_config('
-              'id INTEGER PRIMARY KEY, '
-              'title VARCHAR(30) NOT NULL, '
-              'theme VARCHAR(25) NOT NULL, '
-              'opacity INTEGER NOT NULL,'
-              'creation_date_time VARCHAR(25) NOT NULL)');
-          await db.execute('CREATE TABLE filters('
-              'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'filter VARCHAR(15) NOT NULL, '
-              'value TEXT, '
-              'home_widget_config_id INTEGER)');
+          await db.execute(
+            'CREATE TABLE home_widget_config('
+            'id INTEGER PRIMARY KEY, '
+            'title VARCHAR(30) NOT NULL, '
+            'theme VARCHAR(25) NOT NULL, '
+            'opacity INTEGER NOT NULL,'
+            'creation_date_time VARCHAR(25) NOT NULL)',
+          );
+          await db.execute(
+            'CREATE TABLE filters('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'filter VARCHAR(15) NOT NULL, '
+            'value TEXT, '
+            'home_widget_config_id INTEGER)',
+          );
           await db.insert('filters', {'filter': Filters.FAVORITES});
           await db.insert('filters', {'filter': Filters.BY_DATE});
           await db.insert('filters', {'filter': Filters.BY_TEXT});
           await db.insert('filters', {'filter': Filters.BY_LABEL});
           await db.insert('filters', {'filter': Filters.BY_COLOR});
           await db.insert('filters', {'filter': Filters.CROSSED_OUT});
-          await db.execute('CREATE TABLE labels('
-              'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'text VARCHAR(30) NOT NULL)');
+          await db.execute(
+            'CREATE TABLE labels('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'text VARCHAR(30) NOT NULL)',
+          );
           await db.insert('labels', {'text': 'Business'});
           await db.insert('labels', {'text': 'Important'});
           await db.insert('labels', {'text': 'To Do'});
-          await db.execute('CREATE TABLE notes('
-              'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'text TEXT NOT NULL, '
-              'modif_date_time VARCHAR(25) NOT NULL, '
-              'creation_date_time VARCHAR(25) NOT NULL, '
-              'is_crossed_out INTEGER NOT NULL DEFAULT 0, '
-              'number_of_lines INTEGER NOT NULL DEFAULT 1, '
-              'color INTEGER, '
-              'favorite INTEGER NOT NULL DEFAULT 0, '
-              'label_ids TEXT, '
-              'parent_id INTEGER, '
-              'history_date_time VARCHAR(25), '
-              'archive_date_time VARCHAR(25), '
-              'trash_date_time VARCHAR(25))');
+          await db.execute(
+            'CREATE TABLE notes('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'text TEXT NOT NULL, '
+            'modif_date_time VARCHAR(25) NOT NULL, '
+            'creation_date_time VARCHAR(25) NOT NULL, '
+            'is_crossed_out INTEGER NOT NULL DEFAULT 0, '
+            'number_of_lines INTEGER NOT NULL DEFAULT 1, '
+            'color INTEGER, '
+            'favorite INTEGER NOT NULL DEFAULT 0, '
+            'label_ids TEXT, '
+            'parent_id INTEGER, '
+            'history_date_time VARCHAR(25), '
+            'archive_date_time VARCHAR(25), '
+            'trash_date_time VARCHAR(25))',
+          );
           //notes_user_order table is used to update user order for several notes (also trash and archive) in a single statement.
           await db.execute('CREATE TABLE notes_user_order(data TEXT NOT NULL DEFAULT \'\')');
           await db.insert('notes_user_order', {'data': ''});
@@ -177,12 +192,16 @@ class AppData {
   }
 
   static void initData({bool runEnsureInitialized = true}) async {
-    ErrorLogger.onLogStarted = _onErrorLogStarted;
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    ErrorLogger.onLogStarted = _onErrorLogStarted;
     HomeWidgetManager.onError = ErrorLogger.log;
+
     if (runEnsureInitialized) {
       WidgetsFlutterBinding.ensureInitialized(); //Avoid errors caused by flutter upgrade.
     }
+
     if (_resetDatabase) {
       _resetDatabase = false;
       await _deleteDb();
@@ -225,18 +244,19 @@ class AppData {
       filters.add(filter);
     }
     query = await iDb.db.query('home_widget_config', columns: ['id', 'title', 'theme', 'opacity', 'creation_date_time']);
-    homeWidgetConfigs = query.map((e) {
-      int id = e['id'];
-      String themeString = e['theme'];
-      return HomeWidgetConfig(
-        id: id,
-        title: e['title'],
-        theme: AppThemeBrightness.values.where((e) => e.caption == themeString).first,
-        opacity: e['opacity'],
-        creationDateTime: DateTime.parse(e['creation_date_time']),
-        filters: Filters.fromDbQuery(filtersQuery[id]!),
-      );
-    }).toList();
+    homeWidgetConfigs =
+        query.map((e) {
+          int id = e['id'];
+          String themeString = e['theme'];
+          return HomeWidgetConfig(
+            id: id,
+            title: e['title'],
+            theme: AppThemeBrightness.values.where((e) => e.caption == themeString).first,
+            opacity: e['opacity'],
+            creationDateTime: DateTime.parse(e['creation_date_time']),
+            filters: Filters.fromDbQuery(filtersQuery[id]!),
+          );
+        }).toList();
     homeWidgetConfigs.sort((a, b) => a.id.compareTo(b.id));
 
     //Filters
@@ -274,25 +294,14 @@ class AppData {
     await _closeDb(iDb);
   }
 
-  static Future<List<Note>> queryNotes({
-    required GuiManager guiManager,
-    required String where,
-  }) async {
+  static Future<List<Note>> queryNotes({required GuiManager guiManager, required String where}) async {
     var iDb = await _openDb();
-    var noteList = await _queryNotes(
-      iDb: iDb,
-      guiManager: guiManager,
-      where: where,
-    );
+    var noteList = await _queryNotes(iDb: iDb, guiManager: guiManager, where: where);
     _closeDb(iDb);
     return noteList;
   }
 
-  static Future<List<Note>> _queryNotes({
-    required _IndexedDatabase iDb,
-    required GuiManager guiManager,
-    required String where,
-  }) async {
+  static Future<List<Note>> _queryNotes({required _IndexedDatabase iDb, required GuiManager guiManager, required String where}) async {
     List<Map<String, dynamic>> query = await iDb.db.query(
       'notes',
       columns: [
@@ -337,21 +346,23 @@ class AppData {
   }
 
   static Future<void> _recoverFromDraft(_IndexedDatabase iDb) async {
-    List<Map<String, dynamic>> query = await iDb.db.query('notes',
-        columns: [
-          'id',
-          'text',
-          'modif_date_time',
-          'creation_date_time',
-          'is_crossed_out',
-          'number_of_lines',
-          'color',
-          'favorite',
-          'label_ids',
-          'parent_id',
-        ],
-        where: 'parent_id IS NOT NULL AND history_date_time IS NULL',
-        orderBy: 'modif_date_time DESC'); //It should be only one draft in db, other drafts should already be saved and will be deleted.
+    List<Map<String, dynamic>> query = await iDb.db.query(
+      'notes',
+      columns: [
+        'id',
+        'text',
+        'modif_date_time',
+        'creation_date_time',
+        'is_crossed_out',
+        'number_of_lines',
+        'color',
+        'favorite',
+        'label_ids',
+        'parent_id',
+      ],
+      where: 'parent_id IS NOT NULL AND history_date_time IS NULL',
+      orderBy: 'modif_date_time DESC',
+    ); //It should be only one draft in db, other drafts should already be saved and will be deleted.
     var draft = query.firstOrNull;
     if (draft != null) {
       String draftText = draft['text'];
@@ -361,7 +372,7 @@ class AppData {
         'modif_date_time': draft['modif_date_time'],
         'color': draft['color'],
         'favorite': draft['favorite'],
-        'label_ids': draft['label_ids']
+        'label_ids': draft['label_ids'],
       };
       if (parentId == 0) {
         if (draftText.trim().isNotEmpty) {
@@ -550,10 +561,10 @@ class AppData {
         'modif_date_time': history.modifDateTime.toStr(DTToStrFormat.DATABASE),
         ...(withStyle
             ? {
-                'is_crossed_out': history.isCrossedOut.value ? 1 : 0,
-                'number_of_lines': history.numberOfLines.value,
-                'color': history.color.value?.toInt(),
-              }
+              'is_crossed_out': history.isCrossedOut.value ? 1 : 0,
+              'number_of_lines': history.numberOfLines.value,
+              'color': history.color.value?.toInt(),
+            }
             : {}),
       },
       where: 'id = ?',
@@ -576,8 +587,9 @@ class AppData {
       updateHomeWidget();
       var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
-      var count =
-          await iDb.db.rawUpdate('UPDATE notes SET archive_date_time = \'${DateTime.now().toStr(DTToStrFormat.DATABASE)}\' WHERE id IN ($ids)');
+      var count = await iDb.db.rawUpdate(
+        'UPDATE notes SET archive_date_time = \'${DateTime.now().toStr(DTToStrFormat.DATABASE)}\' WHERE id IN ($ids)',
+      );
       if (count <= 0) {
         ErrorLogger.log('Error on archiving a list of notes. Note Ids: $ids.');
       }
@@ -592,7 +604,8 @@ class AppData {
       var ids = notes.map((e) => e.id).join(',');
       var iDb = await _openDb();
       var count = await iDb.db.rawUpdate(
-          'UPDATE notes SET trash_date_time = \'${DateTime.now().toStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN ($ids)');
+        'UPDATE notes SET trash_date_time = \'${DateTime.now().toStr(DTToStrFormat.DATABASE)}\', archive_date_time = NULL WHERE id IN ($ids)',
+      );
       if (count <= 0) {
         ErrorLogger.log('Error on sending a list of notes to trash can. Note Ids: $ids.');
       }
@@ -710,11 +723,7 @@ class AppData {
     } else {
       dbResult = await iDb.db.update(
         'home_widget_config',
-        {
-          'title': homeWidgetConfig.title,
-          'theme': homeWidgetConfig.theme.caption,
-          'opacity': homeWidgetConfig.opacity,
-        },
+        {'title': homeWidgetConfig.title, 'theme': homeWidgetConfig.theme.caption, 'opacity': homeWidgetConfig.opacity},
         where: 'id = ?',
         whereArgs: [homeWidgetConfig.id],
       );
@@ -842,7 +851,8 @@ class AppData {
 
   static Future<void> _validateMaxHistory(_IndexedDatabase iDb, int maxHistory, int parentNoteId) {
     return iDb.db.rawDelete(
-        'DELETE FROM notes WHERE id IN (SELECT id FROM notes WHERE parent_id = $parentNoteId AND history_date_time IS NOT NULL ORDER BY history_date_time DESC LIMIT -1 OFFSET ${maxHistory >= 0 ? maxHistory : 0})');
+      'DELETE FROM notes WHERE id IN (SELECT id FROM notes WHERE parent_id = $parentNoteId AND history_date_time IS NOT NULL ORDER BY history_date_time DESC LIMIT -1 OFFSET ${maxHistory >= 0 ? maxHistory : 0})',
+    );
   }
 
   static Future<void> _addHistory(
@@ -893,10 +903,7 @@ class AppData {
       int dbResult;
       var dbValue = notNullCondition ? value : null;
       if (insert) {
-        dbResult = await iDb.db.insert(
-          'filters',
-          {'filter': filterName, 'value': dbValue, 'home_widget_config_id': homeWidgetConfigId},
-        );
+        dbResult = await iDb.db.insert('filters', {'filter': filterName, 'value': dbValue, 'home_widget_config_id': homeWidgetConfigId});
       } else {
         dbResult = await iDb.db.update(
           'filters',
@@ -907,7 +914,8 @@ class AppData {
       }
       if (dbResult <= 0) {
         ErrorLogger.log(
-            'Error on ${insert ? 'creating a new' : 'updating a'} filter. Filter name: $filterName, value: $dbValue, home widget config Id: ${homeWidgetConfigId == null ? 'null' : '$homeWidgetConfigId'}.');
+          'Error on ${insert ? 'creating a new' : 'updating a'} filter. Filter name: $filterName, value: $dbValue, home widget config Id: ${homeWidgetConfigId == null ? 'null' : '$homeWidgetConfigId'}.',
+        );
       }
     }
 
@@ -929,7 +937,8 @@ class AppData {
   static Future<void> validateTimeInTrash() async {
     var iDb = await _openDb();
     await iDb.db.rawDelete(
-        'DELETE FROM notes WHERE trash_date_time IS NOT NULL AND (SELECT 30 - (JULIANDAY(\'now\',\'localtime\') - JULIANDAY(trash_date_time))) <= 0');
+      'DELETE FROM notes WHERE trash_date_time IS NOT NULL AND (SELECT 30 - (JULIANDAY(\'now\',\'localtime\') - JULIANDAY(trash_date_time))) <= 0',
+    );
     await _closeDb(iDb);
   }
 
@@ -970,16 +979,24 @@ class AppData {
         requests.add(config.notesManager.requestUpdateDisplayList());
       }
       await Future.wait(requests);
-      var consecutiveIdsConfigs =
-          List.generate(maxId, (index) => homeWidgetConfigs.firstWhereOrNull((e) => e.id == index + 1) ?? HomeWidgetConfig(id: index + 1));
-      var serializableObjects = Map.fromEntries(consecutiveIdsConfigs.map((e) {
-        return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[]');
-      }));
+      var consecutiveIdsConfigs = List.generate(
+        maxId,
+        (index) => homeWidgetConfigs.firstWhereOrNull((e) => e.id == index + 1) ?? HomeWidgetConfig(id: index + 1),
+      );
+      var serializableObjects = Map.fromEntries(
+        consecutiveIdsConfigs.map((e) {
+          return MapEntry('_ohNoteWidgetList_${e.id}', e.notesManager.displayList.value ?? '[]');
+        }),
+      );
       if (updateConfigurations) {
         serializableObjects.addAll({'_ohNoteWidgetConfigIds': homeWidgetConfigs.map((e) => e.id).toList()});
-        serializableObjects.addAll(Map.fromEntries(consecutiveIdsConfigs.map((e) {
-          return MapEntry('_ohNoteWidgetConfig_${e.id}', e.notesManager.displayList.value != null ? e : '[REMOVED]');
-        })));
+        serializableObjects.addAll(
+          Map.fromEntries(
+            consecutiveIdsConfigs.map((e) {
+              return MapEntry('_ohNoteWidgetConfig_${e.id}', e.notesManager.displayList.value != null ? e : '[REMOVED]');
+            }),
+          ),
+        );
       }
       await HomeWidgetManager.updateWidgetWithSerializable(serializableObjects);
     }

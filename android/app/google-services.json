@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "153229865253",
+    "project_id": "ohnoteapp",
+    "storage_bucket": "ohnoteapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153229865253:android:69f30098341e3433b5aacc",
+        "android_client_info": {
+          "package_name": "com.trendsapps.ohnote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApr-5iA8XJQEYqMKn88Mvh2rTqbaznlc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

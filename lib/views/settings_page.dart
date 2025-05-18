@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
@@ -7,7 +9,9 @@ import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animated_growth.dart';
 import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
+import 'package:ohnote/tools/datetime_to_str_converter.dart';
 import 'package:ohnote/tools/option_tiles.dart';
+import 'package:ohnote/tools/single_async.dart';
 import 'package:ohnote/views/about_page.dart';
 import 'package:ohnote/views/dialogs/change_wallpaper_dialog.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
@@ -64,6 +68,8 @@ class _SettingsPageState extends State<SettingsPage> {
             c.defaultDivider,
             _restartStartupHelp(context),
             c.defaultDivider,
+            _sendLogToDev(),
+            c.defaultDivider,
             _about(),
           ],
         ),
@@ -83,11 +89,14 @@ class _SettingsPageState extends State<SettingsPage> {
               context: context,
               builder: (context) {
                 return SimpleDialog(
-                  children: OptionTiles.build(context: context, options: {
-                    AppThemeBrightness.systemDefault.caption: Icons.brightness_6,
-                    AppThemeBrightness.light.caption: Icons.light_mode,
-                    AppThemeBrightness.dark.caption: Icons.dark_mode,
-                  }),
+                  children: OptionTiles.build(
+                    context: context,
+                    options: {
+                      AppThemeBrightness.systemDefault.caption: Icons.brightness_6,
+                      AppThemeBrightness.light.caption: Icons.light_mode,
+                      AppThemeBrightness.dark.caption: Icons.dark_mode,
+                    },
+                  ),
                 );
               },
             ).then((value) {
@@ -124,15 +133,16 @@ class _SettingsPageState extends State<SettingsPage> {
           trailing: AnimatedGrowth(
             animate: _animateColorCircle,
             isVisible: _defaultColor != null,
-            child: _previousDefaultColor != null && _defaultColor != null
-                ? AnimatedColor(
-                    duration: c.animationDuration,
-                    color: _defaultColor!,
-                    builder: (color) => ColoredCircle(color: color, diameter: 25.0),
-                  )
-                : (_defaultColor != null || _previousDefaultColor != null
-                    ? ColoredCircle(color: _defaultColor ?? _previousDefaultColor!, diameter: 25.0)
-                    : const SizedBox.shrink()),
+            child:
+                _previousDefaultColor != null && _defaultColor != null
+                    ? AnimatedColor(
+                      duration: c.animationDuration,
+                      color: _defaultColor!,
+                      builder: (color) => ColoredCircle(color: color, diameter: 25.0),
+                    )
+                    : (_defaultColor != null || _previousDefaultColor != null
+                        ? ColoredCircle(color: _defaultColor ?? _previousDefaultColor!, diameter: 25.0)
+                        : const SizedBox.shrink()),
           ),
           onTap: () {
             StyleColorPickerDialog.show(
@@ -165,10 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(defaultNumberOfLines),
-                  ),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0), child: Text(defaultNumberOfLines)),
                   Slider(
                     min: 1.0,
                     max: 10.0,
@@ -205,10 +212,7 @@ class _SettingsPageState extends State<SettingsPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(maxHistory),
-                  ),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0), child: Text(maxHistory)),
                   Slider(
                     min: 0.0,
                     max: 10.0,
@@ -262,10 +266,7 @@ class _SettingsPageState extends State<SettingsPage> {
           builder: (context) {
             return SimpleDialog(
               title: Text('Do you want to reset these settings to the default values?', style: Theme.of(context).textTheme.bodyLarge!),
-              children: OptionTiles.build(context: context, options: {
-                'Reset': Icons.restart_alt,
-                'Cancel': Icons.arrow_back,
-              }),
+              children: OptionTiles.build(context: context, options: {'Reset': Icons.restart_alt, 'Cancel': Icons.arrow_back}),
             );
           },
         ).then((value) {
@@ -301,10 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
           builder: (context) {
             return SimpleDialog(
               title: Text('Do you want to reset the startup help?', style: Theme.of(context).textTheme.bodyLarge!),
-              children: OptionTiles.build(context: context, options: {
-                'Restart': Icons.restart_alt,
-                'Cancel': Icons.arrow_back,
-              }),
+              children: OptionTiles.build(context: context, options: {'Restart': Icons.restart_alt, 'Cancel': Icons.arrow_back}),
             );
           },
         ).then((value) {
@@ -312,13 +310,38 @@ class _SettingsPageState extends State<SettingsPage> {
             AppData.firstAccesses.forEach((key, value) {
               AppData.firstAccesses[key] = false;
             });
-            AppData.updateDbShownFirstAccesses(
-              AppData.firstAccesses.entries.map((e) => e.key).where((e) => e.name.endsWith('SC')).toList(),
-              false,
-            );
+            AppData.updateDbShownFirstAccesses(AppData.firstAccesses.entries.map((e) => e.key).where((e) => e.name.endsWith('SC')).toList(), false);
             if (context.mounted) {
               t.showCustomToast('Startup help was restarted.', context);
             }
+          }
+        });
+      },
+    );
+  }
+
+  Widget _sendLogToDev() {
+    return ListTile(
+      title: Text('Send app log to support', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+      onTap: () {
+        t.showCustomToast('Comming soon...', context);
+        //TODO: Por el momento uso este código para pruebas.
+        runFirst(() async {
+          var testsDate = DateTime(2026, 5, 10);
+          var notes = AppData.notesManager.allList.where(
+            (note) => note.text.trim().startsWith('[Repetido]') == note.creationDateTime.compareTo(testsDate) < 0,
+          );
+          if (notes.length == 2) {
+            var notesDetails = '';
+            for (var note in notes) {
+              notesDetails +=
+                  'id:${note.id},text:${note.text},creationDateTime:${note.creationDateTime.toStr(DTToStrFormat.DATABASE)},modifDateTime:${note.modifDateTime.toStr(DTToStrFormat.DATABASE)}${Platform.lineTerminator}';
+            }
+            await FirebaseCrashlytics.instance.recordError(
+              Exception('Repeated records:${Platform.lineTerminator}${notesDetails.trim()}'),
+              StackTrace.current,
+            );
+            await FirebaseCrashlytics.instance.sendUnsentReports();
           }
         });
       },
@@ -343,10 +366,7 @@ class _SettingsPageState extends State<SettingsPage> {
           builder: (context) {
             return SimpleDialog(
               title: Text('Do you want to reset the "Don\'t show this message again" checks?', style: Theme.of(context).textTheme.bodyLarge!),
-              children: OptionTiles.build(context: context, options: {
-                'Reset': Icons.restart_alt,
-                'Cancel': Icons.arrow_back,
-              }),
+              children: OptionTiles.build(context: context, options: {'Reset': Icons.restart_alt, 'Cancel': Icons.arrow_back}),
             );
           },
         ).then((value) {

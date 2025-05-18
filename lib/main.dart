@@ -12,6 +12,7 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //TODO: OhNote Bugs y Pendientes
 //Anuncios.
 //Solicitar Rate us.
+//Corrección en drawer por altura del notification bar (Pixel 5 API 33. Android 13 Tiramisu | x86_64).
 //---------------Puede esperar:
 //Autenticación google para guardar base de datos (como sería en iPhone? tambien google?).
 //Capturar errores de base de datos con try catch y enviar errores periódicamente a desarrollador.
@@ -50,9 +51,10 @@ class OhNoteApp extends StatelessWidget {
           title: 'OhNote',
           theme: AppTheme.current.lightTheme,
           darkTheme: AppTheme.current.darkTheme,
-          themeMode: theme == AppThemeBrightness.light.caption
-              ? ThemeMode.light
-              : (theme == AppThemeBrightness.dark.caption ? ThemeMode.dark : ThemeMode.system),
+          themeMode:
+              theme == AppThemeBrightness.light.caption
+                  ? ThemeMode.light
+                  : (theme == AppThemeBrightness.dark.caption ? ThemeMode.dark : ThemeMode.system),
           home: const MainScaffold(),
           builder: (context, child) {
             LandscapeTextField.inputDecoration = InputDecoration(
@@ -67,9 +69,7 @@ class OhNoteApp extends StatelessWidget {
                 onFinish: (shownKeyValues) {
                   AppData.updateDbShownFirstAccesses(shownKeyValues, true);
                 },
-                child: CustomModalBottomSheetListener(
-                  child: child ?? const SizedBox.shrink(),
-                ),
+                child: CustomModalBottomSheetListener(child: child ?? const SizedBox.shrink()),
               ),
             );
           },
