@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -67,8 +66,8 @@ class _SettingsPageState extends State<SettingsPage> {
             _resetDontShowAgain(context),
             c.defaultDivider,
             _restartStartupHelp(context),
-            c.defaultDivider,
-            _sendLogToDev(),
+            // c.defaultDivider,
+            // _sendCrashes(),
             c.defaultDivider,
             _about(),
           ],
@@ -320,27 +319,20 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _sendLogToDev() {
+  Widget _sendCrashes() {
     return ListTile(
-      title: Text('Send app log to support', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+      title: Text('Send app crashes to support', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       onTap: () {
         t.showCustomToast('Comming soon...', context);
-        //TODO: Por el momento uso este código para pruebas.
         runFirst(() async {
-          var testsDate = DateTime(2026, 5, 10);
-          var notes = AppData.notesManager.allList.where(
-            (note) => note.text.trim().startsWith('[Repetido]') == note.creationDateTime.compareTo(testsDate) < 0,
-          );
+          var notes = AppData.notesManager.allList.where((note) => note.text.trim().startsWith('[Repetido]'));
           if (notes.length == 2) {
             var notesDetails = '';
             for (var note in notes) {
               notesDetails +=
-                  'id:${note.id},text:${note.text},creationDateTime:${note.creationDateTime.toStr(DTToStrFormat.DATABASE)},modifDateTime:${note.modifDateTime.toStr(DTToStrFormat.DATABASE)}${Platform.lineTerminator}';
+                  '{id:${note.id},text:${note.text},creationDateTime:${note.creationDateTime.toStr(DTToStrFormat.DATABASE)},modifDateTime:${note.modifDateTime.toStr(DTToStrFormat.DATABASE)}}';
             }
-            await FirebaseCrashlytics.instance.recordError(
-              Exception('Repeated records:${Platform.lineTerminator}${notesDetails.trim()}'),
-              StackTrace.current,
-            );
+            await FirebaseCrashlytics.instance.recordError(Exception('Repeated records: $notesDetails'), StackTrace.current);
             await FirebaseCrashlytics.instance.sendUnsentReports();
           }
         });

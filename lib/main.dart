@@ -14,7 +14,8 @@ import 'package:ohnote/tools/home_widget_manager.dart';
 //Solicitar Rate us.
 //Corrección en drawer por altura del notification bar (Pixel 5 API 33. Android 13 Tiramisu | x86_64).
 //---------------Puede esperar:
-//Autenticación google para guardar base de datos (como sería en iPhone? tambien google?).
+//Botón para deshacer cambios.
+//Autenticación google para guardar base de datos por si se desinstala (como sería en iPhone? tambien google?).
 //Capturar errores de base de datos con try catch y enviar errores periódicamente a desarrollador.
 //Idioma español.
 //Opciones para hacer share de nota (por ejemplo enviar por correo o copiar al portapapeles).
