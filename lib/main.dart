@@ -10,11 +10,13 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
+//Limpiar Id al abrir nota para ver si deja de abrir otra nota que no es (la que se abrió antes). UPDATE: (Se abren muchas instancias, actualizar id y luego entrar con url sin query)
+//Corrección en página de selección de widget, en mi celular el contenido del scaffold más alto de lo que debería.
+//Corrección en drawer por altura del notification bar (Pixel 5 API 33. Android 13 Tiramisu | x86_64).
 //Anuncios.
 //Solicitar Rate us.
-//Corrección en drawer por altura del notification bar (Pixel 5 API 33. Android 13 Tiramisu | x86_64).
+//Luego de subir app: Botón para deshacer cambios.
 //---------------Puede esperar:
-//Botón para deshacer cambios.
 //Autenticación google para guardar base de datos por si se desinstala (como sería en iPhone? tambien google?).
 //Capturar errores de base de datos con try catch y enviar errores periódicamente a desarrollador.
 //Idioma español.

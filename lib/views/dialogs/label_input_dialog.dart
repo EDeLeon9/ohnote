@@ -42,10 +42,7 @@ class _LabelInputDialogState extends State<LabelInputDialog> {
       insetPadding: const EdgeInsets.all(24.0),
       contentPadding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 15.0),
       actionsPadding: const EdgeInsets.fromLTRB(0.0, 0.0, 15.0, 15.0),
-      title: Text(
-        '${widget.text == null ? 'New' : 'Edit'} Label',
-        style: Theme.of(context).textTheme.titleLarge!,
-      ),
+      title: Text('${widget.text == null ? 'New' : 'Edit'} Label', style: Theme.of(context).textTheme.titleLarge!),
       content: SingleChildScrollView(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -69,6 +66,7 @@ class _LabelInputDialogState extends State<LabelInputDialog> {
         ),
       ),
       actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
         TextButton(
           onPressed: () {
             _textController.text = _textController.text.trim();
@@ -80,12 +78,7 @@ class _LabelInputDialogState extends State<LabelInputDialog> {
                     insetPadding: const EdgeInsets.all(70.0),
                     actionsPadding: const EdgeInsets.fromLTRB(0.0, 0.0, 15.0, 15.0),
                     content: Text('Label "${_textController.text}" already exists. Use a different label text.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('OK'),
-                      ),
-                    ],
+                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
                   );
                 },
               );
@@ -96,10 +89,6 @@ class _LabelInputDialogState extends State<LabelInputDialog> {
             }
           },
           child: const Text('DONE'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('CANCEL'),
         ),
       ],
     );
