@@ -134,7 +134,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
             ],
           ),
           body: PageView.builder(
-            physics: !_showCaseFinished ? NeverScrollableScrollPhysics() : null,
+            physics: !_showCaseFinished ? const NeverScrollableScrollPhysics() : null,
             controller: _pageController,
             onPageChanged: (index) {
               _saveNote(_currentEditor);
@@ -150,61 +150,62 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
               return SafeArea(
                 key: Key('edt_$index'),
                 child: Column(
-                  children: index == _configBarSCPageIndex && !_showCaseFinished
-                      ? [
-                          CustomShowCase(
-                            showCaseKey: _configBarSCK,
-                            description: 'You can tap on this\nzone to set a color\nto your note.',
-                            child: _configBar(editor),
-                          ),
-                          const Divider(height: 0.0),
-                          Expanded(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                _textField(editor),
-                                Positioned.fill(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 70.0),
-                                    child: CustomShowCase(
-                                      showCaseKey: _swipeSCK,
-                                      description: 'Swipe left or right\nto scroll through\nyour notes.',
-                                      overlay: Opacity(
-                                        opacity: 0.3,
-                                        child: ExplicitAnimationBuilder(
-                                          begin: 1.0,
-                                          end: 0.9,
-                                          durationMs: 500,
-                                          builder: (context, animation) {
-                                            return ScaleTransition(
-                                              scale: animation,
-                                              child: Icon(
-                                                Icons.swipe,
-                                                size: MediaQuery.of(context).size.width - 130.0,
-                                              ),
-                                            );
-                                          },
+                  children:
+                      index == _configBarSCPageIndex && !_showCaseFinished
+                          ? [
+                            CustomShowCase(
+                              showCaseKey: _configBarSCK,
+                              description: 'You can tap on this\nzone to set a color\nto your note.',
+                              child: _configBar(editor),
+                            ),
+                            const Divider(height: 0.0),
+                            Expanded(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  _textField(editor),
+                                  Positioned.fill(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 70.0),
+                                      child: CustomShowCase(
+                                        showCaseKey: _swipeSCK,
+                                        description: 'Swipe left or right\nto scroll through\nyour notes.',
+                                        overlay: Opacity(
+                                          opacity: 0.3,
+                                          child: ExplicitAnimationBuilder(
+                                            begin: 1.0,
+                                            end: 0.9,
+                                            durationMs: 500,
+                                            builder: (context, animation) {
+                                              return ScaleTransition(
+                                                scale: animation,
+                                                child: Icon(
+                                                  Icons.swipe,
+                                                  size: MediaQuery.of(context).size.width - 130.0,
+                                                ),
+                                              );
+                                            },
+                                          ),
                                         ),
+                                        child: const SizedBox.expand(),
                                       ),
-                                      child: SizedBox.expand(),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          CustomShowCase(
-                            showCaseKey: _removeLabelSCK,
-                            description: 'You can long-press\na label to detach it\nfrom your note.',
-                            child: _labels(editor),
-                          ),
-                        ]
-                      : [
-                          _configBar(editor),
-                          const Divider(height: 0.0),
-                          Expanded(child: _textField(editor)),
-                          _labels(editor),
-                        ],
+                            CustomShowCase(
+                              showCaseKey: _removeLabelSCK,
+                              description: 'You can long-press\na label to detach it\nfrom your note.',
+                              child: _labels(editor),
+                            ),
+                          ]
+                          : [
+                            _configBar(editor),
+                            const Divider(height: 0.0),
+                            Expanded(child: _textField(editor)),
+                            _labels(editor),
+                          ],
                 ),
               );
             },
@@ -321,9 +322,10 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   Widget _moreButton() {
     return HeaderButtons.moreButton(
       context: context,
-      button: HeaderButton(HeaderButtonDetails.more)
-        ..showCaseKey = _moreSCK
-        ..showCaseDescription = 'Tap here for more\noptions, such as\nviewing your note\'s\nhistory or adding\nlabels to your note.',
+      button:
+          HeaderButton(HeaderButtonDetails.more)
+            ..showCaseKey = _moreSCK
+            ..showCaseDescription = 'Tap here for more\noptions, such as\nviewing your note\'s\nhistory or adding\nlabels to your note.',
       moreButtons: [
         HeaderButton(HeaderButtonDetails.labelNote),
         HeaderButton(HeaderButtonDetails.history),
@@ -352,12 +354,13 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
               child: InkWell(
                 onTap: () {
                   StyleColorPickerDialog.show(
-                      context: context,
-                      pickerColor: color,
-                      onColorChanged: (value) {
-                        editor.note.color.value = value != Colors.transparent ? value : null;
-                        _saveDraft(editor);
-                      });
+                    context: context,
+                    pickerColor: color,
+                    onColorChanged: (value) {
+                      editor.note.color.value = value != Colors.transparent ? value : null;
+                      _saveDraft(editor);
+                    },
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
@@ -433,38 +436,39 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
         child: Wrap(
           spacing: 15.0,
           runSpacing: 10.0,
-          children: AppData.labels.where((e) => editor.note.labelIds.contains(e.id)).map((e) {
-            return LabelContainer(
-              onLongPress: () {
-                ConfirmationDialog.show(
-                  context: context,
-                  caption: 'Do you want to detach label "${e.text}" from your note?',
-                  confirmOption: 'Detach',
-                  confirmOptionIcon: Icons.label_off,
-                  dontShowAgainChecked: AppData.settings[Settings.hideDetachLabelDialog]!.value == true.toString(),
-                  setDontShowAgain: () {
-                    AppData.settings[Settings.hideDetachLabelDialog]!.value = true.toString();
-                    AppData.updateDbSettings([Settings.hideDetachLabelDialog]);
-                  },
-                ).then((value) {
-                  if (value) {
-                    setState(() {
-                      editor.note.labelIds.remove(e.id);
+          children:
+              AppData.labels.where((e) => editor.note.labelIds.contains(e.id)).map((e) {
+                return LabelContainer(
+                  onLongPress: () {
+                    ConfirmationDialog.show(
+                      context: context,
+                      caption: 'Do you want to detach label "${e.text}" from your note?',
+                      confirmOption: 'Detach',
+                      confirmOptionIcon: Icons.label_off,
+                      dontShowAgainChecked: AppData.settings[Settings.hideDetachLabelDialog]!.value == true.toString(),
+                      setDontShowAgain: () {
+                        AppData.settings[Settings.hideDetachLabelDialog]!.value = true.toString();
+                        AppData.updateDbSettings([Settings.hideDetachLabelDialog]);
+                      },
+                    ).then((value) {
+                      if (value) {
+                        setState(() {
+                          editor.note.labelIds.remove(e.id);
+                        });
+                        _saveDraft(editor);
+                      }
                     });
-                    _saveDraft(editor);
-                  }
-                });
-              },
-              content: Text(
-                e.text,
-                maxLines: 1,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
-                ),
-              ),
-            );
-          }).toList(),
+                  },
+                  content: Text(
+                    e.text,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                    ),
+                  ),
+                );
+              }).toList(),
         ),
       ),
     );

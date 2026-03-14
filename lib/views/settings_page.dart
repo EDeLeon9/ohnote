@@ -258,7 +258,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _resetSettingsToDefault(BuildContext context) {
     return ListTile(
-      title: Text('Reset above settings to default', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+      title: Text('Reset the above settings to default', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       onTap: () {
         showDialog<String>(
           context: context,
@@ -344,7 +344,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       title: Text('About', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       onTap: () {
-        Navigator.push(context, CupertinoPageRoute(builder: (context) => AboutPage()));
+        Navigator.push(context, CupertinoPageRoute(builder: (context) => const AboutPage()));
       },
     );
   }

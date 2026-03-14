@@ -35,7 +35,7 @@ class AppTheme {
       appBarTheme: theme.appBarTheme.copyWith(
         elevation: 2.0,
         toolbarHeight: 55.0,
-        color: colorScheme.tertiaryContainer,
+        backgroundColor: colorScheme.tertiaryContainer,
         foregroundColor: colorScheme.primary,
         shadowColor: colorScheme.shadow,
         titleTextStyle: TextStyle(fontSize: 26.0, color: colorScheme.primary),
@@ -56,7 +56,7 @@ class AppTheme {
     );
   }
 
-  final appIconColor = Color(0xFF132A38);
+  final appIconColor = const Color(0xFF132A38);
 
   final _lightColorScheme = const ColorScheme(
     brightness: Brightness.light,

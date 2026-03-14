@@ -66,10 +66,11 @@ class _TrashCanPageState extends State<TrashCanPage> {
             ),
             HeaderButtons.moreButton(
               context: context,
-              button: HeaderButton(HeaderButtonDetails.more)
-                ..showCaseKey = _trashMoreSCK
-                ..showCaseDescription =
-                    'Here you can filter\nthe trash can notes,\nrestore them or remove\nthem permanently. Tap\nhere to see the options.',
+              button:
+                  HeaderButton(HeaderButtonDetails.more)
+                    ..showCaseKey = _trashMoreSCK
+                    ..showCaseDescription =
+                        'Here you can filter\nthe trash can notes,\nrestore them or remove\nthem permanently. Tap\nhere to see the options.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.filters),
                 HeaderButton(HeaderButtonDetails.restore),
@@ -129,7 +130,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
               ),
               const Divider(height: 0.0),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
+                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
                 child: Text('Notes are kept in trash can up to 30 days.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
               ),
               FiltersPanel(guiManager: widget.trashManager),

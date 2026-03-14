@@ -25,7 +25,7 @@ class RestoreLocalDbPage extends StatelessWidget {
                 alignment: Alignment.bottomRight,
                 child: Row(
                   children: [
-                    Spacer(),
+                    const Spacer(),
                     ElevatedButton(
                       onPressed: () {
                         a.runFirst(() async {

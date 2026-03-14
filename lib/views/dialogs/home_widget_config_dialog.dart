@@ -67,7 +67,7 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
           ScrollViewWithBar(
             scrollbarCrossAxisMargin: 10.0,
             scrollbarMainAxisMargin: 55.0,
-            padding: EdgeInsets.only(top: 55.0),
+            padding: const EdgeInsets.only(top: 55.0),
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Column(
@@ -176,11 +176,14 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
             context: context,
             builder: (context) {
               return SimpleDialog(
-                children: OptionTiles.build(context: context, options: {
-                  AppThemeBrightness.systemDefault.caption: Icons.brightness_6,
-                  AppThemeBrightness.light.caption: Icons.light_mode,
-                  AppThemeBrightness.dark.caption: Icons.dark_mode,
-                }),
+                children: OptionTiles.build(
+                  context: context,
+                  options: {
+                    AppThemeBrightness.systemDefault.caption: Icons.brightness_6,
+                    AppThemeBrightness.light.caption: Icons.light_mode,
+                    AppThemeBrightness.dark.caption: Icons.dark_mode,
+                  },
+                ),
               );
             },
           ).then((value) {
@@ -264,26 +267,26 @@ class _HomeWidgetConfigDialogState extends State<HomeWidgetConfigDialog> {
   List<Widget> _filters() {
     var textTheme = Theme.of(context).textTheme.titleLarge!;
     return [
-      Divider(height: 0.0),
+      const Divider(height: 0.0),
       ClipRect(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             HeaderContainer(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(26.0, 14.0, 26.0, 4.0),
+                padding: const EdgeInsets.fromLTRB(26.0, 14.0, 26.0, 4.0),
                 child: Text(
                   'Filters',
                   style: textTheme.copyWith(color: Theme.of(context).colorScheme.primary, fontSize: textTheme.fontSize! - 1.0),
                 ),
               ),
             ),
-            SizedBox(height: 2.5),
+            const SizedBox(height: 2.5),
           ],
         ),
       ),
       Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
         child: FiltersForm(
           filtersToEdit: _homeWidgetConfigResult.notesManager.filters.value,
           availableColors: AppData.notesManager.styleColors,

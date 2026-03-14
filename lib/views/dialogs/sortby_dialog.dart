@@ -49,41 +49,37 @@ class _SortByDialogState extends State<SortByDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
-              child: Text('Sorts notes by the selected option once.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
+              child: Text('Sorts notes by the selected option.', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
             ),
-            Divider(height: 0.0),
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile(
-                    contentPadding: const EdgeInsets.only(left: 12.0),
-                    visualDensity: const VisualDensity(horizontal: -4.0),
-                    title: Text('Ascending', style: Theme.of(context).textTheme.bodyMedium),
-                    value: SortByOrder.asc,
-                    groupValue: _order,
-                    onChanged: (value) {
-                      setState(() {
-                        _order = value;
-                      });
-                    },
+            const Divider(height: 0.0),
+            RadioGroup(
+              onChanged: (value) {
+                setState(() {
+                  _order = value;
+                });
+              },
+              groupValue: _order,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile(
+                      contentPadding: const EdgeInsets.only(left: 12.0),
+                      visualDensity: const VisualDensity(horizontal: -4.0),
+                      title: Text('Ascending', style: Theme.of(context).textTheme.bodyMedium),
+                      value: SortByOrder.asc,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: RadioListTile(
-                    contentPadding: const EdgeInsets.only(right: 22.0),
-                    visualDensity: const VisualDensity(horizontal: -4.0),
-                    title: Text('Descending', style: Theme.of(context).textTheme.bodyMedium),
-                    value: SortByOrder.desc,
-                    groupValue: _order,
-                    onChanged: (value) {
-                      setState(() {
-                        _order = value;
-                      });
-                    },
+                  Expanded(
+                    child: RadioListTile(
+                      contentPadding: const EdgeInsets.only(right: 22.0),
+                      visualDensity: const VisualDensity(horizontal: -4.0),
+                      title: Text('Descending', style: Theme.of(context).textTheme.bodyMedium),
+                      value: SortByOrder.desc,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             c.defaultDivider,
             ...SortBy.values.map<Widget>((e) {

@@ -115,13 +115,13 @@ class HeaderButtons extends StatefulWidget {
   }) {
     return button != null
         ? button.build(
-            color: color,
-            shadows: shadows,
-            isVisible: isVisible,
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          )
+          color: color,
+          shadows: shadows,
+          isVisible: isVisible,
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        )
         : const SizedBox.shrink();
   }
 
@@ -132,14 +132,14 @@ class HeaderButtons extends StatefulWidget {
   }) {
     return button != null
         ? button.build(
-            color: color,
-            shadows: shadows,
-            isVisible: isVisible,
-            onPressed: () {
-              guiManager.selectionQuantity.value = null;
-              guiManager.showSearchText.value = false;
-            },
-          )
+          color: color,
+          shadows: shadows,
+          isVisible: isVisible,
+          onPressed: () {
+            guiManager.selectionQuantity.value = null;
+            guiManager.showSearchText.value = false;
+          },
+        )
         : const SizedBox.shrink();
   }
 
@@ -152,45 +152,45 @@ class HeaderButtons extends StatefulWidget {
   }) {
     return button != null
         ? ValueListenableBuilder(
-            valueListenable: guiManager.selectionQuantity,
-            builder: (context, selectionQuantity, child) {
-              return ValueListenableBuilder(
-                valueListenable: guiManager.isAllSelected,
-                builder: (context, isAllSelected, child) {
-                  return Stack(
-                    children: [
-                      button.build(
-                        color: color,
-                        shadows: shadows,
-                        isVisible: selectionQuantity == null,
-                        onPressed: () {
-                          guiManager.isManualSelection = true;
-                        },
-                      ),
-                      HeaderButton(HeaderButtonDetails.selectAll).build(
-                        color: color,
-                        shadows: shadows,
-                        isVisible: selectionQuantity != null && !isAllSelected,
-                        onPressed: () {
-                          guiManager.setIsCheckedToAll(true);
-                          guiManager.setSelectionQuantity();
-                        },
-                      ),
-                      HeaderButton(HeaderButtonDetails.deselectAll).build(
-                        color: color,
-                        shadows: shadows,
-                        isVisible: selectionQuantity != null && isAllSelected,
-                        onPressed: () {
-                          guiManager.setIsCheckedToAll(false);
-                          guiManager.setSelectionQuantity();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          )
+          valueListenable: guiManager.selectionQuantity,
+          builder: (context, selectionQuantity, child) {
+            return ValueListenableBuilder(
+              valueListenable: guiManager.isAllSelected,
+              builder: (context, isAllSelected, child) {
+                return Stack(
+                  children: [
+                    button.build(
+                      color: color,
+                      shadows: shadows,
+                      isVisible: selectionQuantity == null,
+                      onPressed: () {
+                        guiManager.isManualSelection = true;
+                      },
+                    ),
+                    HeaderButton(HeaderButtonDetails.selectAll).build(
+                      color: color,
+                      shadows: shadows,
+                      isVisible: selectionQuantity != null && !isAllSelected,
+                      onPressed: () {
+                        guiManager.setIsCheckedToAll(true);
+                        guiManager.setSelectionQuantity();
+                      },
+                    ),
+                    HeaderButton(HeaderButtonDetails.deselectAll).build(
+                      color: color,
+                      shadows: shadows,
+                      isVisible: selectionQuantity != null && isAllSelected,
+                      onPressed: () {
+                        guiManager.setIsCheckedToAll(false);
+                        guiManager.setSelectionQuantity();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        )
         : const SizedBox.shrink();
   }
 
@@ -202,13 +202,13 @@ class HeaderButtons extends StatefulWidget {
   }) {
     return button != null
         ? button.build(
-            color: color,
-            shadows: shadows,
-            onPressed: () {
-              guiManager.showSearchText.value = true;
-              guiManager.searchTextFocusNode.requestFocus();
-            },
-          )
+          color: color,
+          shadows: shadows,
+          onPressed: () {
+            guiManager.showSearchText.value = true;
+            guiManager.searchTextFocusNode.requestFocus();
+          },
+        )
         : const SizedBox.shrink();
   }
 
@@ -222,15 +222,17 @@ class HeaderButtons extends StatefulWidget {
   }) {
     return button != null
         ? TappablePopupMenuButton(
-            childButtonBuilder: (showButtonMenuAction) {
-              return button.build(
-                color: color,
-                shadows: shadows,
-                onPressed: showButtonMenuAction,
-              );
-            },
-            items: moreButtons
-                .map((e) => PopupMenuItem<HeaderButtonDetails>(
+          childButtonBuilder: (showButtonMenuAction) {
+            return button.build(
+              color: color,
+              shadows: shadows,
+              onPressed: showButtonMenuAction,
+            );
+          },
+          items:
+              moreButtons
+                  .map(
+                    (e) => PopupMenuItem<HeaderButtonDetails>(
                       value: e.details,
                       child: ListTile(
                         contentPadding: EdgeInsets.zero,
@@ -238,10 +240,11 @@ class HeaderButtons extends StatefulWidget {
                         title: Text(e.details.caption),
                         leading: Icon(e.details.icon, color: Theme.of(context).colorScheme.primary),
                       ),
-                    ))
-                .toList(),
-            onSelected: onSelected,
-          )
+                    ),
+                  )
+                  .toList(),
+          onSelected: onSelected,
+        )
         : const SizedBox.shrink();
   }
 
@@ -430,7 +433,7 @@ class _HeaderButtonsState extends State<HeaderButtons> {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          SizedBox(width: 1.4),
+                          const SizedBox(width: 1.4),
                           Stack(
                             children: [
                               widget._navMenuButton(
@@ -465,15 +468,16 @@ class _HeaderButtonsState extends State<HeaderButtons> {
                                 color: widget.color,
                                 shadows: widget.shadows,
                                 button: buttonsMap[HeaderButtonDetails.more],
-                                moreButtons: [
-                                  buttonsMap[HeaderButtonDetails.filters],
-                                  buttonsMap[HeaderButtonDetails.sortBy],
-                                  buttonsMap[HeaderButtonDetails.style],
-                                  buttonsMap[HeaderButtonDetails.favorite],
-                                  buttonsMap[HeaderButtonDetails.archive],
-                                  buttonsMap[HeaderButtonDetails.sendToTrash],
-                                  buttonsMap[HeaderButtonDetails.discardHistory],
-                                ].where((e) => e != null).map((e) => e!).toList(),
+                                moreButtons:
+                                    [
+                                      buttonsMap[HeaderButtonDetails.filters],
+                                      buttonsMap[HeaderButtonDetails.sortBy],
+                                      buttonsMap[HeaderButtonDetails.style],
+                                      buttonsMap[HeaderButtonDetails.favorite],
+                                      buttonsMap[HeaderButtonDetails.archive],
+                                      buttonsMap[HeaderButtonDetails.sendToTrash],
+                                      buttonsMap[HeaderButtonDetails.discardHistory],
+                                    ].where((e) => e != null).map((e) => e!).toList(),
                                 onSelected: (selected) {
                                   if (selected == HeaderButtonDetails.filters) {
                                     HeaderButtons.filtersPressed(context: context, guiManager: widget.guiManager, updateDb: widget.updateDbFilters);
@@ -503,15 +507,15 @@ class _HeaderButtonsState extends State<HeaderButtons> {
               ),
               widget.title != null
                   ? AnimatedScaleText(
-                      duration: c.animationDuration,
-                      trueText: widget.title!,
-                      falseText: '$selectionQuantity selected',
-                      condition: selectionQuantity == null,
-                      textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            color: widget.color ?? Theme.of(context).colorScheme.primary,
-                            shadows: widget.shadows,
-                          ),
-                    )
+                    duration: c.animationDuration,
+                    trueText: widget.title!,
+                    falseText: '$selectionQuantity selected',
+                    condition: selectionQuantity == null,
+                    textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: widget.color ?? Theme.of(context).colorScheme.primary,
+                      shadows: widget.shadows,
+                    ),
+                  )
                   : const SizedBox.shrink(),
             ],
           );
