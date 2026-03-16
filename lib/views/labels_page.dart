@@ -7,7 +7,7 @@ import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
@@ -34,15 +34,18 @@ class _LabelsPageState extends State<LabelsPage> {
 
   @override
   void initState() {
-    _labelsManager.allList = AppData.labels
-        .map((e) => Note(
-              id: e.id,
-              text: e.text,
-              guiManager: _labelsManager,
-            ))
-        .toList();
+    _labelsManager.allList =
+        AppData.labels
+            .map(
+              (e) => Note(
+                id: e.id,
+                text: e.text,
+                guiManager: _labelsManager,
+              ),
+            )
+            .toList();
     _labelsManager.requestUpdateDisplayList();
-    CustomShowCase.startShowCase(
+    SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: [_newLabelSCK, _labelMoreSCK],
       usePostFrameCallback: true,
@@ -77,9 +80,10 @@ class _LabelsPageState extends State<LabelsPage> {
             _newLabelButton(),
             HeaderButtons.moreButton(
               context: context,
-              button: HeaderButton(HeaderButtonDetails.more)
-                ..showCaseKey = _labelMoreSCK
-                ..showCaseDescription = 'To search for or\nremove a label tap\nhere and select the\noption.',
+              button:
+                  HeaderButton(HeaderButtonDetails.more)
+                    ..showCaseKey = _labelMoreSCK
+                    ..showCaseDescription = 'To search for or\nremove a label tap\nhere and select the\noption.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.searchLabel),
                 HeaderButton(HeaderButtonDetails.removeLabel),
@@ -182,7 +186,7 @@ class _LabelsPageState extends State<LabelsPage> {
   }
 
   void _onPopInvoked(bool didPop, BuildContext context) {
-    if (!didPop && !CustomShowCase.next(context)) {
+    if (!didPop && !SizedShowCase.next(context)) {
       if (_labelsManager.selectionQuantity.value == null && !_labelsManager.showSearchText.value) {
         Navigator.pop(context);
       }
@@ -194,7 +198,7 @@ class _LabelsPageState extends State<LabelsPage> {
   }
 
   Widget _newLabelButton() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: _newLabelSCK,
       description: 'To add a new label\nyou can tap here\nand then type a title\nfor the label.',
       child: Transform.rotate(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/custom_checkbox.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/views/bottomsheets/style_panel_colors.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
 import 'package:ohnote/tools/custom_toast.dart' as t;
@@ -46,7 +46,7 @@ class _StylePanelState extends State<StylePanel> {
                     const SizedBox(height: 35, child: Row(children: [VerticalDivider(width: 0.0), SizedBox(width: 5.0)])),
                     _closeButton(),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -56,7 +56,7 @@ class _StylePanelState extends State<StylePanel> {
   }
 
   Widget _stylePanelColors() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: MainScaffold.of(context).colorSCK,
       description: 'You can set a color for\nthe selected notes.',
       child: const Row(
@@ -77,7 +77,7 @@ class _StylePanelState extends State<StylePanel> {
   }
 
   Widget _numberOfLinesSlider() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: MainScaffold.of(context).numberOfLinesSCK,
       description: 'Here you can set the\nnumber of lines displayed\nof the selected notes in\nthe list.',
       child: ValueListenableBuilder(
@@ -132,7 +132,7 @@ class _StylePanelState extends State<StylePanel> {
   }
 
   Widget _crossOutButton() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: MainScaffold.of(context).crossOutSCK,
       description: 'You can also toggle a\nstrikethrough style for the\nselected notes by tapping\nthis button.',
       child: ElevatedButton(
@@ -156,7 +156,7 @@ class _StylePanelState extends State<StylePanel> {
   }
 
   Widget _useCreationDateCheck() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: MainScaffold.of(context).useCreationDateTimeSCK,
       description: 'Check this option to toggle\nbetween displaying the\nmodified date and the\ncreation date.',
       child: CustomCheckbox(

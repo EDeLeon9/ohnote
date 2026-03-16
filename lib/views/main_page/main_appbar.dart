@@ -82,52 +82,52 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                                 ?
                                 //Material enables the splash effect that the image hides.
                                 SplashOverlay(
-                                    onLongPress: () {
-                                      if (appBarPercent > 0.0) {
-                                        HapticFeedback.vibrate();
-                                        ChangeWallpaperDialog.show(
-                                          context: context,
-                                        ).whenComplete(() {
-                                          var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
-                                          if (!appliedWallpaper.assetName.endsWith(settingsWallpaper)) {
-                                            AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
-                                          }
-                                        });
-                                      }
-                                    },
-                                    child: Stack(
-                                      fit: StackFit.expand,
-                                      children: [
-                                        AnimatedOpacityChange(
-                                          duration: Duration(milliseconds: c.animationDuration.inMilliseconds * 2),
-                                          transitionColor: shadowColor,
-                                          //Reminder: Image inside InkWell creates issue with opacity effect, So SplashOverlay is used.
-                                          child: Image(
-                                            key: Key('wpp_${appliedWallpaper.assetName}'),
-                                            width: 600.0,
-                                            image: appliedWallpaper,
-                                            fit: BoxFit.cover,
+                                  onLongPress: () {
+                                    if (appBarPercent > 0.0) {
+                                      HapticFeedback.vibrate();
+                                      ChangeWallpaperDialog.show(
+                                        context: context,
+                                      ).whenComplete(() {
+                                        var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
+                                        if (!appliedWallpaper.assetName.endsWith(settingsWallpaper)) {
+                                          AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      AnimatedOpacityChange(
+                                        duration: Duration(milliseconds: c.animationDuration.inMilliseconds * 2),
+                                        transitionColor: shadowColor,
+                                        //Reminder: Image inside InkWell creates issue with opacity effect, So SplashOverlay is used.
+                                        child: Image(
+                                          key: Key('wpp_${appliedWallpaper.assetName}'),
+                                          width: 600.0,
+                                          image: appliedWallpaper,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.bottomCenter,
+                                            end: Alignment.topCenter,
+                                            stops: const [0.075, 0.15, 0.25, 0.3, 0.35],
+                                            colors: [
+                                              shadowColor.withValues(alpha: 0.8),
+                                              shadowColor.withValues(alpha: 0.6),
+                                              shadowColor.withValues(alpha: 0.15),
+                                              shadowColor.withValues(alpha: 0.05),
+                                              Colors.transparent,
+                                            ],
                                           ),
                                         ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.bottomCenter,
-                                              end: Alignment.topCenter,
-                                              stops: const [0.075, 0.15, 0.25, 0.3, 0.35],
-                                              colors: [
-                                                shadowColor.withValues(alpha: 0.8),
-                                                shadowColor.withValues(alpha: 0.6),
-                                                shadowColor.withValues(alpha: 0.15),
-                                                shadowColor.withValues(alpha: 0.05),
-                                                Colors.transparent,
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
+                                      ),
+                                    ],
+                                  ),
+                                )
                                 : const SizedBox.shrink();
                           },
                         ),
@@ -143,9 +143,9 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                           falseText: '$selectionQuantity selected',
                           condition: selectionQuantity == null,
                           textStyle: Theme.of(context).appBarTheme.titleTextStyle!.copyWith(
-                                color: _foregroundColor(Theme.of(context), appBarPercent),
-                                shadows: _shadows(Theme.of(context), appBarPercent),
-                              ),
+                            color: _foregroundColor(Theme.of(context), appBarPercent),
+                            shadows: _shadows(Theme.of(context), appBarPercent),
+                          ),
                         ),
                       ),
                     ),
@@ -161,17 +161,17 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
                   HeaderButton(HeaderButtonDetails.back),
                   HeaderButton(HeaderButtonDetails.navMenu)
                     ..showCaseKey = MainScaffold.of(context).navMenuSCK
-                    ..showCaseDescription = 'This is the menu\nbutton, where the\nsettings, trash can\nand other stuff are.',
+                    ..showCaseDescription = 'This is the menu button, where the settings, trash can and other stuff are.',
                   HeaderButton(HeaderButtonDetails.selectionMode)
                     ..showCaseKey = MainScaffold.of(context).selectionModeSCK
                     ..showCaseDescription =
-                        'If you want to perform\nany action with your\nnotes, enter selection\nmode by tapping here\nto select the notes.',
+                        'If you want to perform any action with your notes, enter selection mode by tapping here to select the notes.',
                   HeaderButton(HeaderButtonDetails.searchText)
                     ..showCaseKey = MainScaffold.of(context).searchSCK
-                    ..showCaseDescription = 'Tap here to search\nfor notes that match\nthe typed text.',
+                    ..showCaseDescription = 'Tap here to search for notes that match the typed text.',
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = MainScaffold.of(context).moreSCK
-                    ..showCaseDescription = 'Tap here to see\nmore actions you\ncan take with your\nnotes.',
+                    ..showCaseDescription = 'Tap here to see more actions you can take with your notes.',
                   HeaderButton(HeaderButtonDetails.filters),
                   HeaderButton(HeaderButtonDetails.sortBy),
                   HeaderButton(HeaderButtonDetails.style),
@@ -189,7 +189,10 @@ class _MainAppBarState extends State<MainAppBar> with WidgetsBindingObserver {
 
   Color _foregroundColor(ThemeData theme, double appBarPercent) {
     return Color.lerp(
-        theme.colorScheme.primary, theme.brightness == Brightness.dark ? theme.colorScheme.onSurface : theme.colorScheme.onPrimary, appBarPercent)!;
+      theme.colorScheme.primary,
+      theme.brightness == Brightness.dark ? theme.colorScheme.onSurface : theme.colorScheme.onPrimary,
+      appBarPercent,
+    )!;
   }
 
   List<Shadow> _shadows(ThemeData theme, double appBarPercent) {

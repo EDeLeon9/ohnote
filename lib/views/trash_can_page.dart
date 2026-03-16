@@ -5,7 +5,7 @@ import 'package:ohnote/data/gui_manager.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/note_tile.dart';
@@ -28,7 +28,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
 
   @override
   void initState() {
-    CustomShowCase.startShowCase(
+    SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: [_trashMoreSCK],
       usePostFrameCallback: true,
@@ -70,7 +70,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = _trashMoreSCK
                     ..showCaseDescription =
-                        'Here you can filter\nthe trash can notes,\nrestore them or remove\nthem permanently. Tap\nhere to see the options.',
+                        'Here you can filter the trash can notes, restore them or remove them permanently. Tap here to see the options.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.filters),
                 HeaderButton(HeaderButtonDetails.restore),
@@ -168,7 +168,7 @@ class _TrashCanPageState extends State<TrashCanPage> {
   }
 
   void _onPopInvoked(bool didPop, BuildContext context) {
-    if (!didPop && !CustomShowCase.next(context)) {
+    if (!didPop && !SizedShowCase.next(context)) {
       if (widget.trashManager.selectionQuantity.value == null && !widget.trashManager.showSearchText.value) {
         Navigator.pop(context);
       }

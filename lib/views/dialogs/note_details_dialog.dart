@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/first_access.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/tools/scrollview_with_bar.dart';
 import 'package:ohnote/view_components/colored_circle.dart';
 import 'package:ohnote/view_components/header_container.dart';
@@ -29,7 +29,7 @@ class _NoteDetailsDialogState extends State<NoteDetailsDialog> {
 
   @override
   void initState() {
-    CustomShowCase.startShowCase(
+    SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: [_detailsDialogSCK],
       usePostFrameCallback: true,
@@ -45,7 +45,7 @@ class _NoteDetailsDialogState extends State<NoteDetailsDialog> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && !CustomShowCase.next(context)) {
+        if (!didPop && !SizedShowCase.next(context)) {
           Navigator.pop(context, result);
         }
       },
@@ -88,7 +88,7 @@ class _NoteDetailsDialogState extends State<NoteDetailsDialog> {
             width: MediaQuery.of(context).size.width,
             child: Stack(
               children: [
-                CustomShowCase(
+                SizedShowCase(
                   showCaseKey: _detailsDialogSCK,
                   description: 'You can select and\ncopy the details and\neven the date if you\nneed to.',
                   child: const SizedBox(

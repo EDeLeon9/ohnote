@@ -10,7 +10,7 @@ import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/color_to_int_converter.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
 import 'package:ohnote/tools/tappable_popupmenubutton.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/views/dialogs/filters_dialog.dart';
 import 'package:ohnote/views/dialogs/sortby_dialog.dart';
 import 'package:ohnote/tools/custom_toast.dart' as t;
@@ -73,7 +73,7 @@ class HeaderButton {
         },
       );
       if (showCaseKey != null) {
-        button = CustomShowCase(
+        button = SizedShowCase(
           showCaseKey: showCaseKey!,
           description: showCaseDescription!,
           child: button,

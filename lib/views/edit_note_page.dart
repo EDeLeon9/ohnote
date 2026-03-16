@@ -8,7 +8,7 @@ import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animated_color.dart';
 import 'package:ohnote/tools/animated/animatedscale_button.dart';
 import 'package:ohnote/tools/animated/explicit_animation_builder.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/label_container.dart';
@@ -80,7 +80,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
 
     _setHistoryManagerList();
 
-    if (!CustomShowCase.startShowCase(
+    if (!SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: _showCaseKeys,
       usePostFrameCallback: true,
@@ -153,7 +153,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
                   children:
                       index == _configBarSCPageIndex && !_showCaseFinished
                           ? [
-                            CustomShowCase(
+                            SizedShowCase(
                               showCaseKey: _configBarSCK,
                               description: 'You can tap on this\nzone to set a color\nto your note.',
                               child: _configBar(editor),
@@ -167,7 +167,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
                                   Positioned.fill(
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 70.0),
-                                      child: CustomShowCase(
+                                      child: SizedShowCase(
                                         showCaseKey: _swipeSCK,
                                         description: 'Swipe left or right\nto scroll through\nyour notes.',
                                         overlay: Opacity(
@@ -194,7 +194,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
                                 ],
                               ),
                             ),
-                            CustomShowCase(
+                            SizedShowCase(
                               showCaseKey: _removeLabelSCK,
                               description: 'You can long-press\na label to detach it\nfrom your note.',
                               child: _labels(editor),
@@ -218,7 +218,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   Widget _backButton() {
     //Center shrinks the button to look like a default leading back button in Flutter new version.
     return Center(
-      child: CustomShowCase(
+      child: SizedShowCase(
         showCaseKey: _backSCK,
         description: 'Tap back to save\nchanges after editing\nyour note.',
         child: IconButton(
@@ -233,7 +233,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   }
 
   Widget _favoriteButton() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: _favoriteSCK,
       description: 'You can set your note\nas a favorite. This can\nhelp you when using\nfilters in the main list.',
       child: ValueListenableBuilder(
@@ -269,7 +269,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   }
 
   Widget _sendToTrashButton() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: _sendToTrashSCK,
       description: 'To send the note\nto trash can tap\nthis button.',
       child: IconButton(
@@ -475,7 +475,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   }
 
   void _onPopInvoked(bool didPop, BuildContext context) async {
-    if (!_closing && !didPop && !CustomShowCase.next(context)) {
+    if (!_closing && !didPop && !SizedShowCase.next(context)) {
       a.runFirst(() async {
         setState(() {
           _closing = true;
@@ -544,7 +544,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
               _removeLabelSCPageIndex = _editors.indexOf(_currentEditor);
             });
             _showCaseFinished = false;
-            CustomShowCase.startShowCase(
+            SizedShowCase.startShowCase(
               context: context,
               showCaseKeys: [_removeLabelSCK],
               usePostFrameCallback: false,

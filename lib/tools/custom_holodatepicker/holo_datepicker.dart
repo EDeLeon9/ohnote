@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_this, unnecessary_const, use_super_parameters, no_logic_in_create_state, avoid_unnecessary_containers, avoid_function_literals_in_foreach_calls, prefer_const_constructors, prefer_single_quotes, curly_braces_in_flow_control_structures, no_leading_underscores_for_local_identifiers, prefer_conditional_assignment
+
 export 'package:flutter_holo_date_picker/date_picker_theme.dart';
 export 'package:ohnote/tools/custom_holodatepicker/holo_datetimepickertheme.dart';
 
@@ -157,25 +158,26 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
       List<int> valueRange = _findPickerItemRange(format)!;
 
       Widget pickerColumn = _renderDatePickerColumnComponent(
-          scrollCtrl: _findScrollCtrl(format),
-          valueRange: valueRange,
-          format: format,
-          valueChanged: (value) {
-            if (format.contains('y')) {
-              _lock = true;
-              _changeYearSelection(value);
+        scrollCtrl: _findScrollCtrl(format),
+        valueRange: valueRange,
+        format: format,
+        valueChanged: (value) {
+          if (format.contains('y')) {
+            _lock = true;
+            _changeYearSelection(value);
+            _lock = false;
+          } else if (format.contains('M')) {
+            if (_lock) {
               _lock = false;
-            } else if (format.contains('M')) {
-              if (_lock) {
-                _lock = false;
-                return;
-              }
-              _changeMonthSelection(value);
-            } else if (format.contains('d')) {
-              _changeDaySelection(value);
+              return;
             }
-          },
-          fontSize: widget.pickerTheme!.itemTextStyle.fontSize ?? sizeByFormat(widget.dateFormat!));
+            _changeMonthSelection(value);
+          } else if (format.contains('d')) {
+            _changeDaySelection(value);
+          }
+        },
+        fontSize: widget.pickerTheme!.itemTextStyle.fontSize ?? sizeByFormat(widget.dateFormat!),
+      );
       pickers.add(pickerColumn);
     });
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: pickers);
@@ -194,12 +196,13 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
     );
   }
 
-  Widget _renderDatePickerColumnComponent(
-      {required FixedExtentScrollController? scrollCtrl,
-      required List<int> valueRange,
-      required String format,
-      required ValueChanged<int> valueChanged,
-      double? fontSize}) {
+  Widget _renderDatePickerColumnComponent({
+    required FixedExtentScrollController? scrollCtrl,
+    required List<int> valueRange,
+    required String format,
+    required ValueChanged<int> valueChanged,
+    double? fontSize,
+  }) {
     return Expanded(
       flex: 1,
       child: Stack(
@@ -238,14 +241,16 @@ class _DatePickerWidgetState extends State<HoloDatePicker> {
           Positioned(
             child: Container(
               margin: EdgeInsets.only(
-                  top: widget.pickerTheme!.topDividerPos ?? ((widget.pickerTheme!.pickerHeight / 2) - (widget.pickerTheme!.itemHeight / 2))),
+                top: widget.pickerTheme!.topDividerPos ?? ((widget.pickerTheme!.pickerHeight / 2) - (widget.pickerTheme!.itemHeight / 2)),
+              ),
               child: _dividerWidget(),
             ),
           ),
           Positioned(
             child: Container(
               margin: EdgeInsets.only(
-                  top: widget.pickerTheme!.bottomDividerPos ?? ((widget.pickerTheme!.pickerHeight / 2) + (widget.pickerTheme!.itemHeight / 2))),
+                top: widget.pickerTheme!.bottomDividerPos ?? ((widget.pickerTheme!.pickerHeight / 2) + (widget.pickerTheme!.itemHeight / 2)),
+              ),
               child: _dividerWidget(),
             ),
           ),

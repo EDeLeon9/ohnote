@@ -7,7 +7,7 @@ import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_container.dart';
 import 'package:ohnote/views/dialogs/note_details_dialog.dart';
 import 'package:ohnote/view_components/note_tile.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/views/bottomsheets/restore_history_bottomsheet.dart';
 import 'package:ohnote/tools/custom_modalbottomsheet.dart';
@@ -52,7 +52,7 @@ class HistoryBottomSheet {
   }
 
   bool _validateCanPop() {
-    if (CustomShowCase.next(context)) {
+    if (SizedShowCase.next(context)) {
       return false;
     }
     if (historyManager.selectionQuantity.value != null) {
@@ -64,7 +64,7 @@ class HistoryBottomSheet {
 
   void _onInitState() {
     if (historyManager.displayList.value?.isNotEmpty == true) {
-      CustomShowCase.startShowCase(
+      SizedShowCase.startShowCase(
         context: context,
         showCaseKeys: [_historyTileSCK],
         usePostFrameCallback: true,
@@ -112,11 +112,11 @@ class HistoryBottomSheet {
               },
             );
             return index == 0
-                ? CustomShowCase(
-                    showCaseKey: _historyTileSCK,
-                    description: 'Tap a note history to\nview the details. You\ncan also long-press to\nselect it and perform\nactions.',
-                    child: noteTile,
-                  )
+                ? SizedShowCase(
+                  showCaseKey: _historyTileSCK,
+                  description: 'Tap a note history to\nview the details. You\ncan also long-press to\nselect it and perform\nactions.',
+                  child: noteTile,
+                )
                 : noteTile;
           },
         ),

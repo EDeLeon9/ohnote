@@ -3,7 +3,7 @@ import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
 import 'package:ohnote/data/gui_manager.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/view_components/gui_listview_builder.dart';
 import 'package:ohnote/view_components/header_buttons.dart';
 import 'package:ohnote/view_components/note_tile.dart';
@@ -26,7 +26,7 @@ class _ArchivePageState extends State<ArchivePage> {
 
   @override
   void initState() {
-    CustomShowCase.startShowCase(
+    SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: [_archiveMoreSCK],
       usePostFrameCallback: true,
@@ -64,10 +64,11 @@ class _ArchivePageState extends State<ArchivePage> {
             ),
             HeaderButtons.moreButton(
               context: context,
-              button: HeaderButton(HeaderButtonDetails.more)
-                ..showCaseKey = _archiveMoreSCK
-                ..showCaseDescription =
-                    'Here you can filter\narchived notes or\nunarchive them using\nthe restore option.\nTap here to see the\noptions.',
+              button:
+                  HeaderButton(HeaderButtonDetails.more)
+                    ..showCaseKey = _archiveMoreSCK
+                    ..showCaseDescription =
+                        'Here you can filter\narchived notes or\nunarchive them using\nthe restore option.\nTap here to see the\noptions.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.filters),
                 HeaderButton(HeaderButtonDetails.restore),
@@ -131,7 +132,7 @@ class _ArchivePageState extends State<ArchivePage> {
   }
 
   void _onPopInvoked(bool didPop, BuildContext context) {
-    if (!didPop && !CustomShowCase.next(context)) {
+    if (!didPop && !SizedShowCase.next(context)) {
       if (widget.archiveManager.selectionQuantity.value == null && !widget.archiveManager.showSearchText.value) {
         Navigator.pop(context);
       }

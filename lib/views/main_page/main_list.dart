@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/note.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/view_components/note_tile.dart';
 import 'package:ohnote/view_components/note_tile_proxy.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
@@ -52,14 +52,15 @@ class MainList extends StatelessWidget {
         return ReorderableDelayedDragStartListener(
           key: Key('nt_${note.id}'),
           index: index,
-          child: index == 0
-              ? CustomShowCase(
-                  showCaseKey: MainScaffold.of(context).noteTileSCK,
-                  description:
-                      'Tap a note to edit it.\nYou can also long-\npress to select it and\nperform actions, or\nlong-press to drag\nand drop and reorder\nnotes.',
-                  child: noteTile,
-                )
-              : noteTile,
+          child:
+              index == 0
+                  ? SizedShowCase(
+                    showCaseKey: MainScaffold.of(context).noteTileSCK,
+                    description:
+                        'Tap a note to edit it. You can also long- press to select it and perform actions, or long-press to drag and drop and reorder notes.',
+                    child: noteTile,
+                  )
+                  : noteTile,
         );
       },
     );

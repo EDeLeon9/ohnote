@@ -11,7 +11,7 @@ import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/animated/animatedscale_text.dart';
 import 'package:ohnote/tools/comfirmation_dialog.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/tools/splash_overlay.dart';
 import 'package:ohnote/view_components/gui_item_tile.dart';
 import 'package:ohnote/view_components/gui_listview_builder.dart';
@@ -39,18 +39,21 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
 
   @override
   void initState() {
-    _homeWidgetConfigManager.allList = AppData.homeWidgetConfigs
-        .map((e) => Note(
-              id: e.id,
-              text: e.title,
-              color: Colors.black.withValues(alpha: e.opacity / 100.0),
-              creationDateTime: e.creationDateTime,
-              guiManager: _homeWidgetConfigManager,
-            ))
-        .toList();
+    _homeWidgetConfigManager.allList =
+        AppData.homeWidgetConfigs
+            .map(
+              (e) => Note(
+                id: e.id,
+                text: e.title,
+                color: Colors.black.withValues(alpha: e.opacity / 100.0),
+                creationDateTime: e.creationDateTime,
+                guiManager: _homeWidgetConfigManager,
+              ),
+            )
+            .toList();
     _homeWidgetConfigManager.allList.sort(_homeWidgetConfigManager.sortComparison);
     _homeWidgetConfigManager.requestUpdateDisplayList();
-    CustomShowCase.startShowCase(
+    SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: [_newHomeWidgetConfigSCK, _homeWidgetConfigMoreSCK],
       usePostFrameCallback: true,
@@ -88,10 +91,11 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
             _newHomeWidgetConfigButton(),
             HeaderButtons.moreButton(
               context: context,
-              button: HeaderButton(HeaderButtonDetails.more)
-                ..showCaseKey = _homeWidgetConfigMoreSCK
-                ..showCaseDescription =
-                    'To remove a home\nwidget configuration\ntap on the option in\nthis menu. You must\nfirst select the confi-\nguration you want to\nremove.',
+              button:
+                  HeaderButton(HeaderButtonDetails.more)
+                    ..showCaseKey = _homeWidgetConfigMoreSCK
+                    ..showCaseDescription =
+                        'To remove a home\nwidget configuration\ntap on the option in\nthis menu. You must\nfirst select the confi-\nguration you want to\nremove.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.removeHomeWidgetConfig),
               ],
@@ -150,7 +154,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
   }
 
   void _onPopInvoked(bool didPop, BuildContext context) {
-    if (!didPop && !CustomShowCase.next(context)) {
+    if (!didPop && !SizedShowCase.next(context)) {
       if (_homeWidgetConfigManager.selectionQuantity.value == null) {
         Navigator.pop(context);
       }
@@ -226,7 +230,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
   }
 
   Widget _newHomeWidgetConfigButton() {
-    return CustomShowCase(
+    return SizedShowCase(
       showCaseKey: _newHomeWidgetConfigSCK,
       description:
           'Tap here to create a\nhome widget configu-\nration that you can use\nto add a widget to your\nhome screen. You can\neven edit it later and\nyour home screen\nwidget will be updated\nas well.',
@@ -247,9 +251,10 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
       'Opacity: ${homeWidgetConfig.opacity}%',
       ...homeWidgetConfig.notesManager.filters.value.getAppliedCaptions(true),
     ];
-    var brightness = homeWidgetConfig.theme == AppThemeBrightness.light
-        ? Brightness.light
-        : (homeWidgetConfig.theme == AppThemeBrightness.dark ? Brightness.dark : Theme.of(context).brightness);
+    var brightness =
+        homeWidgetConfig.theme == AppThemeBrightness.light
+            ? Brightness.light
+            : (homeWidgetConfig.theme == AppThemeBrightness.dark ? Brightness.dark : Theme.of(context).brightness);
     return Theme(
       data: brightness == Brightness.dark ? AppTheme.current.darkTheme : AppTheme.current.lightTheme,
       child: Builder(

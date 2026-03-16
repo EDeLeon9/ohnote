@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ohnote/data/app_data.dart';
 import 'package:ohnote/data/first_access.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/tools/scrollview_with_bar.dart';
 import 'package:ohnote/view_components/label_container.dart';
@@ -33,7 +33,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
 
   @override
   void initState() {
-    CustomShowCase.startShowCase(
+    SizedShowCase.startShowCase(
       context: context,
       showCaseKeys: [_labelDialogSelectSCK, _labelDialogNewSCK],
       usePostFrameCallback: true,
@@ -52,7 +52,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && !CustomShowCase.next(context)) {
+        if (!didPop && !SizedShowCase.next(context)) {
           Navigator.pop(context, _labelsMap.entries.where((e) => e.value).map((e) => e.key).toList());
         }
       },
@@ -67,7 +67,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
         ),
         content: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: CustomShowCase(
+          child: SizedShowCase(
             showCaseKey: _labelDialogSelectSCK,
             description: 'Select the labels you\nwant to attach to the\nnote, then press "Done"\nto apply the labels.',
             child: ScrollViewWithBar(
@@ -76,25 +76,26 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
               child: Wrap(
                 spacing: 15.0,
                 runSpacing: 10.0,
-                children: AppData.labels.map((e) {
-                  var selected = _labelsMap[e.id]!;
-                  return LabelContainer(
-                    color: selected ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
-                    onTap: () {
-                      setState(() {
-                        _labelsMap[e.id] = !selected;
-                      });
-                    },
-                    content: Text(
-                      e.text,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
-                        fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                children:
+                    AppData.labels.map((e) {
+                      var selected = _labelsMap[e.id]!;
+                      return LabelContainer(
+                        color: selected ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
+                        onTap: () {
+                          setState(() {
+                            _labelsMap[e.id] = !selected;
+                          });
+                        },
+                        content: Text(
+                          e.text,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+                            fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                          ),
+                        ),
+                      );
+                    }).toList(),
               ),
             ),
           ),
@@ -105,7 +106,7 @@ class _NoteLabelsDialogState extends State<NoteLabelsDialog> {
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: 75,
-                child: CustomShowCase(
+                child: SizedShowCase(
                   showCaseKey: _labelDialogNewSCK,
                   description: 'You can create a new\nlabel by typing a new\nlabel name and then\ntapping the "+" button\nto add the label.',
                   child: Row(

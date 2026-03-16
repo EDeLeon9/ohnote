@@ -8,7 +8,7 @@ import 'package:ohnote/data/note.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 import 'package:ohnote/tools/smooth_materialpageroute.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/view_components/filters_panel.dart';
 import 'package:ohnote/views/bottomsheets/style_panel.dart';
 import 'package:ohnote/views/home_widget_config_page.dart';
@@ -48,7 +48,7 @@ class MainScaffoldState extends State<MainScaffold> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await _initialized();
       if (AppData.launchingFromHomeWidget == false) {
-        Future.delayed(Duration(milliseconds: 750 - CustomShowCase.delay.inMilliseconds), _startShowCase);
+        Future.delayed(Duration(milliseconds: 750 - SizedShowCase.delay.inMilliseconds), _startShowCase);
       }
     });
     super.initState();
@@ -76,29 +76,30 @@ class MainScaffoldState extends State<MainScaffold> {
               }
               return Scaffold(
                 key: _scaffoldKey,
-                drawer: dataInitialized
-                    ? MainDrawer(
-                        onSettingsClosed: () {
-                          AppData.validateMaxHistory();
-                          var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
-                          Future.delayed(const Duration(milliseconds: 300), () {
-                            if (AppData.appliedWallpaper.value?.assetName.endsWith(settingsWallpaper) == false) {
-                              AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
-                            }
-                            AppData.themeUpdatedFromSettings = false;
-                          });
-                          if (AppData.firstAccesses[FirstAccess.addNewNoteSC] == false) {
-                            //Delay for reload the list
-                            var listTemp = AppData.notesManager.displayList.value;
-                            AppData.notesManager.displayList.value = [];
-                            Future.delayed(const Duration(milliseconds: 10), () {
-                              AppData.notesManager.displayList.value = listTemp;
-                              _startShowCase();
+                drawer:
+                    dataInitialized
+                        ? MainDrawer(
+                          onSettingsClosed: () {
+                            AppData.validateMaxHistory();
+                            var settingsWallpaper = AppData.settings[Settings.wallpaper]!.value;
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (AppData.appliedWallpaper.value?.assetName.endsWith(settingsWallpaper) == false) {
+                                AppData.appliedWallpaper.value = AssetImage('assets/wallpapers/$settingsWallpaper');
+                              }
+                              AppData.themeUpdatedFromSettings = false;
                             });
-                          }
-                        },
-                      )
-                    : null,
+                            if (AppData.firstAccesses[FirstAccess.addNewNoteSC] == false) {
+                              //Delay for reload the list
+                              var listTemp = AppData.notesManager.displayList.value;
+                              AppData.notesManager.displayList.value = [];
+                              Future.delayed(const Duration(milliseconds: 10), () {
+                                AppData.notesManager.displayList.value = listTemp;
+                                _startShowCase();
+                              });
+                            }
+                          },
+                        )
+                        : null,
                 onDrawerChanged: (isOpened) {
                   AppData.notesManager.selectionQuantity.value = null;
                   AppData.notesManager.showSearchText.value = false;
@@ -133,7 +134,7 @@ class MainScaffoldState extends State<MainScaffold> {
   }
 
   void _onPopInvoked(bool didPop) {
-    if (!didPop && !CustomShowCase.next(context)) {
+    if (!didPop && !SizedShowCase.next(context)) {
       if (_scaffoldKey.currentState?.isDrawerOpen == true) {
         _scaffoldKey.currentState!.closeDrawer();
       } else {
@@ -168,14 +169,14 @@ class MainScaffoldState extends State<MainScaffold> {
                 custom.SliverOverlapInjector(handle: custom.NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
                 ...(AppData.dataInitialized.value && noteList != null
                     ? [
-                        SliverToBoxAdapter(
-                          child: FiltersPanel(
-                            guiManager: AppData.notesManager,
-                            updateDbFilters: true,
-                          ),
+                      SliverToBoxAdapter(
+                        child: FiltersPanel(
+                          guiManager: AppData.notesManager,
+                          updateDbFilters: true,
                         ),
-                        MainList(noteList: noteList),
-                      ]
+                      ),
+                      MainList(noteList: noteList),
+                    ]
                     : [const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))]),
                 SliverToBoxAdapter(child: SizedBox(height: bottomIndent)),
               ],
@@ -189,11 +190,12 @@ class MainScaffoldState extends State<MainScaffold> {
   Widget _fab({required double stylePanelHeight}) {
     return AnimatedPadding(
       duration: c.animationDuration,
-      padding:
-          EdgeInsets.only(bottom: stylePanelHeight - (AppData.notesManager.stylePanelOpened.value && AppData.dataInitialized.value ? 45.0 : 0.0)),
-      child: CustomShowCase(
+      padding: EdgeInsets.only(
+        bottom: stylePanelHeight - (AppData.notesManager.stylePanelOpened.value && AppData.dataInitialized.value ? 45.0 : 0.0),
+      ),
+      child: SizedShowCase(
         showCaseKey: _addNewNoteSCK,
-        description: 'Tap here to add a\nnew note.',
+        description: 'Tap here to add a new note.',
         child: FloatingActionButton(
           tooltip: 'New note',
           onPressed: openNote,
@@ -206,31 +208,33 @@ class MainScaffoldState extends State<MainScaffold> {
   Widget _stylePanel({required double stylePanelHeight}) {
     return AppData.dataInitialized.value
         ? AnimatedContainer(
-            duration: c.animationDuration,
-            height: stylePanelHeight,
-            onEnd: () {
-              if (stylePanelHeight > 0) {
-                if (AppData.notesManager.stylePanelOpened.value) {
-                  CustomShowCase.startShowCase(
-                    context: context,
-                    showCaseKeys: [numberOfLinesSCK, colorSCK, crossOutSCK, useCreationDateTimeSCK],
-                    usePostFrameCallback: false,
-                  );
-                }
+          duration: c.animationDuration,
+          height: stylePanelHeight,
+          onEnd: () {
+            if (stylePanelHeight > 0) {
+              if (AppData.notesManager.stylePanelOpened.value) {
+                SizedShowCase.startShowCase(
+                  context: context,
+                  showCaseKeys: [numberOfLinesSCK, colorSCK, crossOutSCK, useCreationDateTimeSCK],
+                  usePostFrameCallback: false,
+                );
               }
-            },
-            decoration: AppData.notesManager.stylePanelOpened.value
-                ? BoxDecoration(
+            }
+          },
+          decoration:
+              AppData.notesManager.stylePanelOpened.value
+                  ? BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: c.roundedTopBorder.borderRadius,
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border(top: BorderSide(color: Theme.of(context).colorScheme.outline))
-                        : null,
+                    border:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Border(top: BorderSide(color: Theme.of(context).colorScheme.outline))
+                            : null,
                     boxShadow: const [BoxShadow(blurRadius: 5.0, spreadRadius: -2.0)],
                   )
-                : null,
-            child: const StylePanel(),
-          )
+                  : null,
+          child: const StylePanel(),
+        )
         : const SizedBox.shrink();
   }
 
@@ -252,7 +256,7 @@ class MainScaffoldState extends State<MainScaffold> {
                   guiManager: AppData.notesManager,
                   numberOfLines: int.parse(AppData.settings[Settings.defaultNumberOfLines]!.value),
                   color: colorStr != null.toString() ? Color(int.parse(colorStr)) : null,
-                )
+                ),
               ],
               selectedNoteId: 0,
             );
@@ -345,7 +349,7 @@ class MainScaffoldState extends State<MainScaffold> {
       showCaseKeys.addAll([noteTileSCK, selectionModeSCK, searchSCK, moreSCK, navMenuSCK]);
     }
     if (mounted) {
-      CustomShowCase.startShowCase(
+      SizedShowCase.startShowCase(
         context: context,
         showCaseKeys: showCaseKeys,
         usePostFrameCallback: false,

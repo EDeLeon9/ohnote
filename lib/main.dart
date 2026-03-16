@@ -5,7 +5,7 @@ import 'package:ohnote/data/app_theme.dart';
 import 'package:ohnote/data/settings.dart';
 import 'package:ohnote/tools/landscape_textfield.dart';
 import 'package:ohnote/views/main_page/main_scaffold.dart';
-import 'package:ohnote/tools/custom_showcase.dart';
+import 'package:ohnote/tools/sized_showcase.dart';
 import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
@@ -68,7 +68,7 @@ class OhNoteApp extends StatelessWidget {
             );
             return FToastBuilder().call(
               context,
-              CustomShowCaseWidget(
+              SizedShowCaseWidget(
                 shownMap: AppData.firstAccesses,
                 onFinish: (shownKeyValues) {
                   AppData.updateDbShownFirstAccesses(shownKeyValues, true);

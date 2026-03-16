@@ -24,7 +24,7 @@ class GuiManager {
 
   List<Note> allList = [];
   final displayList = ValueNotifierPlus<List<Note>?>(null);
-  final filters = ValueNotifierPlus<Filters>(Filters());
+  final filters = ValueNotifier<Filters>(Filters());
   final selectionQuantity = ValueNotifier<int?>(null);
   final isAllSelected = ValueNotifier<bool>(false);
   final stylePanelOpened = ValueNotifier<bool>(false);
