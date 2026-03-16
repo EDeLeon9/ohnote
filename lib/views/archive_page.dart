@@ -68,7 +68,7 @@ class _ArchivePageState extends State<ArchivePage> {
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = _archiveMoreSCK
                     ..showCaseDescription =
-                        'Here you can filter\narchived notes or\nunarchive them using\nthe restore option.\nTap here to see the\noptions.',
+                        'Here you can filter archived notes or unarchive them using the restore option. Tap here to see the options.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.filters),
                 HeaderButton(HeaderButtonDetails.restore),

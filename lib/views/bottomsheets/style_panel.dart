@@ -58,7 +58,7 @@ class _StylePanelState extends State<StylePanel> {
   Widget _stylePanelColors() {
     return SizedShowCase(
       showCaseKey: MainScaffold.of(context).colorSCK,
-      description: 'You can set a color for\nthe selected notes.',
+      description: 'You can set a color for the selected notes.',
       child: const Row(
         children: [
           Padding(
@@ -79,7 +79,7 @@ class _StylePanelState extends State<StylePanel> {
   Widget _numberOfLinesSlider() {
     return SizedShowCase(
       showCaseKey: MainScaffold.of(context).numberOfLinesSCK,
-      description: 'Here you can set the\nnumber of lines displayed\nof the selected notes in\nthe list.',
+      description: 'Here you can set the number of lines displayed of the selected notes in the list.',
       child: ValueListenableBuilder(
         valueListenable: AppData.notesManager.styleSelectedNumberOfLines,
         builder: (context, styleSelectedNumberOfLines, child) {
@@ -134,7 +134,7 @@ class _StylePanelState extends State<StylePanel> {
   Widget _crossOutButton() {
     return SizedShowCase(
       showCaseKey: MainScaffold.of(context).crossOutSCK,
-      description: 'You can also toggle a\nstrikethrough style for the\nselected notes by tapping\nthis button.',
+      description: 'You can also toggle a strikethrough style for the selected notes by tapping this button.',
       child: ElevatedButton(
         style: Theme.of(context).elevatedButtonTheme.style!.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 15.0))),
         onPressed: () {
@@ -158,7 +158,7 @@ class _StylePanelState extends State<StylePanel> {
   Widget _useCreationDateCheck() {
     return SizedShowCase(
       showCaseKey: MainScaffold.of(context).useCreationDateTimeSCK,
-      description: 'Check this option to toggle\nbetween displaying the\nmodified date and the\ncreation date.',
+      description: 'Check this option to toggle between displaying the modified date and the creation date.',
       child: CustomCheckbox(
         width: 145.0,
         caption: const Text('Use creation date'),

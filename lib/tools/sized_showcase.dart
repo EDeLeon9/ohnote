@@ -81,103 +81,11 @@ class SizedShowCase<T> extends StatefulWidget {
 }
 
 class _SizedShowCaseState extends State<SizedShowCase> {
-  final _childKey = GlobalKey();
   bool _showOverlay = false;
-  double _arrowOffsetX = 0.0;
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor, textColor;
     var theme = Theme.of(context);
-    // if (theme.brightness == Brightness.dark) {
-    //   textColor = theme.colorScheme.onPrimary;
-    //   backgroundColor = theme.colorScheme.primary;
-    // } else {
-    //   textColor = theme.colorScheme.primary;
-    //   backgroundColor = theme.colorScheme.onPrimary;
-    // }
-    // return Showcase.withWidget(
-    //   key: widget.showCaseKey,
-    //   width: 175.0,
-    //   height: null,
-    //   targetPadding: const EdgeInsets.all(4.0),
-    //   movingAnimationDuration: const Duration(milliseconds: 400),
-    //   disposeOnTap: false, //Required when using onTargetClick.
-    //   //Tapping on the target doesn't close the Showcase so it's being used ShowCaseWidget.completed() but it doesn't animate the
-    //   //closing, and to disable the remaining closing animations it's being used ShowCaseWidget.completed() in onBarrierClick too.
-    //   onTargetClick: () {
-    //     ShowCaseWidget.of(context).completed(widget.showCaseKey);
-    //   },
-    //   onBarrierClick: () {
-    //     ShowCaseWidget.of(context).completed(widget.showCaseKey);
-    //   },
-    //   container: GestureDetector(
-    //     onTap: () {
-    //       ShowCaseWidget.of(context).completed(widget.showCaseKey);
-    //     },
-    //     child: Builder(
-    //       builder: (context) {
-    //         var childBox = _childKey.currentContext?.findRenderObject();
-    //         var tooltipBox = context.findRenderObject();
-    //         if (childBox is RenderBox && tooltipBox is RenderBox) {
-    //           var childPos = childBox.localToGlobal(Offset.zero);
-    //           var tooltipPos = tooltipBox.localToGlobal(Offset.zero);
-    //           setState(() {
-    //             _arrowOffsetX = childPos.dx + (childBox.size.width / 2.0) - tooltipPos.dx - 10.0;
-    //           });
-    //         }
-    //         return Padding(
-    //           padding: const EdgeInsetsGeometry.symmetric(horizontal: 5.0),
-    //           child: Column(
-    //             verticalDirection: VerticalDirection.down,
-    //             children: [
-    //               Container(
-    //                 decoration: BoxDecoration(
-    //                   color: backgroundColor,
-    //                   borderRadius: BorderRadius.circular(5.0),
-    //                 ),
-    //                 padding: const EdgeInsets.all(8.0),
-    //                 child: Text(
-    //                   widget.description,
-    //                   textAlign: TextAlign.justify,
-    //                   style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-    //                 ),
-    //               ),
-    //               Transform.translate(
-    //                 offset: Offset(_arrowOffsetX, -1),
-    //                 child: CustomPaint(
-    //                   painter: _Arrow(
-    //                     strokeColor: backgroundColor,
-    //                     strokeWidth: 10,
-    //                     paintingStyle: PaintingStyle.fill,
-    //                     isUpArrow: false,
-    //                   ),
-    //                   child: const SizedBox(
-    //                     height: 9.0,
-    //                     width: 18.0,
-    //                   ),
-    //                 ),
-    //               ),
-    //             ],
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   ),
-    //   child: Container(
-    //     key: _childKey,
-    //     child:
-    //         widget.overlay != null && _showOverlay
-    //             ? Stack(
-    //               alignment: Alignment.center,
-    //               children: [
-    //                 widget.child,
-    //                 widget.overlay!,
-    //               ],
-    //             )
-    //             : widget.child,
-    //   ),
-    // );
     return Showcase(
       width: 200.0,
       tooltipBorderRadius: BorderRadius.circular(5.0),
@@ -273,47 +181,3 @@ class SizedShowCaseWidgetState<T> extends State<SizedShowCaseWidget<T>> {
     );
   }
 }
-
-// class _Arrow extends CustomPainter {
-//   final Color strokeColor;
-//   final PaintingStyle paintingStyle;
-//   final double strokeWidth;
-//   final bool isUpArrow;
-//   final Paint _paint;
-
-//   _Arrow({
-//     this.strokeColor = Colors.black,
-//     this.strokeWidth = 3,
-//     this.paintingStyle = PaintingStyle.stroke,
-//     this.isUpArrow = true,
-//   }) : _paint =
-//            Paint()
-//              ..color = strokeColor
-//              ..strokeWidth = strokeWidth
-//              ..style = paintingStyle;
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     canvas.drawPath(getTrianglePath(size.width, size.height), _paint);
-//   }
-
-//   Path getTrianglePath(double x, double y) {
-//     if (isUpArrow) {
-//       return Path()
-//         ..moveTo(0, y)
-//         ..lineTo(x / 2, 0)
-//         ..lineTo(x, y)
-//         ..lineTo(0, y);
-//     }
-//     return Path()
-//       ..moveTo(0, 0)
-//       ..lineTo(x, 0)
-//       ..lineTo(x / 2, y)
-//       ..lineTo(0, 0);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant _Arrow oldDelegate) {
-//     return oldDelegate.strokeColor != strokeColor || oldDelegate.paintingStyle != paintingStyle || oldDelegate.strokeWidth != strokeWidth;
-//   }
-// }

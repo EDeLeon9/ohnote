@@ -114,7 +114,7 @@ class HistoryBottomSheet {
             return index == 0
                 ? SizedShowCase(
                   showCaseKey: _historyTileSCK,
-                  description: 'Tap a note history to\nview the details. You\ncan also long-press to\nselect it and perform\nactions.',
+                  description: 'Tap a note history to view the details. You can also long-press to select it and perform actions.',
                   child: noteTile,
                 )
                 : noteTile;

@@ -10,7 +10,6 @@ import 'package:ohnote/tools/custom_modalbottomsheet.dart';
 import 'package:ohnote/tools/home_widget_manager.dart';
 
 //TODO: OhNote Bugs y Pendientes
-//En algunos dispositivos las boquitas del Startup help hacen salto de linea mal (Es que uso \n).
 //Limpiar Id al abrir nota para ver si deja de abrir otra nota que no es (la que se abrió antes). UPDATE: Actualizar un id y luego entrar con url sin query. También se abren muchas instancias en el panel de apps recientes (Usar nueva forma de hacer widgets).
 //Corrección en página de Widget Configuration (cuando se está agregando el widget al home), en mi celular el contenido del scaffold sale más alto de lo que debería (Usar nueva forma de hacer widgets).
 //Corrección en drawer por altura del notification bar (Pixel 5 API 33. Android 13 Tiramisu | x86_64, o sea el que tengo actualmente).

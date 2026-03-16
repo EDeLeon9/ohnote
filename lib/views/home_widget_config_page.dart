@@ -95,7 +95,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
                   HeaderButton(HeaderButtonDetails.more)
                     ..showCaseKey = _homeWidgetConfigMoreSCK
                     ..showCaseDescription =
-                        'To remove a home\nwidget configuration\ntap on the option in\nthis menu. You must\nfirst select the confi-\nguration you want to\nremove.',
+                        'To remove a home widget configuration tap on the option in this menu. You must first select the configuration you want to remove.',
               moreButtons: [
                 HeaderButton(HeaderButtonDetails.removeHomeWidgetConfig),
               ],
@@ -233,7 +233,7 @@ class _HomeWidgetConfigPageState extends State<HomeWidgetConfigPage> {
     return SizedShowCase(
       showCaseKey: _newHomeWidgetConfigSCK,
       description:
-          'Tap here to create a\nhome widget configu-\nration that you can use\nto add a widget to your\nhome screen. You can\neven edit it later and\nyour home screen\nwidget will be updated\nas well.',
+          'Tap here to create a home widget configuration that you can use to add a widget to your home screen. You can even edit it later and your home screen widget will be updated as well.',
       child: IconButton(
         tooltip: 'New home widget configuration',
         icon: const Icon(Icons.add_card),

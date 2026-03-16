@@ -155,7 +155,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
                           ? [
                             SizedShowCase(
                               showCaseKey: _configBarSCK,
-                              description: 'You can tap on this\nzone to set a color\nto your note.',
+                              description: 'You can tap on this zone to set a color to your note.',
                               child: _configBar(editor),
                             ),
                             const Divider(height: 0.0),
@@ -169,7 +169,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
                                       padding: const EdgeInsets.symmetric(vertical: 70.0),
                                       child: SizedShowCase(
                                         showCaseKey: _swipeSCK,
-                                        description: 'Swipe left or right\nto scroll through\nyour notes.',
+                                        description: 'Swipe left or right to scroll through your notes.',
                                         overlay: Opacity(
                                           opacity: 0.3,
                                           child: ExplicitAnimationBuilder(
@@ -196,7 +196,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
                             ),
                             SizedShowCase(
                               showCaseKey: _removeLabelSCK,
-                              description: 'You can long-press\na label to detach it\nfrom your note.',
+                              description: 'You can long-press a label to detach it from your note.',
                               child: _labels(editor),
                             ),
                           ]
@@ -220,7 +220,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
     return Center(
       child: SizedShowCase(
         showCaseKey: _backSCK,
-        description: 'Tap back to save\nchanges after editing\nyour note.',
+        description: 'Tap back to save changes after editing your note.',
         child: IconButton(
           tooltip: HeaderButtonDetails.back.caption,
           icon: Icon(HeaderButtonDetails.back.icon),
@@ -235,7 +235,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   Widget _favoriteButton() {
     return SizedShowCase(
       showCaseKey: _favoriteSCK,
-      description: 'You can set your note\nas a favorite. This can\nhelp you when using\nfilters in the main list.',
+      description: 'You can set your note as a favorite. This can help you when using filters in the main list.',
       child: ValueListenableBuilder(
         valueListenable: _currentEditor.note.favorite,
         builder: (context, favorite, child) {
@@ -271,7 +271,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
   Widget _sendToTrashButton() {
     return SizedShowCase(
       showCaseKey: _sendToTrashSCK,
-      description: 'To send the note\nto trash can tap\nthis button.',
+      description: 'To send the note to trash can tap this button.',
       child: IconButton(
         tooltip: HeaderButtonDetails.sendToTrash.caption,
         icon: Icon(HeaderButtonDetails.sendToTrash.icon),
@@ -325,7 +325,7 @@ class _EditNotePageState extends State<EditNotePage> with WidgetsBindingObserver
       button:
           HeaderButton(HeaderButtonDetails.more)
             ..showCaseKey = _moreSCK
-            ..showCaseDescription = 'Tap here for more\noptions, such as\nviewing your note\'s\nhistory or adding\nlabels to your note.',
+            ..showCaseDescription = 'Tap here for more options, such as viewing your note\'s history or adding labels to your note.',
       moreButtons: [
         HeaderButton(HeaderButtonDetails.labelNote),
         HeaderButton(HeaderButtonDetails.history),
