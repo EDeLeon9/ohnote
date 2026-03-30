@@ -59,77 +59,84 @@ class _MainDrawerState extends State<MainDrawer> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       child: Stack(
         children: [
-          ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const SizedBox(height: 93.0), //Space of the HeaderContainer.
-              ListTile(
-                title: const Text('Labels'),
-                leading: Icon(Icons.label, color: fontColor),
-                onTap: () {
-                  _openPage(const LabelsPage());
-                },
-              ),
-              ListTile(
-                title: const Text('Trash Can'),
-                leading: Icon(Icons.delete, color: fontColor),
-                onTap: () {
-                  _openPage(TrashCanPage(trashManager: trashManager));
-                },
-              ),
-              ListTile(
-                title: const Text('Archive'),
-                leading: Icon(Icons.archive, color: fontColor),
-                onTap: () {
-                  _openPage(ArchivePage(archiveManager: archiveManager));
-                },
-              ),
-              ListTile(
-                title: const Text('Home Widget'),
-                leading: Icon(Icons.add_to_home_screen, color: fontColor),
-                onTap: () {
-                  _openPage(const HomeWidgetConfigPage());
-                },
-              ),
-              c.defaultDivider,
-              ListTile(
-                title: const Text('Settings'),
-                leading: Icon(Icons.settings, color: fontColor),
-                onTap: () {
-                  _openPage<Map<Settings, String>>(const SettingsPage(), (value) => widget.onSettingsClosed());
-                },
-              ),
-            ],
+          SafeArea(
+            bottom: false,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                const SizedBox(height: 68.0), //Spacing for the HeaderContainer.
+                ListTile(
+                  title: const Text('Labels'),
+                  leading: Icon(Icons.label, color: fontColor),
+                  onTap: () {
+                    _openPage(const LabelsPage());
+                  },
+                ),
+                ListTile(
+                  title: const Text('Trash Can'),
+                  leading: Icon(Icons.delete, color: fontColor),
+                  onTap: () {
+                    _openPage(TrashCanPage(trashManager: trashManager));
+                  },
+                ),
+                ListTile(
+                  title: const Text('Archive'),
+                  leading: Icon(Icons.archive, color: fontColor),
+                  onTap: () {
+                    _openPage(ArchivePage(archiveManager: archiveManager));
+                  },
+                ),
+                ListTile(
+                  title: const Text('Home Widget'),
+                  leading: Icon(Icons.add_to_home_screen, color: fontColor),
+                  onTap: () {
+                    _openPage(const HomeWidgetConfigPage());
+                  },
+                ),
+                c.defaultDivider,
+                ListTile(
+                  title: const Text('Settings'),
+                  leading: Icon(Icons.settings, color: fontColor),
+                  onTap: () {
+                    _openPage<Map<Settings, String>>(const SettingsPage(), (value) => widget.onSettingsClosed());
+                  },
+                ),
+              ],
+            ),
           ),
           //Header is required to be above the rest of the widgets to spread the shadow.
           Column(
             children: [
               HeaderContainer(
-                child: ListTile(
-                  //TODO: Icons.account_circle as button for open/login account (also add option from settings), and remember to validate AppData.launchedFromHomeWidget == false for Icon action.
-                  //leading: Icon(Icons.account_circle, size: 50.0, color: fontColor),
-                  leading: Image(
-                    height: 45.0,
-                    width: 45.0,
-                    image: AssetImage('assets/icon/icon_blue${Theme.of(context).brightness == Brightness.dark ? '_dark' : ''}.png'),
-                  ),
-                  tileColor: fontColor,
-                  contentPadding: const EdgeInsets.fromLTRB(15.0, 30.0, 15.0, 6.0),
-                  title: Column(
-                    children: {
-                      'Displayed notes': AppData.notesManager.displayList.value?.length ?? 0,
-                      'Total notes': AppData.notesManager.allList.length,
-                    }.entries.map((e) {
-                      var textStyle = Theme.of(context).textTheme.bodyMedium;
-                      return Row(
-                        children: [
-                          Text(e.key, style: textStyle),
-                          const Spacer(),
-                          Text(e.value.toString(), style: textStyle),
-                          const SizedBox(width: 10.0),
-                        ],
-                      );
-                    }).toList(),
+                child: SafeArea(
+                  bottom: false,
+                  child: ListTile(
+                    //TODO: Icons.account_circle as button for open/login account (also add option from settings), and remember to validate AppData.launchedFromHomeWidget == false for Icon action.
+                    //leading: Icon(Icons.account_circle, size: 50.0, color: fontColor),
+                    leading: Image(
+                      height: 45.0,
+                      width: 45.0,
+                      image: AssetImage('assets/icon/icon_blue${Theme.of(context).brightness == Brightness.dark ? '_dark' : ''}.png'),
+                    ),
+                    tileColor: fontColor,
+                    contentPadding: const EdgeInsets.fromLTRB(15.0, 6.0, 15.0, 6.0),
+                    title: Column(
+                      children:
+                          {
+                            'Displayed notes': AppData.notesManager.displayList.value?.length ?? 0,
+                            'Total notes': AppData.notesManager.allList.length,
+                          }.entries.map((e) {
+                            var textStyle = Theme.of(context).textTheme.bodyMedium;
+                            return Row(
+                              children: [
+                                Text(e.key, style: textStyle),
+                                const Spacer(),
+                                Text(e.value.toString(), style: textStyle),
+                                const SizedBox(width: 10.0),
+                              ],
+                            );
+                          }).toList(),
+                    ),
                   ),
                 ),
               ),
