@@ -71,7 +71,7 @@ class OhNoteWidget : HomeWidgetProvider() {
             val launchIntent = Intent(context, MainActivity::class.java).apply {
                 action = "es.antonborri.home_widget.action.LAUNCH"  //action string From HomeWidgetLaunchIntent: https://github.com/ABausG/home_widget/blob/main/packages/home_widget/android/src/main/kotlin/es/antonborri/home_widget/HomeWidgetIntent.kt
                 data = Uri.parse("$APP_SCHEME_NAME://$OPEN_NOTE?id=$noteId&configid=$configId")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
             context.startActivity(launchIntent)
         }

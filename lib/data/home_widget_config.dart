@@ -38,11 +38,11 @@ class HomeWidgetConfig {
 
   //Used by jsonEncode in HomeWidgetManager.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'theme': theme.caption,
-        'opacity': opacity,
-        'creation_datetime': creationDateTime!.toStr(DTToStrFormat.DATABASE),
-        'filters': notesManager.filters.value.getAppliedCaptions(),
-      };
+    'id': id,
+    'title': title,
+    'theme': theme.caption,
+    'opacity': opacity,
+    'creation_datetime': creationDateTime!.toStr(DTToStrFormat.DATABASE),
+    'filters': notesManager.filters.value.getAppliedCaptions(),
+  };
 }

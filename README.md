@@ -1,6 +1,6 @@
 # ohnote
 
-Project of notes app.
+Notes app project.
 
 ## Getting Started
 

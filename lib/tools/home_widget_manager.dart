@@ -3,14 +3,13 @@ import 'package:home_widget/home_widget.dart';
 import 'package:ohnote/tools/single_async.dart' as a;
 import 'dart:convert' as cv;
 
-final _clickedFunctions = <String, void Function(Map<String, String>)>{};
-
 class HomeWidgetManager {
   const HomeWidgetManager._();
 
   static late String _appSchemeName;
   static late String _androidWidgetName;
   static late String _iOSWidgetName;
+  static final _clickedFunctions = <String, void Function(Map<String, String>)>{};
   static final _singleAsync = a.SingleAsync();
   static void Function(String msg)? onError;
 
